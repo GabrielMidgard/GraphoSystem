@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="638" height="320" title="Multiple File Delete" showCloseButton="true" close="closeWindow()">
+	<mx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.random.converters.Converter;
+			import mx.collections.ArrayCollection;
+			import mx.managers.PopUpManager;
+			import mx.rpc.remoting.RemoteObject;
+			import mx.random.web.WebApplication;
+			
+	        
+			private var _deleteService:RemoteObject;
+			private var _webApplication:WebApplication;
+			private var _workManager:Object;
+[Bindable]	private var _filesToDelete:ArrayCollection;
+			private var _index:Number = 0;
+			private var _errors:Number = 0;
+			
+//---------------------------- Context ---------------------------------------------            
+
+            public function set context(contextObj:Object):void{
+				for( var p:String in contextObj){
+					if(this.hasOwnProperty(p)){
+						this[p] 	= contextObj[p];
+					}
+				}				
+				
+			}
+
+			public function set workManager(value:Object):void{
+				_workManager 		= value;
+			}
+
+			
+			public function set webApplication(value:WebApplication):void{
+				_webApplication 	= value;
+				initView();
+			}
+			
+			public function set filesToDelete(value:ArrayCollection):void{
+				_filesToDelete = value;
+			}
+//---------------------------- Context ---------------------------------------------  
+
+			private function initView():void{
+				_deleteService = _webApplication.getService("Directorios");
+				_deleteService.addEventListener(FaultEvent.FAULT,onFault);
+			}	
+			
+			
+			private function closeWindow():void{
+				PopUpManager.removePopUp(this);
+			}	
+			
+			private function doDelete():void{
+				deleteBt.enabled = false;
+				closeBt.enabled = false;				
+				_deleteService.deleteFile(_filesToDelete[_index].file);
+				_deleteService.deleteFile.addEventListener(ResultEvent.RESULT,deleteFileready);
+			}
+			
+			private function deleteFileready(e:ResultEvent):void{
+				_deleteService.deleteFile.removeEventListener(ResultEvent.RESULT,deleteFileready);
+				if(e.result){
+					_filesToDelete[_index].estatus = "Deleted";
+				}else{
+					_filesToDelete[_index].estatus = "Error";
+					_errors++;
+				}	
+				_filesToDelete.refresh();			
+				_index++;
+				if((_index)<_filesToDelete.length){
+					doDelete();
+				}else{
+					if(_errors==0){
+						Alert.show("Delete Complete","Success");
+						_workManager.initView();						
+					}else{
+						Alert.show("Delete Complete with "+_errors+" Errors","Alert");
+						_workManager.initView();
+					}
+					deleteBt.visible = false;
+					closeBt.label = "Back"
+					closeBt.enabled = true;
+				}
+			}	
+			
+			private function onFault(e:FaultEvent):void{
+				Alert.show(e.fault.faultString,"Error");
+			}
+			
+			
+			
+			
+		]]>
+	</mx:Script>
+	<mx:Label x="10" y="10" text="Files and Directories Selected:"/>
+	<mx:Button x="517" y="259" label="Cancel" width="107" click="closeWindow()" id="closeBt"/>
+	<mx:Button x="394" y="259" label="Delete All" width="115" id="deleteBt" click="doDelete();"/>
+	<mx:DataGrid x="10" y="36" width="614" height="215" id="files" dataProvider="{_filesToDelete}">
+		<mx:columns>
+			<mx:DataGridColumn headerText="" dataField="type" width="20" textAlign="center">
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:HBox width="100%" horizontalAlign="center">
+							<mx:Image source="assets/{data.type}.png" width="16" height="16" autoLoad="true"/>
+						</mx:HBox>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn headerText="File" dataField="file"/>
+			<mx:DataGridColumn headerText="Status" dataField="estatus" width="80" textAlign="right"/>
+		</mx:columns>
+	</mx:DataGrid>
+</mx:TitleWindow>

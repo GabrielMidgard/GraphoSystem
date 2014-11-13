@@ -1,0 +1,996 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" width="1008" height="606" backgroundColor="#0E1433"
+	 backgroundAlpha="0.9" layout="absolute" title="Crop Image" showCloseButton="true" close="closeWindow();">
+	<mx:Script>
+		<![CDATA[
+			import views.components.CambiaNombreImagen;
+			import mx.random.encoders.JPEGEncoder;
+			import mx.random.drawing.DrawingObjects;
+			import mx.random.drawing.BoxHandler;
+			import mx.random.web.WebApplication;
+			import mx.messaging.channels.StreamingAMFChannel;
+			import mx.events.CloseEvent;
+			import mx.rpc.events.InvokeEvent;
+			import mx.utils.Base64Encoder;
+			import mx.rpc.events.ResultEvent;
+			import mx.controls.Alert;
+			import mx.rpc.Fault;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.remoting.RemoteObject;
+			import mx.graphics.ImageSnapshot;
+			import mx.managers.PopUpManager;
+			import mx.binding.utils.BindingUtils;
+			import mx.messaging.AbstractConsumer;
+			import flash.display.Bitmap;
+			import flash.filters.ColorMatrixFilter;
+			import flash.display.DisplayObject;
+		    import mx.managers.CursorManager;
+		    import flash.net.URLRequestMethod;
+
+
+[Bindable]	private var _matrix:Array						= new Array(	1, 0, 0, 0, 0, 
+																			0, 1, 0, 0, 0, 
+																			0, 0, 1, 0 ,0, 
+																			0, 0, 0, 1, 0	);
+																			
+			private var _preSat:Number 						= 0;
+			private var _preCont:Number 					= 0;
+			private var _preBrillo:Number 					= 0;
+			private var _cropScale:Number 					= 0;
+			private var _newName:String 					= "";			
+[Bindable]	private var _iniX:Number 						= 0;
+[Bindable]	private var _iniY:Number 						= 0;
+[Bindable]	private var _endX:Number 						= 0;
+[Bindable]	private var _endY:Number 						= 0;
+[Bindable]	private var _orgWt:Number 						= 0;
+[Bindable]	private var _orgHt:Number 						= 0;
+[Bindable]	private var _sclWt:Number 						= 0;
+[Bindable]	private var _sclHt:Number 						= 0;
+[Bindable]	private var _resWt:Number 						= 0;
+[Bindable]	private var _resHt:Number 						= 0;
+[Bindable]	private var _resWD:Number 						= 0;
+[Bindable]	private var _resHT:Number 						= 0;
+[Bindable]	private var _aspect:Number						= 0;
+[Bindable]	private var _resizeAspect:Number 				= 0;
+[Bindable]	private var _resizeAspectThumb:Number 			= 0;
+[Bindable]  private var _vertical:Number					= 0;
+[Bindable]  private var _horizontal:Number					= 0;
+[Bindable]  private var _quality:Number						= 85;
+[Bindable]  private var _cand:Boolean						= false;
+[Bindable]  private var _candCrop:Boolean					= false;														
+[Bindable]	private	var finalFilter:ColorMatrixFilter		= new ColorMatrixFilter();
+[Bindable]	private	var saturacion:ColorMatrixFilter		= new ColorMatrixFilter();
+[Bindable]	private	var contraste:ColorMatrixFilter			= new ColorMatrixFilter();
+[Bindable]	private	var brillo:ColorMatrixFilter			= new ColorMatrixFilter();
+[Bindable]	private	var test:ColorMatrixFilter				= new ColorMatrixFilter();
+[Bindable]  private var _candContraste:Boolean 				= false;
+[Bindable]  private var _candSaturacion:Boolean 			= false;
+[Bindable]  private var _candBrillo:Boolean 				= false;
+[Bindable]  private var _zoom:Boolean 						= false; 
+[Bindable]  private var _cropImageButtonSelected:Boolean 	= true;
+[Bindable]  private var _thumbExist:Boolean 				= false;
+[Bindable]  private var _croped:Boolean						= false;
+[Bindable]  private var _cropedThumb:Boolean				= false;
+[Bindable]  private var _cropedReady:Boolean 				= false;
+[Bindable]  private var _opened:Boolean						= false			
+            private var _workManager:Object 				= new Object();
+           	private var _path:String 						= new String();
+           	private var _pathThumb:String 					= new String();
+           	private var _flipDirectionH:Boolean 			= false;
+			private var _flipDirectionV:Boolean 			= false;
+			private var _data:Object 						= new Object();	
+			private var _urlUpload:URLRequest 				= new URLRequest("");
+			private var _drawing:DrawingObjects 	  		= new DrawingObjects();
+			private var _fileReferenece:FileReference 		= new FileReference();
+			private var _fileRefereneceSave:FileReference 	= new FileReference();			
+			private var _keepAspect:Boolean					= false;
+			private var _isClick:Boolean 					= false;			
+			private var _prevCoorSat:Number;
+			private var _prevCoorCont:Number;
+			private var _imageOrg:BitmapData;
+			private var _imageDummie:BitmapData;
+			private var _imageCrop:BitmapData;
+			private var _thumbCrop:BitmapData;
+			private var _imageCropDoble:BitmapData;
+			private var _thumbCropDoble:BitmapData;
+			private var _imageDummieShape:Shape;
+			private var _imageCropShape:Shape;
+			private var _thumbCropShape:Shape;
+			private var _tempImg:Bitmap;
+			private var _tempThumb:Bitmap;
+			private var _contrasteId:Number;
+			private var _saturacionId:Number;
+			private var myByteArray:ByteArray;
+			private var myBitmapData:BitmapData;
+			private var _tLoader:Loader;		
+			private var rectSrc:Rectangle;
+			private var rectSrcThumb:Rectangle;
+			private var mtrx:Matrix;
+			private var mtrxT:Matrix;
+			private var _webApplication:WebApplication;
+			private var _tempCrop:BitmapData;
+           	private var _thumbWD:Number;
+           	private var _thumbHT:Number;
+            private var _imageService:RemoteObject;
+            private var _uploadService:NetConnection;
+[Bindable]  private var _handler:BoxHandler;
+			private var _imagePath:String;
+						
+            
+//---------------------------- Context ---------------------------------------------            
+
+            public function set context(contextObj:Object):void{
+				for( var p:String in contextObj){
+					if(this.hasOwnProperty(p)){
+						this[p] 	= contextObj[p];
+					}
+				}
+				initView();
+			}
+			
+			public function set thumbExist(value:Boolean):void{				_thumbExist 	= value;}
+			public function set thumbWD(value:Number):void{					_thumbWD 		= value;}			
+			public function set thumbHT(value:Number):void{					_thumbHT 		= value;}						
+			public function set path(value:String):void{					_path 			= value;}			
+			public function set pathThumb(value:String):void{				_pathThumb 		= value;}			
+			public function set webApplication(value:WebApplication):void{	_webApplication = value;}			
+			public function set workManager(value:Object):void{				_workManager 	= value;}
+			public function set resWD(value:Number):void{					_resWD 			= value;}			
+			public function set resHT(value:Number):void{					_resHT 			= value;}
+			public function set keepAspect(value:Boolean):void{				_keepAspect 	= value;}
+			public function set imagePath(value:String):void{				_imagePath		= value;}
+//--------------------------------- Context --------------------------------------------------------
+	
+			
+			private function initView():void{
+				_imageService = _webApplication.getService("ImageManager");
+				_imageService.addEventListener(FaultEvent.FAULT,onFault);
+				_imageDummieShape = new Shape();
+				_imageCropShape = new Shape();
+				_thumbCropShape = new Shape();
+				_aspect = _resHT/_resWD;
+				//MainCanvas.addChild(_drawing);
+				//MainCanvas.addEventListener(MouseEvent.MOUSE_DOWN,onMouseDown);
+				MainCanvas.addEventListener(MouseEvent.MOUSE_UP,onMouseUp);
+				//MainCanvas.addEventListener(MouseEvent.MOUSE_MOVE,onMouseMove);
+				_fileReferenece.addEventListener(Event.SELECT,onSelectFile);
+				modifySaturation();
+				modifyContrast();
+				modifyBrillo();
+				createHandler();
+				centerWindow();
+			}
+			
+			private function centerWindow():void{
+				PopUpManager.centerPopUp(this);	
+			}
+			
+			private function createHandler():void{
+				_handler = new BoxHandler(_resWD/10,_resHT/10,_keepAspect);
+				
+			}
+			
+			private function resetHandler():void{
+				_handler.initHandler(_resWD/10,_resHT/10,_keepAspect);
+				MainCanvas.addChild(_handler);
+				_iniX = _handler._coors._x;
+				_iniY = _handler._coors._y;
+				_endX = _handler._coors._x+ _handler._coors._w;
+				_endY = _handler._coors._y+ _handler._coors._h;
+			}			
+			
+			private function onFault(e:FaultEvent):void{
+				Alert.show(e.fault.faultString,"Error");
+			}
+			
+			private function onMouseDown(e:MouseEvent):void{
+				_isClick = true;
+				_iniX = e.localX;				
+				_iniY = e.localY;
+			}
+			
+			private function onMouseUp(e:MouseEvent):void{
+				//var wt:Number =(e.localX-_iniX);
+				_isClick = false;
+				//_endX = e.localX;
+				//_endY = _iniY+(wt*_aspect);
+				//_endY = e.localY;
+				
+				_iniX = _handler._coors._x;
+				_iniY = _handler._coors._y;
+				_endX = _handler._coors._x+ _handler._coors._w;
+				_endY = _handler._coors._y+ _handler._coors._h;
+				
+			}
+			private function onMouseMove(e:MouseEvent):void{
+				if(_isClick){
+					var wt:Number =(e.localX-_iniX);
+					_drawing.box(_iniX,_iniY,e.localX,_iniY+(wt*_aspect));
+				}
+			}
+			
+			private function openFile():void{
+				_opened = false;
+				_croped = false;
+				var filter:Array = new Array();
+				filter.push(new FileFilter("Images", ".gif;*.jpeg;*.jpg;*.png"));
+				_fileReferenece.browse(filter);
+				_cropImageButtonSelected = true;
+				ThumbImageSelector.selectedValue = "Imagen";
+				_cropedThumb	= false;
+				_croped			= false;
+				
+				
+			}
+			
+			private function onSelectFile(e:Event):void{
+				 _fileReferenece.load();
+				_fileReferenece.addEventListener(Event.COMPLETE,fileLoaded);
+			}
+			
+			private function fileLoaded(e:Event):void{
+				_fileReferenece.removeEventListener(Event.COMPLETE,fileLoaded);
+				//_image.source =  _fileReferenece.data;	
+				var loader:Loader = new Loader();
+				loader.loadBytes(_fileReferenece.data);
+				myByteArray = _fileReferenece.data;
+				loader.contentLoaderInfo.addEventListener(Event.COMPLETE,imageReady);
+				while(_result.numChildren){
+					_result.removeChildAt(0);
+				}
+				while(_tResult.numChildren){
+					_tResult.removeChildAt(0);
+				}
+			}
+			
+			private function imageReady(event:Event):void { 
+				while(_result.numChildren){
+					_result.removeChildAt(0);
+				}
+				while(_result.numChildren){
+					_result.removeChildAt(0);
+				}
+				_result.width			= 320;
+				_result.height			= 240;
+				canvasImg.width			= 320;
+				canvasImg.height		= 240;
+				
+				_vertical		=	0;
+				_horizontal		=	0;
+				
+				_cand = true;
+				var mtrx:Matrix = new Matrix();
+				var loaderInfo:LoaderInfo = LoaderInfo(event.target); 
+				
+				_orgWt = loaderInfo.width;
+				_orgHt = loaderInfo.height;
+				
+				_imageDummie = new BitmapData(loaderInfo.width, loaderInfo.height, false, 0xFFFFFF);  
+				_imageDummie.draw(loaderInfo.loader); 				
+				
+				if(_imageDummie.width > _imageDummie.height){
+					_resizeAspect = 640/_imageDummie.width;
+				}else{
+					_resizeAspect = 480/_imageDummie.height;
+				}
+				
+                mtrx.scale(_resizeAspect,_resizeAspect);
+
+				_imageDummieShape.graphics.clear(); 
+				_imageDummieShape.graphics.beginBitmapFill(_imageDummie,mtrx,false);
+                _imageDummieShape.graphics.lineStyle(1, 0xFFFFFF,0.5);
+               
+               if(_imageDummie.width>640 || _imageDummie.height>480){
+               		if(_imageDummie.width > _imageDummie.height){
+               			_imageDummieShape.graphics.drawRect(0, 0, 640, _imageDummie.height*_resizeAspect);
+               		}else{
+               			_imageDummieShape.graphics.drawRect(0, 0, _imageDummie.width*_resizeAspect, 480);
+               		}
+       
+               }else{
+	               if(_imageDummie.width > _imageDummie.height){
+						_imageDummieShape.graphics.drawRect(0, 0, 640, _imageDummie.height*_resizeAspect);
+					}else{
+						_imageDummieShape.graphics.drawRect(0, 0, _imageDummie.width*_resizeAspect, 480);
+					}
+               }
+              
+               	_sclWt = _imageDummieShape.width;
+				_sclHt = _imageDummieShape.height;
+               
+               MainCanvas.width		=	_sclWt;
+               MainCanvas.height	=	_sclHt;
+               MainCanvas.x			=  650- MainCanvas.width;
+               
+               
+               
+				_image.addChild(_imageDummieShape);
+				_opened = true;
+				_croped = false;
+				 resetHandler();
+			} 
+			
+			private function cropImage():void{
+				var loader:Loader 	= new Loader();
+				loader.loadBytes(_fileReferenece.data);
+				loader.contentLoaderInfo.addEventListener(Event.COMPLETE,loaderComplete);
+			}
+			
+			private function cropThumb():void{
+				var loader:Loader 	= new Loader();
+				loader.loadBytes(_fileReferenece.data);
+				loader.contentLoaderInfo.addEventListener(Event.COMPLETE,loaderThumbComplete);
+			}
+			
+			private function loaderComplete(event:Event):void {  
+				while(_result.numChildren){
+					_result.removeChildAt(0);
+				}
+				
+				_result.width			= 320;
+				_result.height			= 240;
+				canvasImg.width			= 320;
+				canvasImg.height		= 240;
+				
+				_imageCropShape = new Shape();
+				var loaderInfo:LoaderInfo = LoaderInfo(event.target); 
+				
+				 
+				var bitmapData:BitmapData = new BitmapData(loaderInfo.width, loaderInfo.height, false, 0xFFFFFF); 
+					
+				bitmapData.draw(loaderInfo.loader); 
+				
+				
+				_tempImg = new Bitmap(bitmapData);
+				//_tempImg.filters(_filterArray);
+				
+				_resWt = Math.abs(_endX-_iniX)/_resizeAspect;
+				_resHt = Math.abs(_endY-_iniY)/_resizeAspect;
+				
+				rectSrc = new Rectangle(	_iniX/_resizeAspect, 
+											_iniY/_resizeAspect, 
+											Math.abs(_endX-_iniX)/_resizeAspect, 
+											Math.abs(_endY-_iniY)/_resizeAspect
+										);
+				
+				_imageCrop = new BitmapData(Math.abs(_endX-_iniX)/_resizeAspect,Math.abs(_endY-_iniY)/_resizeAspect,true,0x000000);
+				_imageCropDoble = new BitmapData(Math.abs(_endX-_iniX)/_resizeAspect,Math.abs(_endY-_iniY)/_resizeAspect,true,0x000000);
+				
+				_imageCrop.copyPixels(	bitmapData,
+										rectSrc,
+										new Point(0,0)
+									 );
+									 
+				
+				
+				_resWt = _imageCrop.width;
+				_resHt = _imageCrop.height;
+				
+					
+				var finalaAspect:Number = _resWD/_imageCrop.width;
+					mtrx = new Matrix();
+              		mtrx.scale(finalaAspect,finalaAspect);
+                
+                myBitmapData = new BitmapData(_resWD,_resHT,true,0x000000);
+				myBitmapData.copyPixels(bitmapData,
+										new Rectangle(	_iniX/_resizeAspect, 
+														_iniY/_resizeAspect, 
+														Math.abs(_endX-_iniX)/_resizeAspect, 
+														Math.abs(_endY-_iniY)/_resizeAspect
+													  ),
+										new Point(0,0)
+									 );
+									 
+					_imageCropShape.graphics.clear(); 
+					_imageCropShape.graphics.beginBitmapFill(_imageCrop,mtrx,false);
+	                _imageCropShape.graphics.lineStyle(1, 0xFFFFFF,0.5);
+	                
+	                _imageCropShape.graphics.drawRect(0, 0, _resWD, _resHT);
+	                	
+                			 
+				_result.scaleX 	= 1;
+				_result.addChild(_imageCropShape);
+				_result.width	=	320;
+				_result.height	=	240;
+				
+				var tempVal:Number = 0;
+				
+				if(_resWD > _resHT){
+					if(_resWD >= 320){
+						tempVal = _resWD/320;
+						porcentajeZoom.text		=  ""+Math.ceil((320*100)/_resWD)+"%";
+						_imageCropShape.width 	= 	320;
+						_imageCropShape.height 	=  myBitmapData.height/tempVal;
+					}
+				}else{
+					if(_resHT >= 240){
+						tempVal = _resHT/240;
+						porcentajeZoom.text		=  ""+Math.ceil((240*100)/_resHT)+"%";
+						_imageCropShape.height 	= 	240;
+						_imageCropShape.width 	=  myBitmapData.width/tempVal;
+					}
+				}
+				
+				_result.width			=	_imageCropShape.width;
+				_result.height			=	_imageCropShape.height;
+				
+				porcentajeZoom.text
+				
+				_candCrop = true;
+				
+				_flipDirectionV 		= false;
+				_flipDirectionH 		= false;
+				_croped 				= true;
+				
+				if(_thumbExist){
+					if(_cropedThumb && _croped){
+						_cropedReady = true;
+					}
+					ThumbImageSelector.selectedValue = "Thumb";
+					_cropImageButtonSelected = false;
+					setSize();
+				}else{
+					_cropedReady = true;
+				}
+
+			} 
+			
+			
+			private function loaderThumbComplete(event:Event):void {  
+				while(_tResult.numChildren){
+					_tResult.removeChildAt(0);
+				}
+				
+				_tResult.width			= 100;
+				_tResult.height			= 100;
+				thumbCanvas.width		= 100;
+				thumbCanvas.height		= 100;
+				
+				_imageCropShape = new Shape();
+				var loaderInfo:LoaderInfo = LoaderInfo(event.target); 
+				
+				 
+				var bitmapData:BitmapData = new BitmapData(loaderInfo.width, loaderInfo.height, false, 0xFFFFFF); 
+					
+				bitmapData.draw(loaderInfo.loader); 
+				
+				
+				_tempThumb = new Bitmap(bitmapData);
+				//_tempImg.filters(_filterArray);
+				
+				_resWt = Math.abs(_endX-_iniX)/_resizeAspect;
+				_resHt = Math.abs(_endY-_iniY)/_resizeAspect;
+				
+				rectSrcThumb = new Rectangle(	_iniX/_resizeAspect, 
+												_iniY/_resizeAspect, 
+												Math.abs(_endX-_iniX)/_resizeAspect, 
+												Math.abs(_endY-_iniY)/_resizeAspect
+										);
+				
+				_thumbCrop = new BitmapData(Math.abs(_endX-_iniX)/_resizeAspect,Math.abs(_endY-_iniY)/_resizeAspect,true,0x000000);
+				_thumbCropDoble = new BitmapData(Math.abs(_endX-_iniX)/_resizeAspect,Math.abs(_endY-_iniY)/_resizeAspect,true,0x000000);
+				
+				_thumbCrop.copyPixels(	bitmapData,
+										rectSrcThumb,
+										new Point(0,0)
+									 );
+				
+				
+				_resWt = _thumbCrop.width;
+				_resHt = _thumbCrop.height;
+				
+					
+				var finalaAspectT:Number = _thumbWD/_thumbCrop.width;
+					mtrxT = new Matrix();
+              		mtrxT.scale(finalaAspectT,finalaAspectT);
+                
+                myBitmapData = new BitmapData(_thumbWD,_thumbHT,true,0x000000);
+				myBitmapData.copyPixels(bitmapData,
+										new Rectangle(	_iniX/_resizeAspect, 
+														_iniY/_resizeAspect, 
+														Math.abs(_endX-_iniX)/_resizeAspect, 
+														Math.abs(_endY-_iniY)/_resizeAspect
+													  ),
+										new Point(0,0)
+									 );
+									 
+					_thumbCropShape.graphics.clear(); 
+					_thumbCropShape.graphics.beginBitmapFill(_thumbCrop,mtrxT,false);
+	                _thumbCropShape.graphics.lineStyle(1, 0xFFFFFF,0.5);
+	                
+	                _thumbCropShape.graphics.drawRect(0, 0, _thumbWD, _thumbHT);
+	                	
+                			 
+				_tResult.scaleX 	= 1;
+				_tResult.addChild(_thumbCropShape);
+				_tResult.width	=	100;
+				_tResult.height	=	100;
+				
+				var tempVal:Number = 0;
+				
+				if(_thumbWD > _thumbHT){
+					if(_thumbWD >= 100){
+						tempVal = _thumbWD/100;
+						_thumbCropShape.width 	= 	100;
+						_thumbCropShape.height 	=  myBitmapData.height/tempVal;
+					}
+				}else{
+					if(_thumbHT >= 100){
+						tempVal = _thumbHT/100;
+						_thumbCropShape.height 	= 	100;
+						_thumbCropShape.width 	=  myBitmapData.width/tempVal;
+					}
+				}
+				
+				
+				_tResult.width	=	_thumbCropShape.width;
+				_tResult.height	=	_thumbCropShape.height;
+				
+				_candCrop = true;
+				
+				_cropedThumb = true;
+				
+				if(_cropedThumb && _croped){
+					_cropedReady = true;
+				}
+				
+			} 
+			private function setMedidas():void{
+			//	_resHT = Number(heigthBox.text);
+			//	_resWD = Number(widthBox.text);
+				_aspect = _resHT/_resWD;
+				resetCrop();
+			}
+			
+			private function resetCrop():void{
+				_iniX = 0;				
+				_iniY = 0;
+				_isClick = false;
+				_endX = 0;
+				_endY = 0;
+				while(_drawing.numChildren){
+					_drawing.removeChildAt(0);
+				}
+			}
+			private function modifySaturation():Boolean{
+					
+					var valor:Number = 	sliderSaturation.value+1;	
+								
+					var red:Number = 0.3086;  // luminance contrast value for red
+					var green:Number = 0.694; // luminance contrast value for green
+					var blue:Number = 0.0820; // luminance contrast value for blue
+					var a:Number = (1-valor) * red + valor;
+					var b:Number = (1-valor) * green;
+					var c:Number = (1-valor) * blue;
+					var d:Number = (1-valor) * red;
+					var e:Number = (1-valor) * green + valor;
+					var f:Number = (1-valor) * blue;
+					var g:Number = (1-valor) * red ;
+					var h:Number = (1-valor) * green;
+					var i:Number = (1-valor) * blue + valor;
+					
+					_matrix = new Array(a, b, c, 0, 0, 
+										d, e, f, 0, 0, 
+										g, h, i, 0 ,0, 
+										0, 0, 0, 1, 0);
+					
+					saturacion = new ColorMatrixFilter(_matrix);
+					updateEffect();
+					modifyContrast();
+					return true;
+			}
+			private function modifyContrast():Boolean{
+				if(sliderSaturation.value < 0){
+					
+					var tempValor:Number = (sliderContrast.value) / 15;
+					var tempValor2:Number = (sliderContrast.value+1.5) / 15;
+					
+					var aa:Number;
+					var bb:Number;
+					var cc:Number;
+					var dd:Number;
+					
+					
+						aa = tempValor / 1.5;    //  .1 -  1
+						bb = (tempValor*2)/1.5;  //  .2 -  2
+						cc = (tempValor*2)/1.5;  // .02 - .2
+						dd = (tempValor2)*(500); //  15 - -150
+					
+					contraste =	new ColorMatrixFilter(new Array(	aa, bb, cc, 0, dd, 
+																	aa, bb, cc, 0, dd, 
+																	aa, bb, cc, 0 ,dd, 
+																	0, 0, 0, 1, 0	));
+																
+					updateEffect();										
+				}else{
+					
+					var valor:Number = sliderContrast.value/50;
+					
+					var a:Number = valor * 20;
+					var b:Number = 63.5 - (valor * 100);
+					//redValue = greenValue = blueValue = a;
+					//redOffset = greenOffset = blueOffset = b;
+					var tempArray:Array = new Array(a, 0, 0, 0, b, 
+													0, a, 0, 0, b, 
+													0, 0, a, 0, b, 
+													0, 0, 0, 1, 0);
+													
+					contraste = new ColorMatrixFilter(tempArray);
+					updateEffect();
+					
+				}
+					return true;
+			}
+			private function modifyBrillo():Boolean{
+				//if(_candCrop){
+					var valor:Number = (sliderBrightness.value - .5)*50;
+					//redValue = greenValue = blueValue = a;
+					//redOffset = greenOffset = blueOffset = b;
+					var tempArray:Array = new Array(0, 0, 0, 0, valor, 
+													0, 0, 0, 0, valor, 
+													0, 0, 0, 0, valor, 
+													0, 0, 0, 1, 0);
+													
+					brillo = new ColorMatrixFilter(tempArray);
+					updateEffect();
+					return true;
+				//}
+			}
+			private function updateEffect():void{
+				var arrayEffect:Array = new Array();
+				for(var n:Number = 0; n < 20; n++){
+					var tempVal:Number = (saturacion.matrix[n]+contraste.matrix[n]+brillo.matrix[n]);
+					arrayEffect.push(tempVal);
+				}
+				finalFilter = new ColorMatrixFilter(arrayEffect);
+			}
+			private function activarSaturacion():void{
+				if(checkSaturacion.selected){
+					_candSaturacion = checkSaturacion.selected;
+					sliderSaturation.value = _preSat;
+					modifySaturation();
+				}else{
+					_preSat = sliderSaturation.value;
+					sliderSaturation.value 	= 0;
+					if(modifySaturation()){
+						_candSaturacion = checkSaturacion.selected;
+					}
+					sliderSaturation.value = _preSat;
+				}
+			}
+			private function activarContraste():void{
+				if(checkContraste.selected){
+					_candContraste = checkContraste.selected;
+					sliderContrast.value 	= _preCont;
+					modifyContrast();
+				}else{
+					_preCont = sliderContrast.value;
+					sliderContrast.value 	= 0;
+					if(modifyContrast()){
+						_candContraste = checkContraste.selected;
+					}
+					sliderContrast.value 	= _preCont;
+				}
+			}
+			private function activarBrillo():void{
+				if(checkBrillo.selected){
+					_candBrillo = checkBrillo.selected;
+					sliderBrightness.value = _preBrillo;
+					modifyBrillo();
+				}else{
+					_preBrillo = sliderBrightness.value;
+					sliderBrightness.value 		= 0;
+					if(modifyBrillo()){
+						_candBrillo = checkBrillo.selected;
+					}
+					sliderBrightness.value = _preBrillo;
+				}
+			}
+			private function resetContraste():void{
+				sliderContrast.value 	= 0;
+				modifyContrast();
+			}
+			private function resetSaturacion():void{
+				sliderSaturation.value 	= 0;
+				modifySaturation();
+			}
+			private function resetBrightness():void{
+				sliderBrightness.value 		= 0;
+				modifyBrillo();
+			}
+			private function resetAll():void{
+				finalFilter		=	new ColorMatrixFilter();
+				sliderContrast.value = 0;
+				sliderSaturation.value = 0;
+				sliderBrightness.value   = 0;
+				checkSaturacion.selected = false;
+				checkContraste.selected = false;
+				checkBrillo.selected = false;
+			}
+			private function closeWindow():void{
+				//dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
+				PopUpManager.removePopUp(this);
+			}
+			
+			
+			private function saveFile():void{
+				CursorManager.setBusyCursor();
+				_cropedReady = false;
+				_imageCropDoble.applyFilter(_imageCrop,_imageCrop.rect,new Point(0,0),finalFilter);
+				myBitmapData = new BitmapData(_resWD, _resHT, false);
+				myBitmapData.draw(_imageCropDoble,mtrx);
+				
+				var jpgEncoder:JPEGEncoder = new JPEGEncoder(_quality);
+				var jpgStream:ByteArray = jpgEncoder.encode(myBitmapData);
+				var encode:Base64Encoder = new Base64Encoder();
+				encode.encodeBytes(jpgStream);
+				
+				var hoy:Date = new Date();
+				var unique:Number = hoy.getTime();
+				
+				var params:Object = {	
+										data:encode.toString() ,
+										name:_fileReferenece.name.toLowerCase(),
+										path:"/"+_imagePath
+									};
+				
+				_newName = _fileReferenece.name;
+				_imageService.uploadImage.addEventListener(ResultEvent.RESULT,saveFileRady);
+				//_imageService.uploadImage.addEventListener(ResultEvent.RESULT,saveFileError);
+				_imageService.uploadImage(params);
+				
+				
+				var data:Object = {path:params.path, name:params.name};
+				_data = data;
+				
+				//_workManager.imageUploadReady(data);
+				//closeWindow();
+				
+			}
+			private function saveThumb():void{
+				CursorManager.setBusyCursor();
+				_thumbCropDoble.applyFilter(_thumbCrop,_thumbCrop.rect,new Point(0,0),finalFilter);
+				myBitmapData = new BitmapData(_thumbWD, _thumbHT, false);
+				myBitmapData.draw(_thumbCropDoble,mtrxT);
+				
+				var jpgEncoder:JPEGEncoder = new JPEGEncoder(_quality);
+				var jpgStream:ByteArray = jpgEncoder.encode(myBitmapData);
+				var encode:Base64Encoder = new Base64Encoder();
+				encode.encodeBytes(jpgStream);
+				
+				var hoy:Date = new Date();
+				var unique:Number = hoy.getTime();
+				
+				var tempName:Array = _newName.split(".");
+								
+				var imgName:String = tempName[0]+".jpg";
+				var params:Object = {	
+										data:encode.toString() ,
+										name:imgName.toLowerCase(),
+										path:"/"+_pathThumb
+									};
+				
+				
+				_imageService.uploadImage.addEventListener(ResultEvent.RESULT,saveFileRadyT);
+				//_imageService.uploadImage.addEventListener(ResultEvent.RESULT,saveFileError);
+				_imageService.uploadImage(params);
+				
+				
+				var data:Object = {path:params.path, name:params.name};
+				_data = data;
+				
+				//_workManager.imageUploadReady(data);
+				//closeWindow();
+			}
+			public function renameImage(name:String):void{				
+				var tempName:Array = name.split(".");
+				
+				_newName = tempName[0];
+				
+				_imageCropDoble.applyFilter(_imageCrop,_imageCrop.rect,new Point(0,0),finalFilter);
+				myBitmapData = new BitmapData(_resWD, _resHT, false);
+				myBitmapData.draw(_imageCropDoble,mtrx);
+				
+				var jpgEncoder:JPEGEncoder = new JPEGEncoder(_quality);
+				var jpgStream:ByteArray = jpgEncoder.encode(myBitmapData);
+				var encode:Base64Encoder = new Base64Encoder();
+				encode.encodeBytes(jpgStream);
+				
+				var hoy:Date = new Date();
+				var unique:Number = hoy.getTime();
+				var imgName:String = _newName+".jpg"
+				var params:Object = {	
+										data:encode.toString() ,
+										name:imgName.toLowerCase(),
+										path:_path
+									};
+				
+				_imageService.uploadImage.addEventListener(ResultEvent.RESULT,saveFileRady);
+				_imageService.uploadImage.addEventListener(ResultEvent.RESULT,saveFileError);
+				_imageService.uploadImage(params);
+				
+				
+				var data:Object = {path:params.path, name:params.name};
+				
+				_data = data;
+				
+				//_workManager.imageUploadReady(data);
+				//closeWindow();
+				
+			}
+			private function saveFileError(e:ResultEvent):void{
+				_imageService.uploadImage.removeEventListener(ResultEvent.RESULT,saveFileError);
+				if(e.result){
+					Alert.show(e.result.toString());
+				}
+			}
+			
+			private function saveFileRady(e:ResultEvent):void{
+				CursorManager.removeBusyCursor();
+				_imageService.uploadImage.removeEventListener(ResultEvent.RESULT,saveFileRady);
+				if(e.result){
+					if(_thumbExist){
+						saveThumb();
+					}else{
+						_workManager.imageUploadReady(_data);
+						closeWindow();
+					}
+				//	_workManager.imageUploadReady(_data);
+					//Alert.show(e.result.toString());
+					//closeWindow();
+				}else{
+					 var _cambiaNombre:CambiaNombreImagen = CambiaNombreImagen(PopUpManager.createPopUp(this,CambiaNombreImagen,true));
+				 
+					 var context:Object = { 
+					 						webApplication:_webApplication,
+					 						workManager: this
+					 }
+					 
+					 _cambiaNombre.context = context;
+					 PopUpManager.centerPopUp(_cambiaNombre);
+				}
+			}
+			private function saveFileRadyT(e:ResultEvent):void{
+				CursorManager.removeBusyCursor();
+				_imageService.uploadImage.removeEventListener(ResultEvent.RESULT,saveFileRadyT);
+				if(e.result){
+					_newName = _fileReferenece.name;
+					_workManager.imageUploadReady(_data);
+					//Alert.show(e.result.toString());
+					closeWindow();
+				}else{
+					 var _cambiaNombre:CambiaNombreImagen = CambiaNombreImagen(PopUpManager.createPopUp(this,CambiaNombreImagen,true));
+				 
+					 var context:Object = { 
+					 						webApplication:_webApplication,
+					 						workManager: this
+					 }
+					 
+					 _cambiaNombre.context = context;
+					 PopUpManager.centerPopUp(_cambiaNombre);
+				}
+			}
+			private function FlipHorizontal():void{
+				if(_flipDirectionH){
+					_result.scaleX 			= 1;
+					_flipDirectionH 		= false;
+					_imageCropShape.x      	= 0;
+				}else{
+					_result.scaleX 			= -1;
+					_imageCropShape.x      	= _imageCropShape.width*(-1);
+					_flipDirectionH 		= true;
+				}
+			}
+			private function FlipVertical():void{
+				if(_flipDirectionV){
+					_imageCropShape.scaleY 	= 1
+					_flipDirectionV 		= false;
+					_imageCropShape.y 		= 0;
+				}else{
+					_imageCropShape.scaleY 	= -1;
+					_imageCropShape.y 		= _imageCropShape.height;
+					_flipDirectionV 		= true;
+				}
+			}
+			private function changeQuality():void{
+				_quality = qualitySlider.value;
+			}
+			private function setSize():void{
+				if(ThumbImageSelector.selectedValue == "Imagen"){
+					_handler.initHandler(_resWD/10,_resHT/10,_keepAspect);
+					MainCanvas.addChild(_handler);
+					_iniX = _handler._coors._x;
+					_iniY = _handler._coors._y;
+					_endX = _handler._coors._x+ _handler._coors._w;
+					_endY = _handler._coors._y+ _handler._coors._h;
+					_cropImageButtonSelected = true;
+					
+				}else{
+					_cropImageButtonSelected = false;
+					_handler.initHandler(_thumbWD,_thumbHT,_keepAspect);
+					MainCanvas.addChild(_handler);
+					_iniX = _handler._coors._x;
+					_iniY = _handler._coors._y;
+					_endX = _handler._coors._x+ _handler._coors._w;
+					_endY = _handler._coors._y+ _handler._coors._h;
+					
+				}
+				
+			}
+			private function setQuality():void{
+				if(Number(qualityText.text) > 100){
+					_quality = 100;
+				}else{
+					_quality = Number(qualityText.text);
+				}
+				qualityText.text 	= _quality.toString();
+				qualitySlider.value = _quality;
+			}
+			private function openZoom():void{
+				if(!_zoom){
+					_imageCropShape.width   = _resWD;
+					_imageCropShape.height  = _resHT;
+					_result.width			= _resWD;
+					_result.height			= _resHT;
+					canvasImg.width			= _resWD;
+					canvasImg.height		= _resHT;
+				//	_vertical				= (_resHT - 240/2);
+				//	_horizontal				= (_resWD - 320/2);
+					_horizontal				= 200;
+					_zoom = true;
+				}else{
+					cropImage();
+					_vertical		=	0;
+					_horizontal		=	0;
+					_zoom = false;
+				}
+			}
+		]]>
+	</mx:Script>
+	<mx:Button x="374.9" y="542" label="Crop Image" click="cropImage()" width="132.05" enabled="{_cropImageButtonSelected}"/>
+	<mx:CheckBox x="786" y="409.45" click="activarSaturacion();" enabled="{_opened}" id="checkSaturacion"/>
+	<mx:HSlider x="808" y="407.45" width="120" liveDragging="true" change="modifySaturation()" value="0" id="sliderSaturation" toolTip="Modifica Saturación" enabled="{_opened}" minimum="-1" maximum="1"/>
+	<mx:Button x="936" y="409.45" label="Reset" click="resetSaturacion();" enabled="{_opened}" height="17"/>
+	<mx:CheckBox x="786" y="435.45" click="activarContraste();" enabled="{_opened}" id="checkContraste"/>
+	<mx:HSlider x="808" y="433.45" width="120" liveDragging="true" change="modifyContrast()" value="0" id="sliderContrast" toolTip="Modifica Contraste" enabled="{_opened}" minimum="-1.5" maximum="1.5"/>
+	<mx:Button x="936" y="435.45" label="Reset" click="resetContraste();" enabled="{_opened}" height="17"/>
+	<mx:Button x="936" y="460.45" label="Reset" click="resetBrightness();" enabled="{_opened}" height="17"/>
+	<mx:Button x="785" y="486.95" label="Reset All" click="resetAll();" height="17" width="209" enabled="{_opened}"/>
+	<mx:HSlider x="808" y="459.45" width="120" liveDragging="true" change="modifyBrillo()" value="0" id="sliderBrightness" toolTip="Modifica Brillo" enabled="{_opened}" minimum="-1.5" maximum="1.5"/>
+	<mx:CheckBox x="786" y="459.45" click="activarBrillo();" enabled="{_opened}" id="checkBrillo"/>
+	<mx:Label x="746" y="459.45" text="Brillo" enabled="{_opened}"/>
+	<mx:Label x="719" y="435.45" text="Contraste" enabled="{_opened}"/>
+	<mx:Label x="715" y="409.45" text="Saturación" enabled="{_opened}"/>
+	<mx:Canvas x="7" y="50" width="640" height="480" backgroundColor="#D9D9D9" id="Container" verticalScrollPolicy="off" horizontalScrollPolicy="off" backgroundImage="@Embed(source='../../assets/backgroundAlpha.jpg')" borderStyle="solid">
+		<mx:Canvas width="640" height="480" backgroundColor="#FFFFFF" id="MainCanvas" verticalScrollPolicy="off" horizontalScrollPolicy="off" horizontalCenter="0" verticalCenter="0" backgroundAlpha="0.0" dropShadowEnabled="true" dropShadowColor="#000000" shadowDirection="right" shadowDistance="10">
+			<mx:Image x="0" y="0" width="640" height="480" id="_image" scaleContent="false" alpha="1.0"/>
+		</mx:Canvas>
+	</mx:Canvas>
+	<mx:Button x="10" y="542" label="Abrir Archivo" click="openFile();" width="224"/>
+	<mx:Button x="664" y="541.95" label="Guardar Imágen" click="saveFile();" width="330" enabled="{_cropedReady}" id="buardarBtn"/>
+	<mx:VRule x="655" y="10" height="527.05" width="1"/>
+	<mx:Canvas x="664" y="142" width="320" height="240" backgroundImage="@Embed(source='../../assets/backgroundAlpha.jpg')" clipContent="true" id="canvasImgB">
+		<mx:Canvas width="320" height="240" backgroundColor="#D16D6D" backgroundAlpha="0.0" horizontalCenter="{_horizontal}" verticalCenter="{_vertical}" clipContent="true" id="canvasImg">
+			<mx:Image id="_result" width="320" height="240" scaleContent="false" alpha="1.0"  filters="{[finalFilter]}" themeColor="#000000" verticalCenter="0" horizontalCenter="0"/>
+		</mx:Canvas>
+	</mx:Canvas>
+	<mx:HSlider x="810" y="512.95" width="120" minimum="0" maximum="100" value="{_quality}" id="qualitySlider" snapInterval="1" liveDragging="true" change="changeQuality()" enabled="{_opened}"/>
+	<mx:Label x="755" y="514.95" text="Calidad" enabled="{_opened}"/>
+	<mx:TextInput x="938" y="511.95" width="56" text="{_quality}" id="qualityText" change="setQuality()" enabled="{_opened}"/>
+	<mx:Image x="664" y="390" source="assets/zoom.png" width="20" height="20" buttonMode="true" autoLoad="true" scaleContent="true" click="openZoom()" enabled="{_opened}"/>
+	<mx:Label x="692" y="390" text="100%" id="porcentajeZoom" enabled="{_opened}"/>
+	<mx:Label x="10" y="24" text="Imagen Original :"/>
+	<mx:Label x="660" y="116" text="Imagen Recortada :"/>
+	<mx:Label x="827" y="10" text="Thumb:" visible="{_thumbExist}"/>
+	<mx:Canvas x="884" y="10" width="100" height="100" backgroundImage="@Embed(source='../../assets/backgroundAlpha.jpg')" clipContent="true" visible="{_thumbExist}">
+		<mx:Canvas x="0" y="0" width="100" height="100" clipContent="true" horizontalCenter="0" verticalCenter="0" visible="{_thumbExist}" id="thumbCanvas">
+			<mx:Image width="100" height="100" verticalCenter="0" horizontalCenter="0" visible="{_thumbExist}" id="_tResult" filters="{[finalFilter]}"/>
+		</mx:Canvas>
+	</mx:Canvas>
+	<mx:RadioButtonGroup id="ThumbImageSelector"/>
+	<mx:RadioButton x="692" y="76" label="Thumb" groupName="ThumbImageSelector" click="setSize()" visible="{_thumbExist}"/>
+	<mx:RadioButton x="692" y="50" label="Imagen" groupName="ThumbImageSelector" selected="true" click="setSize()"/>
+	<mx:Button x="514.95" y="542" label="Crop Thumb" click="cropThumb();" width="132.05" enabled="{!_cropImageButtonSelected}" visible="{_thumbExist}"/>
+	<mx:CheckBox x="786" y="78" selected="{_cropedThumb}" enabled="false" id="cB1" visible="{_thumbExist}"/>
+	<mx:CheckBox x="786" y="52" selected="{_croped}" enabled="false" id="cB2"/>
+</mx:TitleWindow>

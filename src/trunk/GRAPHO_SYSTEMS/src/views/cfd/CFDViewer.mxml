@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="826" height="618" title="Comprobante Fiscal Digital" showCloseButton="true">	
+	<mx:DataGrid x="107" y="315" width="702" height="128" dataProvider="{_CFDData.conceptos}">
+		<mx:columns>
+			<mx:DataGridColumn headerText="Cant" dataField="cantidad" width="70"/>
+			<mx:DataGridColumn headerText="Descripcion" dataField="descripcion"/>
+			<mx:DataGridColumn headerText="P.U." dataField="valorUnitario" width="120" textAlign="right"/>
+			<mx:DataGridColumn headerText="Importe" dataField="importe" width="120" textAlign="right"/>
+		</mx:columns>
+	</mx:DataGrid>
+	<mx:Label x="63" y="135" text="RFC :"/>
+	<mx:Label x="45" y="29" text="Factura :"/>
+	<mx:Label x="607" y="454" text="Sub-Total :"/>
+	<mx:Label x="634" y="484" text="I.V.A.:"/>
+	<mx:TextInput x="683" y="452" width="126" id="subTotal" text="{_CFDData.subTotal}" textAlign="right"/>
+	<mx:Label x="107" y="113" text="EMISOR" fontWeight="bold"/>
+	<mx:TextInput x="107" y="133" id="rfc" text="{_CFDData.emisor.rfc}"/>
+	<mx:Label x="42" y="163" text="Nombre :"/>
+	<mx:Label x="35" y="207" text="Dirección :"/>
+	<mx:Label x="10" y="512" text="Tipo de Pago :"/>
+	<mx:TextInput x="106" y="205" width="207" id="calle" text="{_CFDData.emisor.calle}"/>
+	<mx:Label x="27" y="318" text="Conceptos :"/>
+	<mx:Label x="42" y="454" text="Cadena :"/>
+	<mx:TextInput x="107" y="159" width="340" id="nombre" text="{_CFDData.emisor.nombre}"/>
+	<mx:Label x="107" y="189" text="calle" color="#D0CACA" fontSize="9" fontStyle="italic"/>
+	<mx:Label x="321" y="189" text="número" color="#D0CACA" fontSize="9" fontStyle="italic"/>
+	<mx:Label x="107" y="227" text="colonioa" color="#D0CACA" fontSize="9" fontStyle="italic"/>
+	<mx:Label x="321" y="227" text="municipio" color="#D0CACA" fontSize="9" fontStyle="italic"/>
+	<mx:Label x="107" y="269" text="estado" color="#D0CACA" fontSize="9" fontStyle="italic"/>
+	<mx:Label x="321" y="269" text="país" color="#D0CACA" fontSize="9" fontStyle="italic"/>
+	<mx:Label x="388" y="189" text="c.p." color="#D0CACA" fontSize="9" fontStyle="italic"/>
+	<mx:TextInput x="106" y="510" width="341" id="formaDePago" text="{_CFDData.formaDePago}"/>
+	<mx:TextInput x="106" y="243" width="207" id="colonia" text="{_CFDData.emisor.colonia}"/>
+	<mx:TextInput x="321" y="243" width="126" id="municipio" text="{_CFDData.emisor.municipio}"/>
+	<mx:TextInput x="107" y="285" width="206" id="estado" text="{_CFDData.emisor.estado}"/>
+	<mx:TextInput x="321" y="285" width="126" id="pais" text="{_CFDData.emisor.pais}"/>
+	<mx:TextInput x="321" y="205" width="59" id="noExterior" text="{_CFDData.emisor.noExterior}"/>
+	<mx:TextInput x="388" y="205" width="59" id="codigoPostal" text="{_CFDData.emisor.codigoPostal}"/>
+	<mx:TextInput x="467" y="133" text="{_CFDData.receptor.rfc}"/>
+	<mx:TextInput x="466" y="205" width="207" text="{_CFDData.receptor.calle}"/>
+	<mx:TextInput x="467" y="161" width="340" text="{_CFDData.receptor.nombre}"/>
+	<mx:Label x="467" y="189" text="calle" color="#D0CACA" fontSize="9" fontStyle="italic"/>
+	<mx:Label x="681" y="189" text="número" color="#D0CACA" fontSize="9" fontStyle="italic"/>
+	<mx:Label x="467" y="227" text="colonioa" color="#D0CACA" fontSize="9" fontStyle="italic"/>
+	<mx:Label x="681" y="227" text="municipio" color="#D0CACA" fontSize="9" fontStyle="italic"/>
+	<mx:Label x="467" y="269" text="estado" color="#D0CACA" fontSize="9" fontStyle="italic"/>
+	<mx:Label x="681" y="269" text="país" color="#D0CACA" fontSize="9" fontStyle="italic"/>
+	<mx:Label x="748" y="189" text="c.p." color="#D0CACA" fontSize="9" fontStyle="italic"/>
+	<mx:TextInput x="466" y="243" width="207" text="{_CFDData.receptor.colonia}"/>
+	<mx:TextInput x="681" y="243" width="126" text="{_CFDData.receptor.municipio}"/>
+	<mx:TextInput x="467" y="285" width="206" text="{_CFDData.receptor.estado}"/>
+	<mx:TextInput x="681" y="285" width="126" text="{_CFDData.receptor.pais}"/>
+	<mx:TextInput x="681" y="205" width="59" text="{_CFDData.receptor.noExterior}"/>
+	<mx:TextInput x="748" y="205" width="59" text="{_CFDData.receptor.codigoPostal}"/>
+	<mx:Label x="107" y="11" text="SERIE" color="#D0CACA" fontSize="9" fontStyle="italic" fontWeight="bold"/>
+	<mx:Label x="166" y="11" text="FOLIO" color="#D0CACA" fontSize="9" fontStyle="italic" fontWeight="bold"/>
+	<mx:TextInput x="107" y="27" width="51" id="serie" text="{_CFDData.serie}"/>
+	<mx:TextInput x="166" y="27" width="95" id="folio" text="{_CFDData.folio}"/>
+	<mx:Label x="646" y="10" text="FECHA" color="#D0CACA" fontSize="9" fontStyle="italic" fontWeight="bold"/>
+	<mx:TextInput x="646" y="26" width="129" id="fecha" text="{_CFDData.fecha}"/>
+	<mx:Label x="543" y="10" text="HORA" color="#D0CACA" fontSize="9" fontStyle="italic" fontWeight="bold"/>
+	<mx:TextInput x="543" y="26" width="95" id="hora" text="{_CFDData.hora}"/>
+	<mx:Label x="269" y="11" text="NO. APROBACION" color="#D0CACA" fontSize="9" fontStyle="italic" fontWeight="bold"/>
+	<mx:TextInput x="269" y="27" width="129" id="noAprobacion" text="{_CFDData.noAprobacion}"/>
+	<mx:TextInput x="406" y="27" width="129" id="anoAprobacion" text="{_CFDData.anoAprobacion}"/>
+	<mx:Label x="107" y="57" text="TIPO DE COMPROBANTE" color="#D0CACA" fontSize="9" fontStyle="italic" fontWeight="bold"/>
+	<mx:TextInput x="107" y="73" width="129" id="tipoDeComprobante" text="{_CFDData.tipoDeComprobante}"/>
+	<mx:Label x="469" y="113" text="RECEPTOR" fontWeight="bold"/>
+	<mx:TextInput x="683" y="482" width="126" id="totalImpuestosTrasladados" text="{_CFDData.totalImpuestosTrasladados}" textAlign="right"/>
+	<mx:Label x="633" y="512" text="Total :"/>
+	<mx:TextInput x="683" y="510" width="126" id="total" text="{_CFDData.total}" textAlign="right"/>
+	<mx:Text x="107" y="454" text="{_CFDData.sello}" width="476" height="48" id="sello"/>
+	<mx:Label x="406" y="11" text="AÑO. APROBACION" color="#D0CACA" fontSize="9" fontStyle="italic" fontWeight="bold"/>
+	<mx:VRule x="457" y="113" height="194"/>
+	<mx:Button x="106" y="554" label="Regresar" click="closeWindow();" width="207"/>
+	<mx:Button x="321" y="554" label="Abrir" click="browseFile()" width="207"/>
+	<mx:Script>
+	
+		<![CDATA[
+			import mx.collections.XMLListCollection;
+			import mx.events.CloseEvent;
+			import mx.managers.PopUpManager;
+			import mx.messaging.channels.StreamingAMFChannel;
+			import mx.random.cfd.CFDData;
+			import mx.random.web.WebApplication;
+			import mx.random.events.SelectionEvent;
+			import mx.random.events.StaticEvent;			
+			private var _CFDData:CFDData = new CFDData();
+			private var _file:FileReference = new FileReference();
+			private var _xmlData:XML;
+			private var _xmlListData:XMLListCollection;
+			private var _webApplication:WebApplication;
+			private var _workManager:Object;
+			private var _xmlLoader:URLLoader;
+
+			private var _xmlFile:String;
+//---------------------------- Context ---------------------------------------------            
+
+   			public function set context(contextObj:Object):void{
+				for( var p:String in contextObj){
+					if(this.hasOwnProperty(p)){
+						this[p] = contextObj[p];
+					}
+				}
+				initView();
+			}
+
+			public function set workManager(value:Object):void{
+				_workManager = value;
+			}
+
+			public function set webApplication(value:WebApplication):void{
+				_webApplication = value;				
+			}
+			public function get webApplication():WebApplication{ return _webApplication; } 
+				
+			public function set xmlFile(value:String):void{
+				_xmlFile = value;
+			}	
+						
+//---------------------------- Context ---------------------------------------------  
+
+			
+			private function initView():void{
+				//StaticEvent.addEventListener(SelectionEvent.SELECTION_COMPLETE,onselectComplete);
+				//_xmlLoader = new URLLoader(new URLRequest("___DATA/_xml/"+_xmlFile));								
+				//_xmlLoader.addEventListener(Event.COMPLETE,onLoadXMLComplete);
+			}
+			
+			private function onselectComplete(e:SelectionEvent):void{
+				_CFDData.receptor.codigoPostal 	= e.itemData._cp;
+				_CFDData.receptor.calle 		= e.itemData._direccion;
+				_CFDData.receptor.colonia 		= e.itemData._colonia;
+				_CFDData.receptor.estado 		= e.itemData._estado;
+				_CFDData.receptor.municipio 	= e.itemData._ciudad;
+				_CFDData.receptor.noExterior 	= e.itemData._numero;
+				_CFDData.receptor.nombre 		= e.itemData._razonSocial;
+				_CFDData.receptor.pais 			= e.itemData._pais;
+				_CFDData.receptor.rfc 			= e.itemData._rfc;				
+			}
+			
+			
+			private function browseFile():void{
+				var fileFilter:FileFilter = new FileFilter("Facturas XML", "*.xml");
+				_file.browse([fileFilter]);
+				_file.addEventListener(Event.SELECT,onFileSelect);
+			}
+			
+			private function onFileSelect(e:Event):void{
+				_file.removeEventListener(Event.SELECT,onFileSelect);
+				//_file.load();
+				
+				_xmlLoader = new URLLoader(new URLRequest("___DATA/_xml/"+_file.name));								
+				_xmlLoader.addEventListener(Event.COMPLETE,onLoadXMLComplete);
+			}
+			
+			private function onLoadXMLComplete(e:Event):void{
+				_xmlLoader.removeEventListener(Event.COMPLETE,onLoadXMLComplete);
+				var xmlList:XMLList = new XMLList(new XML(_xmlLoader.data));				
+				_CFDData.createData(new XMLListCollection(xmlList));
+			}
+			
+			private function onFileLoaded(e:Event):void{
+				//_file.removeEventListener(Event.COMPLETE,onFileLoaded);
+				//var xmlList:XMLList = new XMLList(new XML(_file.data));				
+				//_CFDData.createData(new XMLListCollection(xmlList));
+			}
+			
+//-------------------------------- POP UP WINDOW --------------------------------------	
+			private function get viewContext():Object{
+				return {selectMode:true,
+						webApplication: _webApplication,
+						workManager: this
+						}					
+			}
+
+			public function openPopUp(popUpName:String,modal:Boolean = false):void{
+				var pop:TitleWindow = PopUpManager.createPopUp(this, getDefinitionByName("views."+popUpName) as Class, modal) as TitleWindow;
+				pop.name = popUpName;
+				pop.addEventListener(CloseEvent.CLOSE, closePopup);
+				if(pop.hasOwnProperty("context")){
+					Object(pop).context = viewContext;
+				}
+				PopUpManager.centerPopUp(pop);
+			}
+			
+			private function closePopup(e:CloseEvent):void{
+	            PopUpManager.removePopUp(e.target as TitleWindow);
+			}
+			
+			public function closeWindow():void{					
+            		dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
+            		PopUpManager.removePopUp(this);
+            }
+//-------------------------------- POP UP WINDOW --------------------------------------			
+			
+		]]>
+	</mx:Script>
+	<mx:HRule x="107" y="103" width="700" height="1"/>
+</mx:TitleWindow>

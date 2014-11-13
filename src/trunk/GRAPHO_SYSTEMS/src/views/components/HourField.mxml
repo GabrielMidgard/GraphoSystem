@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="95.79001" height="22" backgroundAlpha="0.0" 
+	horizontalScrollPolicy="off"
+	verticalScrollPolicy="off"	
+	creationComplete="initComp()" clipContent="false">
+	<mx:TextInput x="0" y="0" width="74" text="00:00:00" id="_hora" maxChars="8" textAlign="center"  change="onChangeData()"/>	
+	<mx:Image x="75.4" y="4" source="assets/Comps/TimeIcon.png" width="15" height="15" scaleContent="false" autoLoad="true" id="_hourIcon"/>
+	
+	<mx:Script>
+		<![CDATA[
+			import flash.sampler.NewObjectSample;
+			import mx.managers.PopUpManager;
+			import mx.core.UIComponent;
+			import mx.events.FlexMouseEvent;
+			import mx.random.events.HourPickerEvent;
+			import mx.events.DragEvent;
+			
+			private var _hourPicker:HourPicker;
+			
+			public function set startHour(value:String):void{
+				_hora.text = value;				
+			}
+			
+			public function get text():String{ return _hora.text }
+			
+			public function get hour():String{ return _hora.text }
+			public function set hour(value:String){ _hora.text = value}
+			
+			private function initComp():void{				
+				_hourIcon.addEventListener(MouseEvent.CLICK,openHourPicker);										
+			}		
+			
+			private function openHourPicker(e:MouseEvent):void{
+				var coor:Point = this.localToGlobal(new Point(this.x,this.y));
+				_hourPicker = HourPicker(PopUpManager.createPopUp(this,HourPicker,false));											
+				_hourPicker.x = coor.x-this.x+_hora.width;
+				_hourPicker.y = coor.y-this.y;
+				_hourPicker.addEventListener(HourPickerEvent.HOUR_SELECTION_COMPLETE,hourSelectComplete);
+				_hourPicker.startHour = _hora.text;										
+			}
+			
+			private function hourSelectComplete(e:HourPickerEvent):void{
+				_hora.text = e.selectedHour;
+				onChangeData();							 
+			}
+			
+			private function onChangeData():void{
+				dispatchEvent(new Event(Event.CHANGE,true));
+			}
+						
+			
+		]]>
+	</mx:Script>
+	
+</mx:Canvas>

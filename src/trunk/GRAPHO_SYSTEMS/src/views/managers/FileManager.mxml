@@ -1,0 +1,608 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" 
+	width="538" height="449" 
+	layout="absolute" 
+	showCloseButton="true" 
+ 	creationComplete="centerWindow()" title="File Manager">
+ 	
+	<mx:Script>
+        <![CDATA[
+        	import mx.events.DragEvent;
+        	import mx.random.converters.Converter;
+        	import mx.collections.ArrayCollection;
+        	import mx.effects.Resize;
+        	import mx.random.users.UserData;
+        	import mx.random.files.UploadFiles;
+        	import mx.collections.XMLListCollection;
+        	import mx.controls.Alert;
+        	import mx.rpc.events.ResultEvent;
+        	import mx.rpc.events.FaultEvent;
+        	import mx.rpc.remoting.RemoteObject;
+        	import mx.random.web.WebApplication;
+        	import mx.events.CloseEvent;
+            import mx.managers.PopUpManager;
+            
+            
+            private var _webApplication:WebApplication;
+            private var _workManager:Object = new Object();
+[Bindable]	private var _files:XMLListCollection;
+			private var _fileService:RemoteObject;
+[Bindable]	private var _url:String;
+			private var _actualDir:String = "/";
+			private var _host:String = "";    
+[Bindable]	private var _fileRef:UploadFiles;
+           	private var _UploadManager:UploadManager;  
+           	private var _actualIndex:Number = 0;      
+            
+            [Bindable]
+	        [Embed(source="assets/Files/txt.png")] 
+	        public var __txt:Class;
+	        
+	        [Bindable]
+	        [Embed(source="assets/Files/ai.png")] 
+	        public var __ai:Class;
+	        
+	        [Bindable]
+	        [Embed(source="assets/Files/fla.png")] 
+	        public var __fla:Class;
+	        
+	         [Bindable]
+	        [Embed(source="assets/Files/wmv.png")] 
+	        public var __mpg:Class;
+	        
+	        [Bindable]
+	        [Embed(source="assets/Files/def.png")] 
+	        public var __dxf:Class;
+	        
+	        [Bindable]
+	        [Embed(source="assets/Files/wmv.png")] 
+	        public var __avi:Class;
+	        
+	        [Bindable]
+	        [Embed(source="assets/Files/flv.png")] 
+	        public var __flv:Class;	
+	        
+	        [Bindable]
+	        [Embed(source="assets/Files/def.png")] 
+	        public var __def:Class;
+	        
+	        [Bindable]
+	        [Embed(source="assets/Files/fld.png")] 
+	        public var __fld:Class;
+	        
+	        [Bindable]
+	        [Embed(source="assets/Files/html.png")] 
+	        public var __html:Class;
+	        
+	        [Bindable]
+	        [Embed(source="assets/Files/mp3.png")] 
+	        public var __mp3:Class;
+	        
+	        [Bindable]
+	        [Embed(source="assets/Files/pps.png")] 
+	        public var __pps:Class;
+	        
+	        [Bindable]
+	        [Embed(source="assets/Files/psd.png")] 
+	        public var __psd:Class;
+	        
+	        [Bindable]
+	        [Embed(source="assets/Files/swf.png")] 
+	        public var __swf:Class;
+	        
+	        [Bindable]
+	        [Embed(source="assets/Files/ppt.png")] 
+	        public var __ppt:Class;
+	        
+	        [Bindable]
+	        [Embed(source="assets/Files/bmp.png")] 
+	        public var __bmp:Class;
+	        
+	        [Bindable]
+	        [Embed(source="assets/Files/doc.png")] 
+	        public var __doc:Class;
+	        
+	        [Bindable]
+	        [Embed(source="assets/Files/docx.png")] 
+	        public var __docx:Class;
+	        
+	        [Bindable]
+	        [Embed(source="assets/Files/gif.png")] 
+	        public var __gif:Class;
+	        
+	        [Bindable]
+	        [Embed(source="assets/Files/jpg.png")] 
+	        public var __jpg:Class;
+	        
+	        [Bindable]
+	        [Embed(source="assets/Files/mov.png")] 
+	        public var __mov:Class;
+	        
+	        [Bindable]
+	        [Embed(source="assets/Files/pdf.png")] 
+	        public var __pdf:Class;
+	        
+	        [Bindable]
+	        [Embed(source="assets/Files/png.png")] 
+	        public var __png:Class;
+	        
+	        [Bindable]
+	        [Embed(source="assets/Files/wmv.png")] 
+	        public var __wmv:Class;
+	        
+	        [Bindable]
+	        [Embed(source="assets/Files/xls.png")] 
+	        public var __xls:Class;
+	        
+	        [Bindable]
+	        [Embed(source="assets/Files/xlsx.png")] 
+	        public var __xlsx:Class;
+	        
+	        [Bindable]
+	        [Embed(source="assets/Files/rar.png")] 
+	        public var __rar:Class;
+	        
+	        [Bindable]
+	        [Embed(source="assets/Files/zip.png")] 
+	        public var __zip:Class;
+	        
+	        [Bindable]
+	        [Embed(source="assets/Files/fldc.png")] 
+	        public var __fldc:Class;
+	        
+	        
+            
+            
+//---------------------------- Context ---------------------------------------------            
+
+            public function set context(contextObj:Object):void{
+				for( var p:String in contextObj){
+					if(this.hasOwnProperty(p)){
+						this[p] 	= contextObj[p];
+					}
+				}
+				preInit();
+				initView();
+			}
+
+			public function set workManager(value:Object):void{
+				_workManager 		= value;
+			}
+
+			
+			public function set webApplication(value:WebApplication):void{
+				_webApplication 	= value;
+			}
+//---------------------------- Context ---------------------------------------------  
+			
+			public function preInit():void{
+				_fileService = _webApplication.getService("Directorios");
+				_multipleSelectionBt.enabled = false;
+			}
+			
+			
+			public function initView():void{
+				_host = UserData.HOST_PATH+UserData.ROOT
+				_fileService.startRead("/");
+				_fileService.addEventListener(FaultEvent.FAULT,onFault);
+				_fileService.startRead.addEventListener(ResultEvent.RESULT,onResult);
+				
+			}    
+			
+			    
+			
+			private function onFault(e:FaultEvent):void{
+				_fileService.removeEventListener(FaultEvent.FAULT,onFault);
+				Alert.show(e.fault.faultString,"Server Error");
+				actBts(true);
+			}
+			
+			private function onResult(e:ResultEvent):void{
+				_fileService.startRead.removeEventListener(ResultEvent.RESULT,onResult);			
+				_files = new XMLListCollection(new XMLList(e.result));
+				directory.text = _actualDir;			
+				callLater(openLastNode);
+
+			}
+			
+			private function openLastNode():void{
+				var xmllistDescendants:XMLList  = _files.descendants().(@path.toString() == _actualDir);
+				
+				if(xmllistDescendants[0]){
+					expandParents(xmllistDescendants[0]);
+					files.selectedItem = xmllistDescendants[0];
+					files.scrollToIndex(files.selectedIndex);
+				}
+				directory.text = _actualDir;
+			}
+			
+			private function openSomeNodes():void {
+                //var xList:XMLList = _files..node.(@path != "null");                
+                //files.openItems = xList;
+                files.openItems=_files.descendants("*")
+                //files.expandItem(_files.getItemAt(1),true);
+                //files.openItems= _files.descendants(_actualDir);
+                files.selectedIndex = _actualIndex;
+            }
+ 
+            private function closeAllNodes():void {
+                files.openItems = [];
+            }
+
+            
+            public function centerWindow():void{
+            	PopUpManager.centerPopUp(this);
+            }
+            
+            public function closeWindow():void{
+            	dispatchEvent(new CloseEvent(CloseEvent.CLOSE));            	
+            }
+            
+            private function openDir():void{ 
+            	_multipleSelectionBt.enabled = false;
+            	renameBt.enabled = true;
+            	doMultipleSelection();
+            	_actualFile.text = files.selectedItem.@name;
+            	_searchField.text = "";
+            	if(files.selectedItem.@icon == "__fld"){
+            		directory.text = files.selectedItem.@path;
+            		actBts(true);
+            		eliminarArchivoBt.enabled = false;
+            	}else{
+            		actBts(false);
+            		directory.text = files.selectedItem.@path;
+            		eliminarArchivoBt.enabled = true;
+            	}
+            	if(_FilesSelected.length>1){
+            		_multipleSelectionBt.enabled = true;
+            		eliminarArchivoBt.enabled = false;
+            		renameBt.enabled = false;
+            		_actualFile.text = "";
+            	}
+            	
+            	
+            }
+            
+            private function mkDir():void{
+            	var params:Object = {dir:dirName.text,parent:directory.text}
+            	_fileService.crear_directorio(params);
+            	_fileService.crear_directorio.addEventListener(ResultEvent.RESULT,onMkDirReady);
+            	_fileService.addEventListener(FaultEvent.FAULT,onFault);
+            	actBts(false);
+            	_actualIndex = files.selectedIndex;
+            }
+            
+            private function onMkDirReady(e:ResultEvent):void{
+            	if(e.result){
+            		_fileService.crear_directorio.removeEventListener(ResultEvent.RESULT,onMkDirReady);
+            		_actualDir = directory.text+dirName.text+"/";            		
+            		initView();
+            	}else{
+            		_actualDir = "/";
+            	}
+            	dirName.text = "";
+            	actBts(true);
+            }
+            
+            private function rmDirAlert():void{
+            	if(directory.text!="/"){
+	            	Alert.show("Confirm delete "+directory.text,"Alert",Alert.YES|Alert.CANCEL,this,rmDir)
+            	}else{
+            		Alert.show("Cannot delete root directory","Error");
+            	}
+            }
+            
+            private function rmDir(e:CloseEvent):void{
+            	if(e.detail==Alert.YES){
+	            	_fileService.eliminar_directorio(directory.text);
+	            	_fileService.eliminar_directorio.addEventListener(ResultEvent.RESULT,rmDirReady);
+	            	_fileService.addEventListener(FaultEvent.FAULT,onFault);
+	            	_actualDir = getParent();
+	            	actBts(false);
+            	}
+            }
+            
+            private function getParent():String{
+            	var res:Array = directory.text.split("/");
+            	var path:String = "";
+            	for(var n:Number=0;n<res.length-2;n++){
+            		path += res[n]+"/";
+            	}            	
+            	return path;
+            }
+            
+            private function rmDirReady(e:ResultEvent):void{
+            	if(e.result){
+            		_fileService.eliminar_directorio.removeEventListener(ResultEvent.RESULT,rmDirReady);
+            		Alert.show("Folder deleted","Success");
+            		
+            		initView();
+            	}
+            	actBts(true);
+            }
+            
+             private function removeAllDirFilesAlert():void{
+            	if(directory.text!="/"){
+	            	Alert.show("Confirm delete "+directory.text+" and all content","Alert",Alert.YES|Alert.CANCEL,this,removeAllDirFiles)
+            	}else{
+            		Alert.show("Cannot delete root directory","Error");
+            	}
+            }
+            
+            
+            private function removeAllDirFiles(e:CloseEvent):void{
+            	if(e.detail == Alert.YES){
+	            	_fileService.remove_AllDir(directory.text,false);
+	            	_fileService.remove_AllDir.addEventListener(ResultEvent.RESULT,removeAllDirFilesReady);
+	            	_fileService.addEventListener(FaultEvent.FAULT,onFault);
+	            	actBts(false);
+            	}
+            }
+            
+            private function removeAllDirFilesReady(e:ResultEvent):void{
+            	if(e.result){
+            		_fileService.remove_AllDir.removeEventListener(ResultEvent.RESULT,removeAllDirFilesReady);
+            		Alert.show("Folder deleted and all content","Success");
+            		initView();
+            	}else{
+            		Alert.show("Cannot delete folder","Error");
+            	}
+            	actBts(true);
+            }
+            
+            private function removeAllDir():void{
+            	if(directory.text!="/"){
+	            	_fileService.remove_dir(directory.text);
+	            	_fileService.remove_dir.addEventListener(ResultEvent.RESULT,removeAllDirReady);
+	            	_fileService.addEventListener(FaultEvent.FAULT,onFault);
+	            	actBts(false);
+            	}else{
+            		Alert.show("Cannot delete root directory","Error");
+            	}
+            }
+            
+            
+            
+            
+            private function removeAllDirReady(e:ResultEvent):void{
+            	if(e.result){
+            		_fileService.remove_dir.removeEventListener(ResultEvent.RESULT,removeAllDirReady);
+            		Alert.show(e.result.toString(),"Success");
+            		//Alert.show("Se eliminó el directorio : /"+dirName.text+" y todo su contenido","Success");
+            		initView();
+            	}else{
+            		Alert.show("Cannot delete folder","Error");
+            	}
+            	actBts(true);
+            }
+
+           private function selectFiles():void {
+	            _UploadManager = UploadManager(PopUpManager.createPopUp(this,UploadManager,true));
+	            _UploadManager.url = directory.text; 
+	            PopUpManager.centerPopUp(_UploadManager);
+	            _UploadManager.addEventListener(Event.COMPLETE,updateList);
+	        }
+			
+			private function updateList(e:Event):void{
+				initView();
+			}
+			
+	        private function listCompleteHandler(event:Event):void {
+	            initView();
+	        }
+
+		    private function actBts(value:Boolean):void{
+		    	crearBt.enabled = value;
+		    	eliminarBt.enabled = value;
+		    	eliminarCtBt.enabled = value;
+		    	upFilesBt.enabled = value;
+		    	dirName.enabled = value;
+		    }
+
+			private function deleteFileAlert():void{
+				Alert.show("Confirm delete file"+directory.text,"Alert",Alert.YES|Alert.CANCEL,this,deleteFile)
+			}
+
+			private function deleteFile(e:CloseEvent):void{
+				if(e.detail==Alert.YES){
+					_fileService.deleteFile(directory.text);
+					_fileService.deleteFile.addEventListener(ResultEvent.RESULT,deleteFileready);
+				}
+			}
+			
+			private function deleteFileready(e:ResultEvent):void{
+				_fileService.deleteFile.removeEventListener(ResultEvent.RESULT,deleteFileready);
+				if(e.result){
+					initView();
+					Alert.show("File deleted : "+directory.text,"Success");
+				}else{
+					Alert.show("Cannot delete file : "+directory.text,"Error");
+				}
+			}
+			
+			private function renameFile():void{
+				if(files.selectedIndex!=-1){
+					if(_actualFile.text!=""){
+					
+						var realPath:String = files.selectedItem.@path;
+						if(files.selectedItem.@icon == "__fld"){
+							realPath = realPath.slice(0,realPath.length-1);					
+						}
+						var filePathArray:Array = realPath.split("/");
+						var filePath:String = "";
+						
+						var oldName:String = filePathArray[filePathArray.length-1];
+						var newName:String = _actualFile.text;
+						
+						for(var n:Number = 0;n<filePathArray.length-1;n++){
+							filePath += filePathArray[n]+"/";
+						}
+						if(oldName==newName){
+							Alert.show("El nombre es el mismo","Error");
+						}else{
+							var params:Object = {oldName:filePath+oldName,newName:filePath+newName};
+							_fileService.renameFile(params);
+							_fileService.renameFile.addEventListener(ResultEvent.RESULT,renameFileready);
+							_actualDir = filePath+newName;
+							if(files.selectedItem.@icon == "__fld")_actualDir += "/";
+						}
+					}else{
+						Alert.show("Nombre inválido","Error");
+					}
+				}else{
+					Alert.show("No hay archivo seleccionado","Error");
+				}
+				
+			}
+			
+			private function renameFileready(e:ResultEvent):void{
+				_actualFile.text ="";
+				_fileService.renameFile.removeEventListener(ResultEvent.RESULT,renameFileready);
+				if(e.result){
+					initView();
+					Alert.show("Se renombró el archivo : "+directory.text,"Success");
+				}else{
+					Alert.show("No se pudo renombrer el archivo : "+directory.text,"Error");
+				}
+			}
+		    
+			private function expandParents(xmlNode:XML):void{
+			    while (xmlNode.parent() != null) {  
+			      xmlNode = xmlNode.parent();
+			      files.expandItem(xmlNode,true, false);
+			    }
+			}
+
+			
+			public function search(searchFor:String):void{
+				var xmllistDescendants:XMLList  = _files.descendants().(@name.toLowerCase() == searchFor.toLowerCase());
+				if(xmllistDescendants[0]){
+					expandParents(xmllistDescendants[0]);
+					files.selectedItem = xmllistDescendants[0];
+					files.scrollToIndex(files.selectedIndex);
+				}
+			}
+			
+			private function searchFile():void{
+				
+				var xmllistDescendants:XMLList  = _files.descendants().(@name.toLowerCase() == _searchField.text.toLowerCase());
+				
+				if(xmllistDescendants[0]){
+					expandParents(xmllistDescendants[0]);
+					files.selectedItem = xmllistDescendants[0];
+					files.scrollToIndex(files.selectedIndex);
+				}
+				//_files.filterFunction = filterXML;
+				//_files.refresh();
+			}
+			
+			private function filterXML(item:Object):Boolean {
+				//item..node.(@name.toLocaleLowerCase()) == _searchField.text.toLowerCase()	
+				
+				//trace();
+				return item.node.(@name.match(new RegExp("^" + _searchField.text, "i")));//item.text().match(new RegExp("^" + _searchField.text, "i"));
+			
+               //return item.descendants().(@name.toLowerCase() == _searchField.text.toLowerCase());
+            }
+            
+            
+            private function moveFiles():void{
+            	if(_FilesSelected.length!=0){
+            		moveFilesPop();
+            	}else{
+            		Alert.show("No hay archivos seleccionado","Error");
+            	}
+            }
+            
+            private var _moveFiles:MoveFiles;
+            
+            private function moveFilesPop():void{
+            	_moveFiles = MoveFiles(PopUpManager.createPopUp(this,MoveFiles,true));
+            	_moveFiles.workManager = this;
+            	_moveFiles.filesToMove = _FilesSelected;
+            	_moveFiles.webApplication = _webApplication;
+            	PopUpManager.centerPopUp(_moveFiles);
+            }
+
+//--------------------------- Multiple Erase --------------------------------------------------------------		
+		
+			private var _FilesSelected:ArrayCollection;
+			
+			private function deleteMultiple():void{              	
+            	if(_FilesSelected.length!=0){
+            		deleteMultiplePop();
+            	}else{
+            		Alert.show("No hay archivos seleccionado","Error");
+            	}
+            }
+            
+            private var _multipleDelete:MultipleDelete;
+            
+            private function deleteMultiplePop():void{
+            	_multipleDelete = MultipleDelete(PopUpManager.createPopUp(this,MultipleDelete,true));
+            	_multipleDelete.workManager = this;
+            	_multipleDelete.filesToDelete = _FilesSelected;
+            	_multipleDelete.webApplication = _webApplication;
+            	PopUpManager.centerPopUp(_multipleDelete);
+            }
+            
+            private function doMultipleSelection():void{
+            	_FilesSelected = new ArrayCollection();
+            	var selectedFiles:Array = new Array();
+            	selectedFiles = files.selectedItems
+            	var counter:Number = 1;
+            	if(selectedFiles.length>0){
+ 
+            		for(var m:Number = 0;m<selectedFiles.length;m++){
+            			if(selectedFiles[m].@icon!="__fld")
+            			_FilesSelected.addItem({id:counter,fileName:selectedFiles[m].@name.toString(),file:selectedFiles[m].@path.toString(),type:Converter.strReplace("","_",selectedFiles[m].@icon),estatus:"Waiting"});
+            			counter++;
+            		} 
+            		
+            		/*for(var n:Number = 0;n<selectedFiles.length;n++){
+            			if(selectedFiles[n].@icon=="__fld")
+            			_FilesToErase.addItem({id:counter,file:selectedFiles[n].@path,type:Converter.strReplace("","_",selectedFiles[n].@icon),estatus:"Waiting"});
+            			counter++;
+            		} */         		
+            	}
+            }
+			
+
+
+
+            
+       ]]>
+       
+	</mx:Script>
+	<mx:Tree x="10" y="74" height="303" width="251" id="files" dataProvider="{_files}" 
+		iconField="@icon"
+		labelField="@name" 
+	 	folderOpenIcon="{__fld}"
+	 	folderClosedIcon="{__fldc}"
+	    change="openDir();"
+	    showRoot="false"
+	     allowMultipleSelection="true"></mx:Tree>
+	<mx:Button x="390" y="385" label="Back" click="closeWindow()" width="132"/>
+	<mx:Button x="269" y="115" label="Create Dir" width="85" click="mkDir()" id="crearBt"/>
+	<mx:Button x="362" y="261" label="Delete Dir" width="160" click="rmDirAlert();" id="eliminarBt"/>
+	<mx:Button x="362" y="230" label="Delete File" width="160" click="deleteFileAlert();" id="eliminarArchivoBt"/>
+	<mx:Button x="362" y="199" label="Move File (s)" width="160" click="moveFiles();" id="moveBt"/>
+	<mx:Label x="10" y="10" text="Directory :"/>
+	<mx:TextInput x="10" y="26" width="512" id="directory" editable="true"/>
+	<mx:Label x="10" y="57" text="Server :"/>
+	<mx:Label x="363" y="100" text="Folder Name :"/>
+	<mx:Label x="305" y="76" text="Search :"/>
+	<mx:TextInput x="362" y="116" id="dirName"/>
+	<mx:TextInput x="364" y="74" id="_searchField" change="searchFile()"/>
+	<mx:Button x="362" y="292" label="Delete Dir Content" click="removeAllDirFilesAlert();" width="160" id="eliminarCtBt"/>
+	<mx:Button x="9" y="385" label="Expand" click="openSomeNodes();"/>
+	<mx:Button x="91" y="385" label="Colaps" click="closeAllNodes();"/>
+	<mx:Button x="269" y="354" label="Upload File(s)" width="253" click="selectFiles();" id="upFilesBt"/>
+	<mx:Button x="182" y="385" label="Refresh" click="initView();"/>
+	<mx:Label x="363" y="146" text="File Name :"/>
+	<mx:TextInput x="362" y="165" width="160" id="_actualFile"/>
+	<mx:Button x="269" y="164" label="Rename" width="85" click="renameFile();" id="renameBt"/>
+	<mx:Button x="362" y="323" label="Delete Selection" click="deleteMultiple();" width="160" id="_multipleSelectionBt"/>
+	
+</mx:TitleWindow>	
+

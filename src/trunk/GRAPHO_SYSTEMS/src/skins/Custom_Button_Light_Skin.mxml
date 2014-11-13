@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+
+    ADOBE SYSTEMS INCORPORATED
+    Copyright 2008 Adobe Systems Incorporated
+    All Rights Reserved.
+
+    NOTICE: Adobe permits you to use, modify, and distribute this file
+    in accordance with the terms of the license agreement accompanying it.
+
+-->
+
+<!--- The default skin class for the Spark Button component.  
+
+       @see spark.components.Button
+        
+      @langversion 3.0
+      @playerversion Flash 10
+      @playerversion AIR 1.5
+      @productversion Flex 4
+-->
+<s:SparkButtonSkin xmlns:fx="http://ns.adobe.com/mxml/2009"
+				   xmlns:s="library://ns.adobe.com/flex/spark"
+				   xmlns:fb="http://ns.adobe.com/flashbuilder/2009"
+				   minWidth="21" minHeight="30" 
+				   alpha.disabled="0.5" textAlign.disabled="center"
+				   width.up="104">
+     
+    <fx:Metadata>
+        <![CDATA[ 
+        /** 
+         * @copy spark.skins.spark.ApplicationSkin#hostComponent
+         */
+        [HostComponent("spark.components.Button")]
+        ]]>
+    </fx:Metadata>
+    
+	
+	<fx:Script>
+		<![CDATA[
+			[Bindable] private var imgSource:*;
+			override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number) : void{
+				//imgSource = hostComponent.getStyle('icon'); 
+				
+				super.updateDisplayList(unscaledWidth, unscaledHeight);
+			}
+		]]>
+	</fx:Script>
+    <!-- states -->
+    <s:states>
+        <s:State name="up" />
+        <s:State name="over" />
+        <s:State name="down" />
+        <s:State name="disabled" />
+		
+		
+    </s:states>
+    
+    <!-- layer 1: shadow -->
+    <!--- @private -->
+    <s:Rect id="shadow" left="-1" right="-1" top="-1" bottom="-1" radiusX="0">
+        <s:fill>
+            <s:LinearGradient rotation="90">
+                <s:GradientEntry color="0x000000" 
+                                 color.down="0xFFFFFF"
+                                 alpha="0.0"
+                                 alpha.down="0" />
+                <s:GradientEntry color="0x000000" 
+                                 color.down="0xFFFFFF" 
+                                 alpha="0.0"
+                                 alpha.down="0.0" />
+            </s:LinearGradient>
+        </s:fill>
+    </s:Rect>
+    
+    <!-- layer 2: fill -->
+    <!--- @private -->
+    <s:Rect id="fill" left="1" right="1" top="1" bottom="1" radiusX="0"
+			left.disabled="0" right.disabled="0" top.disabled="0" bottom.disabled="0"
+			left.down="0" right.down="0" top.down="0" bottom.down="0"
+			left.over="0" right.over="0" top.over="0" bottom.over="0"
+			left.up="0" right.up="0" top.up="0" bottom.up="0">
+        <s:fill>
+            <s:LinearGradient rotation="90">
+                <s:GradientEntry color="0xe9f1f3" 
+                                 color.over="0x2ca03c" 
+                                 color.down="0x195221" 
+                                 alpha="1" />
+               
+            </s:LinearGradient>
+        </s:fill>
+    </s:Rect>
+
+    <!-- layer 3: fill lowlight -->
+    <!--- @private -->
+    <s:Rect id="lowlight" left="1" right="1" top="1" bottom="1" radiusX="0">
+        <s:fill>
+            <s:LinearGradient rotation="270">
+                <s:GradientEntry color="0x000000" ratio="0.0" alpha="0.0" />
+                <s:GradientEntry color="0x000000" ratio="0.0" alpha="0.0" />
+                <s:GradientEntry color="0x000000" ratio="0.0" alpha="0" />
+            </s:LinearGradient>
+        </s:fill>
+    </s:Rect>
+    
+    <!-- layer 4: fill highlight -->
+    <!--- @private -->
+    <s:Rect id="highlight" left="1" right="1" top="1" bottom="1" radiusX="0">
+        <s:fill>
+            <s:LinearGradient rotation="90">
+                <s:GradientEntry color="0xFFFFFF"
+                                 ratio="0.0"
+                                 alpha="0.0" 
+                                 alpha.over="0.0" 
+                                 alpha.down="0.0"/>
+                <s:GradientEntry color="0xFFFFFF"
+                                 ratio="0.0"
+                                 alpha="0.0"
+                                 alpha.over="0.0"
+                                 alpha.down="0.0" />
+                <s:GradientEntry color="0xFFFFFF"
+                                 ratio="0.0"
+                                 alpha="0" />
+            </s:LinearGradient>
+        </s:fill>
+    </s:Rect>
+    
+    <!-- layer 5: highlight stroke (all states except down) -->
+    <!--- @private -->
+    
+    <!-- layer 6: highlight stroke (down state only) -->
+    <!--- @private -->
+    <!--- @private -->
+
+    <!-- layer 7: border - put on top of the fill so it doesn't disappear when scale is less than 1 -->
+    <!--- @private -->
+    
+    <!-- layer 8: text -->
+    <!--- @copy spark.components.supportClasses.ButtonBase#labelDisplay  -->
+	
+	<s:HGroup id="displayGroup" left="10" right="10" top="0" bottom="0"	verticalAlign="middle">
+		
+		
+		<s:BitmapImage id="icon" source="{imgSource}"/>
+		<s:Label id="labelDisplay" 
+				 maxDisplayedLines="1" textAlign="center" verticalAlign="middle" verticalCenter="1"
+				 fontFamily ="Verdana" fontSize ="10" fontWeight ="normal"
+				 color.disabled="#042B36" 
+				 color.down="#FFFFFF" 
+				 color.over="#FFFFFF"
+				 color.up="#042B36"  >
+		</s:Label>
+		
+	   
+
+	</s:HGroup>
+    
+</s:SparkButtonSkin>

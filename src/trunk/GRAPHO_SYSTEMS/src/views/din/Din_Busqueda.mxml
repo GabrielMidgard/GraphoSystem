@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark" 
+			   xmlns:mx="library://ns.adobe.com/flex/mx" 
+			   title="Búsqueda de Clientes"
+			   width="578" height="566">
+
+	<fx:Script>
+		<![CDATA[
+			import flash.sampler.NewObjectSample;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.managers.PopUpManager;
+			import mx.random.constants.Catalogs;
+			import mx.random.constants.ConstantData;
+			import mx.random.constants.Constantes;
+			import mx.random.constants.Languages;
+			import mx.random.constants.SystemGlobals;
+			import mx.random.converters.Converter;
+			import mx.random.dataManagers.DataManager;
+			import mx.random.dataManagers.EventManager;
+			import mx.random.forms.Validator;
+			import mx.random.web.WebApplication;
+			import mx.random.windowManagers.PopManager;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.remoting.RemoteObject;
+
+			private var _webApplication:WebApplication;
+			private var Valid:Validator 			= new Validator();
+			private var _workManager:Object 		= new Object();
+			private var _MainService:RemoteObject 		= new RemoteObject();
+[Bindable]	private var _Data:DataManager 				= new DataManager(this);
+[Bindable]	private var _DataResult:ArrayCollection 		= new ArrayCollection();			
+			private var _eventManager:EventManager 		= new EventManager(this);
+			private var _dataIndex:Number 			= 0;
+			
+			//-----------Event Manager -----------
+
+[Bindable]	public var _dataReady:Boolean 			= true;
+[Bindable]	public var _newData:Boolean 			= false;
+[Bindable]	public var _updateData:Boolean 			= false;
+
+			//-----------Event Manager -----------
+			
+			
+			//-----------Local Vars -----------
+			
+			private var _selectedId:Number 			= 0;
+			private var _selectedName:String 		= "";
+			private var _serviceName  				= "Din";
+			private var _mainId  					= "_idDin";
+			private var _mainFocusField:String      = "_nombre";
+			
+[Bindable]	private var _filterData:ArrayCollection = new ArrayCollection();			
+
+			
+			//-----------Local Vars -----------
+			
+//---------------------------- Context ---------------------------------------------            
+
+   			public function set context(contextObj:Object):void{
+				for( var p:String in contextObj){
+					if(this.hasOwnProperty(p)){
+						this[p] = contextObj[p];
+					}
+				}
+				initView();
+			}
+
+			public function set workManager(value:Object):void{
+				_workManager = value;
+			}
+
+			public function set webApplication(value:WebApplication):void{
+				_webApplication = value;
+				
+			}
+			public function get webApplication():WebApplication{ return _webApplication; } 
+						
+//---------------------------- Context ---------------------------------------------  
+
+//-------------------------------- MainInit --------------------------------------
+			// ------------------- View Extra Data -------------------------------
+			
+			private function get viewContext():Object{
+				return {
+						
+						webApplication: 	_webApplication,
+						workManager: this
+						
+						}					
+			}
+
+			private function addValidations():void{
+				Valid.changeLanguage(Languages.SPANISH);			
+				Valid.setErrorKnot(Validator.CIRCLE_KNOT,0xFF0000);
+			}
+			
+
+			
+			private function forceImports():void{
+				Din;
+			}
+			
+			public function initView():void{
+				forceImports();
+				_dataReady = false;
+				_MainService = _webApplication.getService(_serviceName);				
+				_MainService.addEventListener(FaultEvent.FAULT,onFault);
+				
+				_filterData.addItem({_codigo:"00",_nombre:"TODOS"});
+				
+				for(var n:Number = 0;n<SystemGlobals.PRODUCTOS.length;n++){
+					_filterData.addItem({_codigo:SystemGlobals.PRODUCTOS[n]._codigo,_nombre:SystemGlobals.PRODUCTOS[n]._nombre});
+				}				
+				//loadScroll();
+				//getData();
+			}
+			
+		
+			
+
+			// ------------------- View Extra Data -------------------------------
+
+			private function loadScroll():void{
+				_dataList.visible = false;
+				for(var n:Number = 0;n<100;n++){
+					_DataResult.addItem({i:0});
+				}
+			}
+
+						
+			public function closeWindow():void{
+            		dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
+            		PopUpManager.removePopUp(this);
+            }
+            
+//-------------------------------- MainInit --------------------------------------
+			
+			
+			
+			
+			
+			
+//-------------------------------- ResultsEvents --------------------------------------		
+			
+						
+			public function getData(params:Object):void{
+				_MainService.getRecords(params);
+				_MainService.getRecords.addEventListener(ResultEvent.RESULT,onGetDataResult);
+			}
+			
+			private function onGetDataResult(e:ResultEvent):void{
+				_MainService.getRecords.removeEventListener(ResultEvent.RESULT,onGetDataResult);
+				_DataResult = Converter.arrayConverter(e.result);
+				if(_DataResult.length==0) {
+					Alert.show("No se encontró a nungún Cliente","Atención")
+				}else{
+					if(_dataIndex<0) _dataIndex = 0;					
+					_dataList.selectedIndex = _dataIndex;
+					_dataList.setSelectedIndex(_dataList.selectedIndex);										
+				}
+				_dataReady = true;
+				_dataList.visible = true;
+			}
+			
+			private function onFault(e:FaultEvent):void{
+				Alert.show(e.fault.faultString,"Error");
+			}
+			
+						
+//-------------------------------- ResultsEvents --------------------------------------	
+
+//-------------------------------- POP UP WINDOW --------------------------------------	
+			public function openPopUp(popUpName:String,modal:Boolean = false):void{
+				var pop:TitleWindow = PopUpManager.createPopUp(SystemGlobals.mainStage as DisplayObject, getDefinitionByName("views."+popUpName) as Class, modal) as TitleWindow;
+				pop.name = popUpName;
+				pop.addEventListener(CloseEvent.CLOSE, closePopup);
+				if(pop.hasOwnProperty("context")){
+					Object(pop).context = viewContext;
+				}
+				PopUpManager.centerPopUp(pop);
+			}
+			
+			private function closePopup(e:CloseEvent):void{
+	            PopUpManager.removePopUp(e.target as TitleWindow);
+			}
+			
+			
+			private function selectDin():void{
+				if(_dataList.selectedIndex!=-1){
+					_workManager.selectDin(_dataList.selectedItem);
+					closeWindow();
+				}else{
+					Alert.show("No hay din seleccionado","Error");
+				}
+			}
+			
+//-------------------------------- POP UP WINDOW --------------------------------------
+
+//-------------------------------- Search Engine --------------------------------------
+
+			private function searchFilter():void{
+           			_DataResult.filterFunction = vlidateSearch;
+           			_DataResult.refresh();
+       		}
+      
+       		private function vlidateSearch(item:Object):Boolean{
+           		var isMatch:Boolean = false;           
+           		if(item[_searchType.selectedItem.value].toLowerCase().search(_searchFilter.toLowerCase()) != -1){
+               			isMatch = true
+           		}              
+           		return isMatch;              
+       		}
+       	
+       		private function search():void{
+				_searchFilter = _searchField.text;
+				searchFilter();
+			}
+			
+			private function onFilterChange():void{
+				_dataIndex = -1;
+				//getData();
+			}
+			
+			private function clearFilter():void{
+				_searchField.text = "";
+				search();
+			}
+			
+			
+			private function buscarDin(){
+				var params:Object = new Object();
+				if(_idDin.text!=''){
+					params.idDin = _idDin.text;
+				}
+				if(_nombre.text!=''){
+					params.nombre = _nombre.text;
+				}
+				
+				_nombre.text = "";
+				_idDin.text = "";
+				getData(params)
+			}
+				
+				
+			private var _searchFilter:String 			= new String();
+[Bindable]	private var _searchTypes:ArrayCollection 	= new ArrayCollection([	{label:"Número de Cliente", value:"_idCliente"},
+																				{label:"Nombre",     		value:"_nombre"},
+																				{label:"Paterno",     		value:"_paterno"},
+																				{label:"Materno",     		value:"_materno"}
+																				]);
+
+//-------------------------------- Search Engine --------------------------------------					
+			
+		]]>
+	</fx:Script>
+
+	<s:DataGrid id="_dataList" left="10" right="10" bottom="60" height="248"
+				dataProvider="{_DataResult}" enabled="{_dataReady}">
+		<s:columns>	
+			<s:ArrayList>
+				<s:GridColumn headerText="No" dataField="_idDin" width="70"/>
+				<s:GridColumn headerText="Nombre" dataField="_nombre"/>
+				<s:GridColumn headerText="Paterno" dataField="_paterno"/>
+				<s:GridColumn headerText="Materno" dataField="_materno"/>
+			</s:ArrayList>
+		</s:columns>
+	</s:DataGrid>
+	<s:Button right="10" bottom="10" width="137" height="40" label="Regresar" click="closeWindow();"/>
+	<s:Button left="10" bottom="10" width="199" height="40" label="Seleccionar" click="selectDin();"/>
+
+	<s:ComboBox 	x="11" id="_searchType" 	dataProvider="{_searchTypes}" 	width="153" y="181" change="clearFilter();" enabled="{_dataReady}"/>
+	<s:TextInput 	x="172" id="_searchField" 	change="search();" 		width="396" enabled="{!_newData}" y="181"/>
+	<s:Label x="11" text="Filtrar por :" textAlign="right" y="167"/>
+	<s:ComboBox x="408" y="150" id="_filterList" dataProvider="{_filterData}" width="160" labelField="_nombre" change="onFilterChange()"></s:ComboBox>
+	<s:Label x="375" y="157" text="Ver :"/>
+	<s:Image x="10" y="33" backgroundColor="#FFFFFF" scaleMode="letterbox"
+			 source="@Embed('../../assets/Custom/logo.png')"/>
+	<s:Label x="253" y="18" color="#9A9A9A" fontFamily="Arial" fontSize="10" fontStyle="italic"
+			 fontWeight="normal" text="nombre"/>
+	<s:TextInput id="_nombre" x="252" y="30" width="238" enter="buscarDin()" restrict="a-z A-Z"/>
+	<s:Label x="179" y="18" color="#9A9A9A" fontFamily="Arial" fontSize="10" fontStyle="italic"
+			 fontWeight="normal" text="id"/>
+	<s:TextInput id="_idDin" x="179" y="30" width="65" enter="buscarDin()" restrict="0-9"/>
+	<s:Button x="178" y="60" width="312" height="40" label="Buscar" click="buscarDin()"/>
+	<s:Line left="10" right="10" bottom="398">
+		<s:stroke>
+			<s:SolidColorStroke color="#c6c6c6" weight="1" caps="square"/>
+		</s:stroke>
+	</s:Line>
+	<s:Button x="498" y="31" width="70" height="70" label="Cliente"
+			  click="openPopUp('din.Din',true)" icon="@Embed('../../assets/CRM/NewUser.png')"
+			  iconPlacement="top" skinClass="skins.Custom_Button_Light_Skin"/>
+	
+</s:TitleWindow>

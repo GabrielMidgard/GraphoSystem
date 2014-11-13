@@ -1,0 +1,439 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow 
+	xmlns:mx="http://www.adobe.com/2006/mxml" 
+	width="554" height="502" 
+	layout="absolute" 
+	horizontalCenter="0" 
+	title="Administración de Cuentas Bancarias" 
+	verticalCenter="0"
+	verticalScrollPolicy="off"
+	horizontalScrollPolicy="off"
+	showCloseButton="true">
+
+	<mx:Script>
+		<![CDATA[
+			import mx.controls.dataGridClasses.DataGridColumn;
+			import mx.random.constants.ConstantData;
+			import mx.random.constants.SystemGlobals;
+			import mx.random.events.SelectionEvent;
+			import mx.random.events.StaticEvent;
+			
+			import mx.random.constants.Catalogs;
+			import mx.random.windowManagers.PopManager;
+			import mx.random.constants.Languages;
+			import mx.random.forms.Validator;
+			import mx.random.dataManagers.EventManager;
+			import mx.random.converters.Converter;
+			import mx.random.dataManagers.DataManager;
+			import mx.random.web.WebApplication;
+			import mx.managers.PopUpManager;
+			import mx.collections.ArrayCollection;
+			import mx.events.CloseEvent;
+			import mx.controls.Alert;
+			import mx.rpc.remoting.RemoteObject;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+
+			private var _webApplication:WebApplication;
+			private var Valid:Validator 			= new Validator();
+			private var _workManager:Object 		= new Object();
+			private var _MainService:RemoteObject 		= new RemoteObject();
+[Bindable]	private var _Data:DataManager 				= new DataManager(this);
+[Bindable]	private var _DataResult:ArrayCollection 		= new ArrayCollection();			
+			private var _eventManager:EventManager 		= new EventManager(this);
+			private var _dataIndex:Number 			= 0;
+			
+			//-----------Event Manager -----------
+
+[Bindable]	public var _dataReady:Boolean 			= false;
+[Bindable]	public var _newData:Boolean 			= false;
+[Bindable]	public var _updateData:Boolean 			= false;
+[Bindable]	private var _selectionMode:Boolean		= false;
+[Bindable]	private var _multipleSelection:Boolean	= false;
+
+			//-----------Event Manager -----------
+			
+			
+			//-----------Local Vars -----------
+			
+			private var _selectedId:Number 			= 0;
+			private var _selectedName:String 		= "";
+			private var _serviceName  				= "CuentasEmpresa";
+			private var _mainId  					= "_idCuenta";
+			private var _mainFocusField:String      = "_idBanco";
+
+			
+			//-----------Local Vars -----------
+			
+//---------------------------- Context ---------------------------------------------            
+
+   			public function set context(contextObj:Object):void{
+				for( var p:String in contextObj){
+					if(this.hasOwnProperty(p)){
+						this[p] = contextObj[p];
+					}
+				}
+			}
+
+			public function set workManager(value:Object):void{
+				_workManager = value;
+			}
+
+			public function set selectionMode(value:Boolean):void{
+				_selectionMode = value;
+			}
+			
+			public function set multipleSelection(value:Boolean):void{
+				_multipleSelection = value;
+			}
+
+			public function set webApplication(value:WebApplication):void{
+				_webApplication = value;
+				initView();
+			}
+			public function get webApplication():WebApplication{ return _webApplication; } 
+						
+//---------------------------- Context ---------------------------------------------  
+
+//-------------------------------- MainInit --------------------------------------
+			// ------------------- View Extra Data -------------------------------
+			
+			private function get viewContext():Object{
+				return {webApplication: _webApplication,
+						workManager: this
+						}					
+			}
+
+			private function addValidations():void{
+				Valid.changeLanguage(Languages.SPANISH);
+				Valid.addStringVal(_CLABE,3,50,"CLABE");
+				var validFields:ArrayCollection = Valid.validFields;
+				for(var n:Number = 0;n<validFields.length;n++){					
+					this[validFields[n].obj.name].addEventListener(Event.CHANGE,onFocusOut);
+				}
+				Valid.setErrorKnot(Validator.CIRCLE_KNOT,0xFF0000);
+			}
+
+			private function onFocusOut(e:Event):void{
+				if(_newData||_updateData) Valid.validateAll();//Valid.validateOne(e.currentTarget.name);
+			}
+			
+			private function extraCreateData(params:Object):Object{
+				//params["_newsImage"] = _image;
+				//params['_fechaNacimiento'] 	= _year.selectedItem.label+'-'+_month.selectedItem.value+'-'+_day.selectedItem.value;
+				return params;
+			}
+			
+			private function createRecordExtras():void{
+				//_image = "defaultNew.jpg";
+				/*_day.selectedIndex 	= 0;
+				_month.selectedIndex 	= 0;
+				_year.selectedIndex 	= 0;*/
+			}
+			
+			private function extraUpdateData(params:Object):Object{	
+				//params['_fechaNacimiento'] = _year.selectedItem.label+'-'+_month.selectedItem.value+'-'+_day.selectedItem.value;			
+				return params;
+			}
+			
+			private function loadExtraFields(params:Object):void{
+				//_image = params["_newsImage"];
+				/*
+				if(tempDate){
+					var temp:Array 		 = tempDate.split('-');
+					_day.selectedIndex 	 = parseInt(temp[2]);
+					_month.selectedIndex = parseInt(temp[1]);
+					_year.selectedIndex  = ConstantData.FindYearindex(temp[0]);
+				}else{
+					_day.selectedIndex 		= 0;
+					_month.selectedIndex 	= 0;
+					_year.selectedIndex 	= 0;
+				}*/
+			}
+			
+			private function forceImports():void{
+				Catalogs;
+			}
+			
+			public function initView():void{
+				forceImports();
+				_MainService = _webApplication.getService(_serviceName);
+				_Data.exceptions = ["_idCuenta","_idEmpleado","_tipoAfiliacion"];
+				_MainService.addEventListener(FaultEvent.FAULT,onFault);
+				initData();
+				addValidations();
+				loadScroll();
+			}
+			
+			public function imageUploadReady(data:Object):void{
+				
+			}
+
+			// ------------------- View Extra Data -------------------------------
+
+			private function loadScroll():void{
+				_dataList.visible = false;
+				for(var n:Number = 0;n<100;n++){
+					_DataResult.addItem({i:0});
+				}
+			}
+
+			private function initData():void{
+				_MainService.getFields();
+				_MainService.getFields.addEventListener(ResultEvent.RESULT,onGetFieldsResult);
+				_dataReady = false;
+			}
+			
+			public function closeWindow():void{
+					if(_selectionMode&&_dataList.selectedIndex!=-1) StaticEvent.dispatchEvent(new SelectionEvent(SelectionEvent.SELECTION_COMPLETE,_dataList.selectedItems));
+            		dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
+            		PopUpManager.removePopUp(this);
+            }
+            
+//-------------------------------- MainInit --------------------------------------
+			
+			private function newData():void{
+				_Data.clear();
+				_newData = true;
+				_updateData = false;				
+				this[_mainFocusField].setFocus();
+				createRecordExtras();
+				Valid.validateAll();
+			}
+			
+			private function createData():void{
+				if(Valid.validateAll()){
+					_dataReady = false;
+					var params:Object = extraCreateData(_Data.makeData());
+					_MainService.createRecord(params);
+					_MainService.createRecord.addEventListener(ResultEvent.RESULT,onCreateComplete);
+				}else{
+					Alert.show(Valid.errors,"Error");
+				}
+			}
+
+			private function updateData():void{
+				if(Valid.validateAll()){
+					_dataReady = false;
+					var params:Object = extraUpdateData(_Data.makeData());
+					params[_mainId] = _dataList.selectedItem[_mainId];
+					_MainService.updateRecord(params);
+					_MainService.updateRecord.addEventListener(ResultEvent.RESULT,onUpdateComplete);
+					_dataIndex =_dataList.selectedIndex;
+				}else{
+					Alert.show(Valid.errors,"Error");
+				}
+			}
+			
+			private function deleteDataAlert():void{
+				if(_dataList.selectedIndex!=-1){
+					Alert.show("Desea borrar el registro seleccionado?","Atenci�n",Alert.YES|Alert.CANCEL,this,deleteData);
+				}else{
+					Alert.show("No hay registro selecionado","Error");
+				}
+			}
+			
+			private function deleteData(e:CloseEvent):void{
+				if(e.detail==Alert.YES){
+					var params:Object = new Object();
+					params[_mainId] = _dataList.selectedItem[_mainId];
+					_MainService.deleteRecord(params);
+					_MainService.deleteRecord.addEventListener(ResultEvent.RESULT,onDeleteComplete);
+					_dataReady = false;
+				}
+			}
+			
+			private function cancel():void{
+				onDataSelect();
+				resetBooleans();
+				Valid.validateAll();
+			}
+			
+			private function resetBooleans():void{
+				_newData = false;
+				_updateData = false;
+			}
+
+			private function dataChange():void{
+				_updateData = true;
+			}
+
+			private function openImageEditor():void{
+				if(_dataList.selectedIndex!=-1){
+					//_newsIdNumber 	= new Number(_dataList.selectedItem._blogId);
+					openPopUp("managers.ImageManager")
+				}else{
+					Alert.show("No hay registro selecionado","Error");
+				}
+			}
+//-------------------------------- ResultsEvents --------------------------------------		
+			
+			private function onGetFieldsResult(e:ResultEvent):void{
+				_MainService.getFields.removeEventListener(ResultEvent.RESULT,onGetFieldsResult);
+				if(e){
+					if(e.result) {
+						_Data.createFields(Converter.arrayConverter(e.result));
+						getData();
+					}
+				}else{
+					Alert.show("Error al cargar los datos","Error");
+					_dataReady = false;
+				}
+				_DataResult= new ArrayCollection();
+				_dataList.visible = true;
+				
+			}
+			
+			private function getData():void{
+				_MainService.getRecords();
+				_MainService.getRecords.addEventListener(ResultEvent.RESULT,onGetDataResult);
+			}
+			
+			private function onGetDataResult(e:ResultEvent):void{
+				_MainService.getRecords.removeEventListener(ResultEvent.RESULT,onGetDataResult);
+				_DataResult = Converter.arrayConverter(e.result);
+				if(_DataResult.length==0) {
+					Alert.show("No hay registros en la base de datos","Atenci�n")
+				}else{
+					if(_dataIndex<0) _dataIndex = 0;
+					_Data.loadData(_DataResult[_dataIndex]);
+					_dataList.selectedIndex = _dataIndex;
+					_dataList.scrollToIndex(_dataList.selectedIndex);
+					loadExtraFields(_DataResult[_dataIndex]);
+				}
+				_dataReady = true;
+				resetBooleans();
+			}
+			
+			private function onFault(e:FaultEvent):void{
+				Alert.show(e.fault.faultString,"Error");
+			}
+
+			private function onDataSelect():void{
+				if(_dataList.selectedIndex!=-1) {
+					_Data.loadData(_dataList.selectedItem);
+					_dataIndex =_dataList.selectedIndex;
+					loadExtraFields(_dataList.selectedItem);
+					_selectedId = _dataList.selectedItem[_mainId];
+				}
+			}
+			
+			private function onCreateComplete(e:ResultEvent):void{				
+				_MainService.createRecord.removeEventListener(ResultEvent.RESULT,onCreateComplete);
+				_dataIndex = _DataResult.length;
+				getData();
+			}
+			
+			private function onUpdateComplete(e:ResultEvent):void{
+				_MainService.updateRecord.removeEventListener(ResultEvent.RESULT,onUpdateComplete);
+				getData();
+			}
+			
+			private function onDeleteComplete(e:ResultEvent):void{
+				_MainService.deleteRecord.removeEventListener(ResultEvent.RESULT,onDeleteComplete);
+				_dataIndex = _DataResult.length-2;
+				getData();
+			}
+			
+//-------------------------------- ResultsEvents --------------------------------------	
+
+//-------------------------------- POP UP WINDOW --------------------------------------	
+			public function openPopUp(popUpName:String,modal:Boolean=false):void{
+				var pop:TitleWindow = PopUpManager.createPopUp(this, getDefinitionByName("views."+popUpName) as Class, modal) as TitleWindow;
+				pop.name = popUpName;
+				pop.addEventListener(CloseEvent.CLOSE, closePopup);
+				if(pop.hasOwnProperty("context")){
+					Object(pop).context = viewContext;
+				}
+				PopUpManager.centerPopUp(pop);
+			}
+			
+			private function closePopup(e:CloseEvent):void{			
+	            		PopUpManager.removePopUp(e.target as TitleWindow);
+			}
+//-------------------------------- POP UP WINDOW --------------------------------------
+
+//-------------------------------- Search Engine --------------------------------------
+
+			private function searchFilter():void{
+               			_DataResult.filterFunction = vlidateSearch;
+               			_DataResult.refresh();
+           		}
+          
+	       		private function vlidateSearch(item:Object):Boolean{
+	           		var isMatch:Boolean = false;           
+	           		if(item[_searchType.selectedItem.value].toLowerCase().search(_searchFilter.toLowerCase()) != -1){
+	               			isMatch = true
+	           		}              
+	           		return isMatch;              
+	       		}
+	       	
+	       		private function search():void{
+				_searchFilter = _searchField.text;
+				searchFilter();
+			}
+			private var _searchFilter:String 			= new String();
+[Bindable]	private var _searchTypes:ArrayCollection 	= new ArrayCollection([{label:"Cuenta :",     	value:"_idCuenta"}]);
+
+//-------------------------------- Search Engine --------------------------------------					
+			
+			private function empresaFunction(item:Object,dg:DataGridColumn):String{
+				var res:String = "";
+				if(item["_idCompania"]) {
+					res = SystemGlobals.COMPANIAS[findIndex(Number(item["_idCompania"]))]._nombre;
+				} 
+				return res;
+			}
+			
+			private function findIndex(value:Number):Number{
+				var res:Number = 0;
+				for(var n:Number = 0;n<SystemGlobals.COMPANIAS.length;n++){
+					if(SystemGlobals.COMPANIAS[n]._idCompania==value) res = n;
+				}
+				return res;
+			}
+			
+		]]>
+	</mx:Script>
+	<mx:Label x="96" y="40" text="Banco :" textAlign="right"/>
+<mx:ComboBox  x="151" y="40" id="_idBanco" change="dataChange();" width="219" dataProvider="{Catalogs.DataObject['bancos']}" labelField="_nombre"/>
+<mx:Label x="61" y="72" text="Tipo Cuenta :" textAlign="right"/>
+<mx:ComboBox  x="151" y="70" id="_idTipoCuenta" change="dataChange();" width="159" dataProvider="{ConstantData.AccountTypes}"/>
+<mx:ComboBox  x="318" y="70" id="_idTipoMoneda" change="dataChange();" width="52" dataProvider="{Catalogs.DataObject['bancos_tipos_moneda']}" labelField="_codigo"/>
+<mx:Label x="72" y="12" text="Compania :" textAlign="right"/>
+<mx:ComboBox  x="151" y="10" id="_idCompania" change="dataChange();" width="219" dataProvider="{SystemGlobals.COMPANIAS}" labelField="_nombre"/>
+<mx:Label x="85" y="115" text=" Cuenta :" textAlign="right"/>
+	<mx:Label x="79" y="145" text="Afiliación :" textAlign="right"/>
+<mx:TextInput x="150" y="113" id="_numeroCuenta" restrict="0-9" maxChars="50" change="dataChange();" width="160"/>
+	<mx:TextInput x="150" y="143" id="_numeroAfiliacion" restrict="0-9" maxChars="50" change="dataChange();" width="160"/>
+<mx:Label x="47" y="175" text="Nombre Titular :" textAlign="right"/>
+<mx:TextInput x="150" y="173" id="_nombreTitular" restrict="A-Z  Ñ" maxChars="50" change="dataChange();" width="328"/>
+<mx:TextInput x="318" y="113" id="_CLABE" restrict="0-9" maxChars="50" change="dataChange();" width="160"/>
+<mx:Label x="486" y="98" text="swift" textAlign="left" fontSize="9" color="#C1C1C1" fontStyle="italic"/>
+	<mx:Label x="318" y="98" text="clabe" textAlign="left" fontSize="9" color="#C1C1C1" fontStyle="italic"/>
+	<mx:Label x="378" y="72" text="moneda" textAlign="left" fontSize="9" color="#C1C1C1" fontStyle="italic"/>
+	<mx:Label x="150" y="98" text="número" textAlign="left" fontSize="9" color="#C1C1C1" fontStyle="italic"/>
+<mx:TextInput x="486" y="113" id="_SWIFT" change="dataChange();" width="53"/>
+<mx:Label x="67" y="203" text="Descripcion :" textAlign="right"/>
+<mx:TextArea x="150" y="203" id="_descripcion" change="dataChange();" width="390"/>
+
+	<mx:DataGrid height="150" dataProvider="{_DataResult}" id="_dataList" change="onDataSelect();" allowMultipleSelection="{_multipleSelection}"  enabled="{_dataReady&amp;&amp;!_newData}" y="285" width="529" x="10">
+		<mx:columns>	
+			<mx:DataGridColumn headerText="Id"  dataField="_idCuenta" width="40"/>
+			<mx:DataGridColumn headerText="Empresa" dataField="_idEmpresa" labelFunction="empresaFunction" />
+			<mx:DataGridColumn headerText="Número de Cuenta" dataField="_numeroCuenta" width="150"/>		
+
+		</mx:columns>
+	</mx:DataGrid>
+	<mx:Button label="Nuevo" width="80" enabled="{_dataReady}" visible="{!_newData&amp;&amp;!_updateData}" click="newData();" y="441" x="10"/>
+	<mx:Button label="Cancelar" width="80" enabled="{_dataReady}" visible="{_newData||_updateData}" click="cancel();" y="441" x="98"/>
+	<mx:Button label="Aceptar" width="80" enabled="{_dataReady}" visible="{_newData}" click="createData();" y="441" x="10"/>
+	<mx:Button label="Eliminar" width="80" enabled="{_dataReady&amp;&amp;!_newData}" visible="{!_newData&amp;&amp;!_updateData}" click="deleteDataAlert();" y="441" x="98"/>
+	<mx:Button label="Actualizar" width="80" enabled="{_dataReady&amp;&amp;!_newData&amp;&amp;_updateData}" visible="{_updateData&amp;&amp;!_newData}" click="updateData();" y="441" x="10"/>
+	<mx:Button label="Regresar" click="closeWindow();" width="145"  enabled="{!_newData}" y="441" x="394"/>
+
+	<mx:ComboBox 	x="92" id="_searchType" 	dataProvider="{_searchTypes}" 	width="160" y="255"/>
+	<mx:TextInput 	x="256" id="_searchField" 	change="search();" 		width="283" enabled="{!_newData}" y="255"/>
+	<mx:Label x="13" text="Filtrar por :" textAlign="right" y="257"/>
+	
+</mx:TitleWindow>

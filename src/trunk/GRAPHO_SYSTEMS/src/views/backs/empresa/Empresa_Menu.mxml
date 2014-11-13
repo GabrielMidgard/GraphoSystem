@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="178" height="400" title="Empresa" showCloseButton="true">
+	<mx:Button x="10" y="35" label="Compañias" width="154" textAlign="left" click="openPopUp('empresa.Empresa_Companias')"/>
+	<mx:Button x="10" y="66" label="Areas" width="154" textAlign="left" click="openPopUp('empresa.Empresa_Areas')"/>
+	<mx:Button x="10" y="97" label="Departamentos" width="154" textAlign="left" click="openPopUp('empresa.Empresa_Departamentos')"/>
+	<mx:Button x="10" y="128" label="Puestos" width="154" textAlign="left" click="openPopUp('empresa.Empresa_Puestos')"/>
+	<mx:Button x="10" y="159" label="Sucursales" width="154" textAlign="left" click="openPopUp('empresa.Empresa_Sucursales')"/>
+	<mx:Button x="10" y="190" label="CECOS" width="154" textAlign="left" click="openPopUp('empresa.Empresa_Cecos')"/>
+	<mx:Button x="10" y="252" label="Niveles Administrativos" width="154" textAlign="left" click="openPopUp('empresa.Empresa_Niveles_Accesos')"/>
+	<mx:Button x="10" y="221" label="Organigrama" width="154" textAlign="left" click="openPopUp('empresa.Empresa_Organigrama')"/>
+	<mx:Label x="10" y="10" text="Catálogos :"/>
+
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.random.web.WebApplication;
+			import mx.events.CloseEvent;
+			import mx.managers.PopUpManager;
+			
+			private var _webApplication:WebApplication;
+			private var _workManager:Object 		= new Object();
+			
+			private function get viewContext():Object{
+				return {webApplication: _webApplication,
+						workManager: this
+						}					
+			}
+			
+			public function set context(contextObj:Object):void{
+				for( var p:String in contextObj){
+					if(this.hasOwnProperty(p)){
+						this[p] = contextObj[p];
+					}
+				}
+				
+				Empresa_Areas;
+				Empresa_Departamentos;
+				Empresa_Organigrama;
+				Empresa_Puestos;
+				Empresa_Cecos;
+				Empresa_Sucursales;
+				Empresa_Companias;
+				Empresa_Niveles_Acceso;
+			}
+
+			public function set workManager(value:Object):void{ _workManager = value;}
+			public function set webApplication(value:WebApplication):void{_webApplication = value;}
+			
+//-------------------------------- POP UP WINDOW --------------------------------------	
+			public function openPopUp(popUpName:String,modal:Boolean = false):void{
+				var pop:TitleWindow = PopUpManager.createPopUp(_workManager as DisplayObject, getDefinitionByName("views."+popUpName) as Class, modal) as TitleWindow;
+				pop.name = popUpName;
+				pop.addEventListener(CloseEvent.CLOSE, closePopup);
+				if(pop.hasOwnProperty("context")){
+					Object(pop).context = viewContext;
+				}
+				PopUpManager.centerPopUp(pop);
+			}
+			
+			private function closePopup(e:CloseEvent):void{
+	            PopUpManager.removePopUp(e.target as TitleWindow);
+			}
+//-------------------------------- POP UP WINDOW --------------------------------------
+		]]>
+	</mx:Script>
+	
+</mx:TitleWindow>

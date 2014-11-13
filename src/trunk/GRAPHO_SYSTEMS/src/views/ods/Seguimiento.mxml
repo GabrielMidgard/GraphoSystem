@@ -1,0 +1,328 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   width="928" height="444" backgroundAlpha="1.0" contentBackgroundColor="#D5E7FB"
+			   title="Seguimiento de Orden de Servicio">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:TextInput id="_nombreEmpresa" x="292" y="76" width="310" contentBackgroundColor="#e7e7e7"
+				 enabled="false" fontStyle="italic" text="{_cliente._nombreEmpresa}"/>
+	<s:TextInput id="_nombreContacto" x="292" y="152" width="310" contentBackgroundColor="#e7e7e7"
+				 enabled="false" fontStyle="italic"/>
+	<s:TextInput id="_operador" x="292" y="185" width="310" contentBackgroundColor="#e7e7e7"
+				 enabled="false" fontStyle="italic"/>
+	<s:Label x="228" y="191" text="Operador :"/>
+	<s:TextInput id="_ciudad" x="292" y="114" width="150" contentBackgroundColor="#e7e7e7"
+				 enabled="false" fontStyle="italic" text="{_cliente._ciudad}"/>
+	<s:TextInput id="_nombreEstado" x="452" y="114" width="150" contentBackgroundColor="#e7e7e7"
+				 enabled="false" fontStyle="italic" text="{_cliente._nombreEstado}"/>
+	<s:Label x="453" y="103" color="#767474" fontSize="10" fontStyle="italic" text="estado"/>
+	<s:TextInput id="_idOrden" x="292" y="34" width="70" contentBackgroundColor="#FFFFFF"
+				 fontWeight="bold" textAlign="center"/>
+	<s:TextInput id="_nombreEstatus" x="373" y="34" width="70" contentBackgroundColor="#e7e7e7"
+				 enabled="false" fontWeight="bold" text=" " textAlign="center"/>
+	<s:TextInput id="_fechaCreacion" x="452" y="34" width="70" contentBackgroundColor="#E7E7E7"
+				 enabled="false" fontWeight="bold" textAlign="center"/>
+	<s:Label x="453" y="23" color="#767474" fontSize="10" fontStyle="italic" text="fecha"/>
+	<s:TextInput id="_horaCreacion" x="531" y="34" width="70" contentBackgroundColor="#e7e7e7"
+				 enabled="false" fontWeight="bold" text=" " textAlign="center"/>
+	<s:Label x="532" y="23" color="#767474" fontSize="10" fontStyle="italic" text="hora"/>
+	<s:Label x="374" y="23" color="#767474" fontSize="10" fontStyle="italic" text="estatus"/>
+	<s:Label x="292" y="23" color="#767474" fontSize="10" fontStyle="italic" text="número"/>
+	<s:Label x="292" y="103" color="#767474" fontSize="10" fontStyle="italic" text="ciudad"/>
+	<s:TextInput id="_telefonoCasa" x="610" y="76" width="150" contentBackgroundColor="#e7e7e7"
+				 enabled="false" fontStyle="italic" text="{_cliente._telefonoCasa}"/>
+	<s:TextInput id="_telefonoOficina" x="768" y="76" width="150" contentBackgroundColor="#e7e7e7"
+				 enabled="false" fontStyle="italic" text="{_cliente._telefonoOficina}"/>
+	<s:TextInput id="_mailPrincipal" x="610" y="115" width="150" contentBackgroundColor="#e7e7e7"
+				 enabled="false" fontStyle="italic" text="{_cliente._mailPrincipal}"/>
+	<s:TextInput id="_mailSecundario" x="768" y="115" width="150" contentBackgroundColor="#e7e7e7"
+				 enabled="false" fontStyle="italic" text="{_cliente._mailSecundario}"/>
+	<s:TextInput id="_serie" x="768" y="226" width="70" contentBackgroundColor="#e7e7e7"
+				 enabled="false" fontStyle="italic" text="{_equipo._serie}"/>
+	<s:TextInput id="_modelo" x="610" y="226" width="150" contentBackgroundColor="#e7e7e7"
+				 enabled="false" fontStyle="italic" text="{_equipo._modelo}"/>
+	<s:Label x="611" y="215" color="#767474" fontSize="10" fontStyle="italic" text="modelo"/>
+	<s:Label x="611" y="104" color="#767474" fontSize="10" fontStyle="italic" text="mails"/>
+	<s:Label x="294" y="212" color="#767474" fontSize="10" fontStyle="italic" text="tipo"/>
+	<s:Label x="454" y="213" color="#767474" fontSize="10" fontStyle="italic" text="marca"/>
+	<s:Label x="769" y="215" color="#767474" fontSize="10" fontStyle="italic" text="no. serie"/>
+	<s:Label x="611" y="65" color="#767474" fontSize="10" fontStyle="italic" text="teléfonos"/>
+	<s:Label x="241" y="82" text="Cliente :"/>
+	<s:Label x="292" y="65" color="#767474" fontSize="10" fontStyle="italic" text="nombre"/>
+	<s:Label x="292" y="141" color="#767474" fontSize="10" fontStyle="italic" text="reporto"/>
+	<s:Label x="610" y="141" color="#767474" fontSize="10" fontStyle="italic" text="atendio"/>
+	<s:Label x="261" y="39" fontWeight="bold" text="OS :"/>
+	<s:Label x="241" y="230" text="Equipo :"/>
+	<s:TextInput id="_nombreEmpleado" x="610" y="152" width="308" contentBackgroundColor="#e7e7e7"
+				 enabled="false" fontStyle="italic"/>
+	<s:TextInput id="_nombreTipo" x="292" y="225" width="150" contentBackgroundColor="#e7e7e7"
+				 enabled="false" fontStyle="italic" text="{_equipo._nombreTipo}"/>
+	<s:TextInput id="_nombreMarca" x="452" y="225" width="150" contentBackgroundColor="#e7e7e7"
+				 enabled="false" fontStyle="italic" text="{_equipo._nombreMarca}"/>
+	<s:Label x="849" y="214" color="#767474" fontSize="10" fontStyle="italic" text="año de fab."/>
+	<s:Label x="610" y="22" color="#767474" fontSize="10" fontStyle="italic" text="área de soporte"/>
+	<s:TextInput id="_nombreAreaSoporte" x="610" y="34" width="150" contentBackgroundColor="#e7e7e7"
+				 enabled="false" fontWeight="bold" text=" "/>
+	<s:Label x="771" y="22" color="#767474" fontSize="10" fontStyle="italic" text="servicio"/>
+	<s:TextInput id="_nombreTipoServicio" x="771" y="34" width="34" contentBackgroundColor="#e7e7e7"
+				 enabled="false" fontWeight="bold" text=" " textAlign="center"/>
+	<s:TextInput id="_anioFabricacion" x="848" y="226" width="70" contentBackgroundColor="#e7e7e7"
+				 enabled="false" fontStyle="italic" text="{_equipo._anioFabricacion}"/>
+	<s:Button label="Regresar" click="closeWindow();" width="308"  enabled="{!_newData}" y="361" x="610"/>
+	<s:Button label="Administración de Órdenes de Servicio" click="openPopUp('ods.Administracion_Ordenes',true)" width="308"  enabled="{!_newData}" y="361" x="292"/>
+	<s:Button x="813" y="33" width="105" height="23" label="Buscar" click="searchOrder();"
+			  enabled="{!_newData}"/>
+	<s:Button x="10" y="33" width="192" label="   Apertura de Orden"
+			  click="openPopUp('ods.Apertura',true)"
+			  skinClass="skins.Custom_Button_Light_Skin"/>
+	<s:CheckBox x="16" y="39" enabled="false" id="_tieneServicios"/>
+	<s:Button x="10" y="65" width="192" label="   Prediagnóstico"
+			  click="openPopUp('ods.Prediagnostico',true)"
+			  skinClass="skins.Custom_Button_Light_Skin"/>
+	<s:CheckBox x="16" y="71" enabled="false" id="_tieneServicios0"/>
+	<s:Button x="10" y="97" width="192" label="   Cotización Prediagnóstico"
+			  click="openPopUp('ods.Prediagnostico_Cotizacion',true)"
+			  skinClass="skins.Custom_Button_Light_Skin"/>
+	<s:CheckBox x="16" y="103" enabled="false" id="_tieneServicios1"/>
+	<s:Button x="10" y="129" width="192" label="   Vta de Prediagnóstico"
+			  click="openPopUp('ods.Prediagnostico_Venta',true)"
+			  skinClass="skins.Custom_Button_Light_Skin"/>
+	<s:CheckBox x="16" y="135" enabled="false" id="_tieneServicios2"/>
+	<s:Button x="10" y="161" width="192" label="   Confirmación"
+			  click="openPopUp('fiscales.Fiscales_Cliente_Servicios',true)"
+			  skinClass="skins.Custom_Button_Light_Skin"/>
+	<s:CheckBox x="16" y="167" enabled="false" id="_tieneServicios3"/>
+	<s:Button x="10" y="193" width="192" label="   Diagnóstico"
+			  click="openPopUp('fiscales.Fiscales_Cliente_Servicios',true)"
+			  skinClass="skins.Custom_Button_Light_Skin"/>
+	<s:CheckBox x="16" y="199" enabled="false" id="_tieneServicios4"/>
+	<s:Button x="10" y="226" width="192" label="   Cotización Diagnóstico"
+			  click="openPopUp('fiscales.Fiscales_Cliente_Servicios',true)"
+			  skinClass="skins.Custom_Button_Light_Skin"/>
+	<s:CheckBox x="16" y="232" enabled="false" id="_tieneServicios5"/>
+	<s:Button x="10" y="258" width="192" label="   Venta y Facturación"
+			  click="openPopUp('fiscales.Fiscales_Cliente_Servicios',true)"
+			  skinClass="skins.Custom_Button_Light_Skin"/>
+	<s:CheckBox x="16" y="264" enabled="false" id="_tieneServicios6"/>
+	<s:Button x="10" y="290" width="192" label="   Ejecución de Servicio"
+			  click="openPopUp('fiscales.Fiscales_Cliente_Servicios',true)"
+			  skinClass="skins.Custom_Button_Light_Skin"/>
+	<s:CheckBox x="16" y="296" enabled="false" id="_tieneServicios7"/>
+	<s:Button x="10" y="322" width="192" label="   Cierre de Orden"
+			  click="openPopUp('fiscales.Fiscales_Cliente_Servicios',true)"
+			  skinClass="skins.Custom_Button_Light_Skin"/>
+	<s:CheckBox x="16" y="328" enabled="false" id="_tieneServicios8"/>
+	<s:Label x="293" y="252" color="#767474" fontSize="10" fontStyle="italic" text="observaciones"/>
+	<s:TextArea id="_nota" x="292" y="265" width="625" height="87" contentBackgroundColor="#e7e7e7"
+				enabled="false"/>
+	
+	
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.controls.dataGridClasses.DataGridColumn;
+			import mx.events.CloseEvent;
+			import mx.managers.PopUpManager;
+			import mx.random.constants.Catalogs;
+			import mx.random.constants.ConstantData;
+			import mx.random.constants.Languages;
+			import mx.random.constants.SystemGlobals;
+			import mx.random.converters.Converter;
+			import mx.random.dataManagers.DataManager;
+			import mx.random.dataManagers.EventManager;
+			import mx.random.forms.Validator;
+			import mx.random.web.WebApplication;
+			import mx.random.windowManagers.PopManager;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.remoting.RemoteObject;
+			
+			private var _webApplication:WebApplication;
+			private var Valid:Validator 			= new Validator();
+			private var _workManager:Object 		= new Object();
+			private var _MainService:RemoteObject 		= new RemoteObject();
+			[Bindable]	private var _Data:DataManager 				= new DataManager(this);
+			[Bindable]	private var _DataResult:ArrayCollection 		= new ArrayCollection();			
+			private var _eventManager:EventManager 		= new EventManager(this);
+			private var _dataIndex:Number 			= 0;
+			
+			//-----------Event Manager -----------
+			
+			[Bindable]	public var _dataReady:Boolean 			= false;
+			[Bindable]	public var _newData:Boolean 			= false;
+			[Bindable]	public var _updateData:Boolean 			= false;
+			
+			//-----------Event Manager -----------
+			
+			
+			//-----------Local Vars -----------
+			
+			private var _selectedId:Number = 0;
+			private var _selectedName:String = "";
+			private var _serviceName  		= "Ordenes";
+			private var _mainId  			= "_idOrden";
+			private var _mainFocusField:String      = "_operador";
+			[Bindable] private var _cliente:Object = {};
+			[Bindable] private var _equipo:Object = {};
+			//-----------Local Vars -----------
+			
+			//---------------------------- Context ---------------------------------------------            
+			
+			public function set context(contextObj:Object):void{
+				for( var p:String in contextObj){
+					if(this.hasOwnProperty(p)){
+						this[p] = contextObj[p];
+					}
+				}
+			}
+			
+			public function set workManager(value:Object):void{
+				_workManager = value;
+			}
+			
+			public function set webApplication(value:WebApplication):void{
+				_webApplication = value;
+				initView();
+			}
+			public function get webApplication():WebApplication{ return _webApplication; } 
+			
+			//---------------------------- Context ---------------------------------------------  
+			
+			//-------------------------------- MainInit --------------------------------------
+			// ------------------- View Extra Data -------------------------------
+			
+			private function get viewContext():Object{
+				return {webApplication: _webApplication,
+					workManager: this,
+					cliente: _cliente,
+					idOrden: _idOrden.text
+				}					
+			}
+
+			public function initView():void{
+				//forceImports();
+				_MainService = _webApplication.getService(_serviceName);
+				_Data.exceptions = ["_idTipoServicio","_idAreaSoporteTecnico","_idEstatus","_idEmpleado","_idCliente","_idContacto","_idEquipo"];
+				_MainService.addEventListener(FaultEvent.FAULT,onFault);
+				initData();
+			}
+
+			
+			// ------------------- View Extra Data -------------------------------
+			
+			
+			private function initData():void{
+				_MainService.getFields();
+				_MainService.getFields.addEventListener(ResultEvent.RESULT,onGetFieldsResult);
+				_dataReady = false;
+			}
+			
+			public function closeWindow():void{
+				dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
+				PopUpManager.removePopUp(this);
+			}
+			
+			//-------------------------------- MainInit --------------------------------------
+		
+
+			
+			//-------------------------------- ResultsEvents --------------------------------------		
+			
+			private function onGetFieldsResult(e:ResultEvent):void{
+				_MainService.getFields.removeEventListener(ResultEvent.RESULT,onGetFieldsResult);
+				if(e){
+					if(e.result) {
+						_Data.createFields(Converter.arrayConverter(e.result));
+					}
+				}else{
+					Alert.show("Error al cargar los datos","Error");
+					_dataReady = false;
+				}
+				_DataResult= new ArrayCollection();				
+			}
+			
+			private function searchOrder():void{
+				_MainService.getSpecificOrder(_idOrden.text);
+				_MainService.getClientFromOrder(_idOrden.text);
+				_MainService.getEquipmentFromOrder(_idOrden.text);//Obtiene el equipo actual
+				_MainService.getSpecificOrder.addEventListener(ResultEvent.RESULT,onGetDataResult);
+				_MainService.getClientFromOrder.addEventListener(ResultEvent.RESULT,onGetDataCompanyResult);
+				_MainService.getEquipmentFromOrder.addEventListener(ResultEvent.RESULT,onGetDataSystemResult);
+			}
+			
+			private function onFault(e:FaultEvent):void{
+				Alert.show(e.fault.faultString,"Error");
+			}
+			
+
+
+
+			//-------------------------------- ResultsEvents --------------------------------------
+			private function onGetDataResult(e:ResultEvent):void{
+				_MainService.getSpecificOrder.removeEventListener(ResultEvent.RESULT,onGetDataResult);
+				_DataResult = Converter.arrayConverter(e.result);
+				if(_DataResult.length==0) {
+					Alert.show("No existe orden con el id especificado","Atención")
+				}else{
+					_Data.loadData(_DataResult[0]); //Sólo debe de haber un registro o ninguno
+				}
+				_dataReady = true;
+				
+			}
+			
+			private function onGetDataCompanyResult(e:ResultEvent):void{
+				_MainService.getClientFromOrder.removeEventListener(ResultEvent.RESULT,onGetDataCompanyResult);
+				var resArr:ArrayCollection;
+				resArr = Converter.arrayConverter(e.result);
+				if(resArr.length > 0){
+					resArr[0]._nombreEstado = ConstantData.NationalStates[Number(resArr[0]._estado)].label;
+					_cliente = resArr[0]; //Sólo debe de haber un registro o ninguno
+				}else{
+					_cliente = {};
+				}
+			}
+			
+			private function onGetDataSystemResult(e:ResultEvent):void{
+				_MainService.getSystemFromOrder.removeEventListener(ResultEvent.RESULT,onGetDataSystemResult);
+				var resArr:ArrayCollection;
+				resArr = Converter.arrayConverter(e.result);
+				if(resArr.length > 0){
+					_equipo = resArr[0]; //Sólo debe de haber un registro o ninguno
+				}else{
+					_equipo = {};
+				}
+			}
+			
+			
+			//-------------------------------- POP UP WINDOW --------------------------------------	
+			public function openPopUp(popUpName:String,modal:Boolean = true):void{
+				var pop:TitleWindow = PopUpManager.createPopUp(this, getDefinitionByName("views."+popUpName) as Class, modal) as TitleWindow;
+				pop.name = popUpName;
+				pop.addEventListener(CloseEvent.CLOSE, closePopup);
+				if(pop.hasOwnProperty("context")){
+					Object(pop).context = viewContext;
+				}
+				PopUpManager.centerPopUp(pop);
+			}
+			
+			private function closePopup(e:CloseEvent):void{
+				PopUpManager.removePopUp(e.target as TitleWindow);
+			}
+			
+			//-------------------------------- POP UP WINDOW --------------------------------------
+			
+		
+			
+			
+						
+			
+			
+		]]>
+	</fx:Script>
+	
+</s:TitleWindow>

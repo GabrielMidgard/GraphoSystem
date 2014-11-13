@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" width="814" height="312" layout="absolute" title="Operation Test" showCloseButton="true">
+	<mx:Script>
+		<![CDATA[
+			import mx.random.converters.Converter;
+			import mx.random.prototypes.Results;
+			import mx.random.tools.Operators;
+			import mx.collections.ArrayCollection;
+			
+[Bindable]	private var _itemsArray:ArrayCollection = new ArrayCollection();
+[Bindable]	private var _results:Results = new Results();			
+[Bindable]	private var _detailArray:ArrayCollection = new ArrayCollection();			
+			
+			private function addData():void{
+				_itemsArray.addItem({id:_itemsArray.length,value:Number(inText.text)});
+				calculate();
+			}
+			
+			private function clearData():void{
+				_itemsArray = new ArrayCollection();
+				calculate();
+			}
+			
+			private function calculate():void{
+				_results 		= Operators.sumTool(_itemsArray,"value",true);
+				_detailArray 	= _results.detail;
+				
+			}
+			
+		]]>
+	</mx:Script>
+	<mx:Label text="Input :" x="10" y="13"/>
+	<mx:TextInput x="62" y="11" width="117" id="inText"/>
+	<mx:DataGrid x="10" y="41" dataProvider="{_itemsArray}" width="169" height="170">
+		<mx:columns>
+			<mx:DataGridColumn headerText="Id" dataField="id" width="50"/>
+			<mx:DataGridColumn headerText="Value" dataField="value" labelFunction="Converter.columNumberConverter" textAlign="right"/>
+		</mx:columns>
+	</mx:DataGrid>
+	<mx:DataGrid x="189" y="41" dataProvider="{_detailArray}" width="604" height="170">
+		<mx:columns>
+			<mx:DataGridColumn headerText="Id" dataField="recordId" width="50"/>			
+			<mx:DataGridColumn headerText="SubTotal" dataField="subTotal"     	labelFunction="Converter.columNumberConverter" textAlign="right"/>
+			<mx:DataGridColumn headerText="FederalTax" dataField="federalTax" 	labelFunction="Converter.columNumberConverter" textAlign="right"/>
+			<mx:DataGridColumn headerText="Estatal Tax" dataField="estatalTax" 	labelFunction="Converter.columNumberConverter" textAlign="right"/>
+			<mx:DataGridColumn headerText="Total" dataField="total" 			labelFunction="Converter.columNumberConverter" textAlign="right"/>
+			<mx:DataGridColumn headerText="Totla Fix" dataField="totalFix" 		labelFunction="Converter.columNumberConverter" textAlign="right"/>
+		</mx:columns>
+	</mx:DataGrid>
+	<mx:Button x="187" y="10" label="Add" width="87" click="addData()"/>
+	<mx:Button x="92" y="218" label="Clear" width="87" click="clearData()"/>
+	<mx:Label x="230" y="221" text="Normal" textAlign="right"/>
+	<mx:Label x="253" y="251" text="Fix" textAlign="right"/>
+	<mx:TextInput x="282" y="219" width="76" text="{Converter.numberFormat(_results.subTotal)}" textAlign="right"/>
+	<mx:TextInput x="384" y="219" width="76" text="{Converter.numberFormat(_results.federalTax)}" textAlign="right"/>
+	<mx:TextInput x="490" y="219" width="76" text="{Converter.numberFormat(_results.estatalTax)}" textAlign="right"/>
+	<mx:TextInput x="599" y="219" width="76" text="{Converter.numberFormat(_results.total)}" textAlign="right"/>
+	<mx:Label x="507" y="13" text="Average :" textAlign="right"/>
+	<mx:Label x="10" y="221" text="Rec:" textAlign="right"/>
+	<mx:TextInput x="599" y="11" width="76" text="{Converter.numberFormat(_results.average)}" textAlign="right"/>
+	<mx:TextInput x="282" y="249" width="76" text="{Converter.numberFormat(_results.subTotalFix)}" textAlign="right"/>
+	<mx:TextInput x="384" y="249" width="76" text="{Converter.numberFormat(_results.federalTaxFix)}" textAlign="right"/>
+	<mx:TextInput x="490" y="249" width="76" text="{Converter.numberFormat(_results.estatalTaxFix)}" textAlign="right"/>
+	<mx:TextInput x="717" y="219" width="76" text="{Converter.numberFormat(_results.totalFix)}" textAlign="right"/>
+	<mx:TextInput x="717" y="11" width="76" text="{Converter.numberFormat(_results.averageFix)}" textAlign="right"/>
+	<mx:TextInput x="48" y="219" width="36" text="{_results.records}"/>
+</mx:TitleWindow>

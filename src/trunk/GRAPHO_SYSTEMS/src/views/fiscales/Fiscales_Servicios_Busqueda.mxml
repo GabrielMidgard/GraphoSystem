@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow 
+	xmlns:mx="http://www.adobe.com/2006/mxml" 
+	width="640" height="536" 
+	layout="absolute" 
+	horizontalCenter="0" 
+	title="Búsqueda de Servicios" 
+	verticalCenter="0"
+	verticalScrollPolicy="off"
+	horizontalScrollPolicy="off"
+	showCloseButton="true">
+
+	<mx:Script>
+		<![CDATA[
+			import mx.random.constants.SystemGlobals;
+			
+			import mx.random.constants.Catalogs;
+			import mx.random.constants.ConstantData;
+			import mx.random.constants.Constantes;
+			
+			import mx.random.windowManagers.PopManager;
+			import mx.random.constants.Languages;
+			import mx.random.forms.Validator;
+			import mx.random.dataManagers.EventManager;
+			import mx.random.converters.Converter;
+			import mx.random.dataManagers.DataManager;
+			import mx.random.web.WebApplication;
+			import mx.managers.PopUpManager;
+			import mx.collections.ArrayCollection;
+			import mx.events.CloseEvent;
+			import mx.controls.Alert;
+			import mx.rpc.remoting.RemoteObject;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+
+			private var _webApplication:WebApplication;
+			private var Valid:Validator 			= new Validator();
+			private var _workManager:Object 		= new Object();
+			private var _MainService:RemoteObject 		= new RemoteObject();
+[Bindable]	private var _Data:DataManager 				= new DataManager(this);
+[Bindable]	private var _DataResult:ArrayCollection 		= new ArrayCollection();			
+			private var _eventManager:EventManager 		= new EventManager(this);
+			private var _dataIndex:Number 			= 0;
+			
+			//-----------Event Manager -----------
+
+[Bindable]	public var _dataReady:Boolean 			= true;
+[Bindable]	public var _newData:Boolean 			= false;
+[Bindable]	public var _updateData:Boolean 			= false;
+
+			//-----------Event Manager -----------
+			
+			
+			//-----------Local Vars -----------
+			
+			private var _selectedId:Number = 0;
+			private var _selectedName:String = "";
+			private var _serviceName  		= "Fiscales_Clientes";
+			private var _mainId  			= "_idCliente";
+			private var _mainFocusField:String      = "_nombre";
+			
+[Bindable]	private var _filterData:ArrayCollection = new ArrayCollection();			
+
+			
+			//-----------Local Vars -----------
+			
+//---------------------------- Context ---------------------------------------------            
+
+   			public function set context(contextObj:Object):void{
+				for( var p:String in contextObj){
+					if(this.hasOwnProperty(p)){
+						this[p] = contextObj[p];
+					}
+				}
+			}
+
+			public function set workManager(value:Object):void{
+				_workManager = value;
+			}
+
+			public function set webApplication(value:WebApplication):void{
+				_webApplication = value;
+				initView();
+			}
+			public function get webApplication():WebApplication{ return _webApplication; } 
+						
+//---------------------------- Context ---------------------------------------------  
+
+//-------------------------------- MainInit --------------------------------------
+			// ------------------- View Extra Data -------------------------------
+			
+			private function get viewContext():Object{
+				return {
+						relationIdValue: 	_dataList.selectedItem._numeroCliente,
+						idCliente: 			_dataList.selectedItem._idCliente,
+						nombreCliente:		_dataList.selectedItem._nombre+" "+_dataList.selectedItem._paterno+" "+_dataList.selectedItem._materno,
+						webApplication: 	_webApplication,
+						workManager: this,
+						selectedItem: _dataList.selectedItem
+						}					
+			}
+
+			private function addValidations():void{
+				Valid.changeLanguage(Languages.SPANISH);
+
+				var validFields:ArrayCollection = Valid.validFields;
+				for(var n:Number = 0;n<validFields.length;n++){					
+					this[validFields[n].obj.name].addEventListener(Event.CHANGE,onFocusOut);
+				}
+				
+				Valid.setErrorKnot(Validator.CIRCLE_KNOT,0xFF0000);
+			}
+			
+			private function onFocusOut(e:Event):void{
+				if(_newData||_updateData) Valid.validateAll();//Valid.validateOne(e.currentTarget.name);
+			}
+			
+		
+			
+			
+			
+			
+			
+			
+			
+			private function forceImports():void{
+				
+			}
+			
+			public function initView():void{
+				forceImports();
+				_dataReady = false;
+				_MainService = _webApplication.getService(_serviceName);				
+				_MainService.addEventListener(FaultEvent.FAULT,onFault);
+				
+				_filterData.addItem({_codigo:"00",_nombre:"TODOS"});
+				
+				for(var n:Number = 0;n<SystemGlobals.PRODUCTOS.length;n++){
+					_filterData.addItem({_codigo:SystemGlobals.PRODUCTOS[n]._codigo,_nombre:SystemGlobals.PRODUCTOS[n]._nombre});
+				}				
+				loadScroll();
+				//getData();
+				getServices();
+				
+				
+				for(var m:Number=0;m<SystemGlobals.PROGRAMAS.length;m++){
+					_searchTypes.addItem({_nombre:SystemGlobals.PROGRAMAS[m]._nombre,_idPrograma:SystemGlobals.PROGRAMAS[m]._idPrograma});
+				}
+				
+			}
+			
+			private function getServices():void{
+				_DataResult = SystemGlobals.PRODUCTOS;
+				_dataList.visible = true;
+			}
+			
+
+			// ------------------- View Extra Data -------------------------------
+
+			private function loadScroll():void{
+				_dataList.visible = false;
+				for(var n:Number = 0;n<100;n++){
+					_DataResult.addItem({i:0});
+				}
+			}
+
+						
+			public function closeWindow():void{
+            		dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
+            		PopUpManager.removePopUp(this);
+            }
+            
+//-------------------------------- MainInit --------------------------------------
+			
+			
+			
+			
+			
+			
+//-------------------------------- ResultsEvents --------------------------------------		
+			
+						
+			public function getData():void{
+				var parmas:Object = {	idSucursal:_webApplication.user.idSucursal,
+										accessType:_webApplication.user.accessType
+										};
+				_MainService.getRecords(parmas);
+				_MainService.getRecords.addEventListener(ResultEvent.RESULT,onGetDataResult);
+			}
+			
+			private function onGetDataResult(e:ResultEvent):void{
+				_MainService.getRecords.removeEventListener(ResultEvent.RESULT,onGetDataResult);
+				_DataResult = Converter.arrayConverter(e.result);
+				if(_DataResult.length==0) {
+					Alert.show("No hay registros en la base de datos","Atención")
+				}else{
+					if(_dataIndex<0) _dataIndex = 0;					
+					_dataList.selectedIndex = _dataIndex;
+					_dataList.scrollToIndex(_dataList.selectedIndex);										
+				}
+				_dataReady = true;
+				_dataList.visible = true;
+			}
+			
+			private function onFault(e:FaultEvent):void{
+				Alert.show(e.fault.faultString,"Error");
+			}
+			
+						
+//-------------------------------- ResultsEvents --------------------------------------	
+
+//-------------------------------- POP UP WINDOW --------------------------------------	
+			public function openPopUp(popUpName:String,modal:Boolean = false):void{
+				var pop:TitleWindow = PopUpManager.createPopUp(SystemGlobals.mainStage as DisplayObject, getDefinitionByName("views."+popUpName) as Class, modal) as TitleWindow;
+				pop.name = popUpName;
+				pop.addEventListener(CloseEvent.CLOSE, closePopup);
+				if(pop.hasOwnProperty("context")){
+					Object(pop).context = viewContext;
+				}
+				PopUpManager.centerPopUp(pop);
+			}
+			
+			private function closePopup(e:CloseEvent):void{
+	            PopUpManager.removePopUp(e.target as TitleWindow);
+			}
+			
+			
+			private function selectService():void{
+				if(_dataList.selectedItem!=-1){
+					_workManager.serviceSelected(_dataList.selectedItem);
+					closeWindow();					
+				}else{
+					Alert.show("No hay servicios seleccionados","Error");
+				}
+			}
+			
+//-------------------------------- POP UP WINDOW --------------------------------------
+
+//-------------------------------- Search Engine --------------------------------------
+
+			private function searchFilter():void{
+           			_DataResult.filterFunction = vlidateSearch;
+           			_DataResult.refresh();
+       		}
+      
+       		private function vlidateSearch(item:Object):Boolean{
+           		var isMatch:Boolean = false;           
+           		if(item["_nombre"].toLowerCase().search(_searchFilter.toLowerCase()) != -1){
+               			isMatch = true
+           		}              
+           		return isMatch;              
+       		}
+       	
+       		private function search():void{
+				_searchFilter = _searchField.text;
+				searchFilter();
+			}
+			
+			private function onFilterChange():void{
+				_dataIndex = -1;
+				getData();
+			}
+			
+			private function clearFilter():void{
+				_searchField.text = "";
+				search();
+			}
+			
+				
+				
+			private var _searchFilter:String 			= new String();
+[Bindable]	private var _searchTypes:ArrayCollection 	= new ArrayCollection([	{_nombre:"Todos", _idPrograma:"0"}	]);
+
+
+
+			private function filterData():void{
+				_dataList.selectedIndex = -1;
+				if(_searchType.selectedIndex==0){
+					_DataResult = SystemGlobals.PRODUCTOS;
+				}else{
+					_DataResult = new ArrayCollection();
+					var sel:Number = _searchType.selectedItem._idPrograma;
+					for(var n:Number = 0;n<SystemGlobals.PRODUCTOS.length;n++){
+						if(SystemGlobals.PRODUCTOS[n]._idPrograma == sel){
+							_DataResult.addItem(SystemGlobals.PRODUCTOS[n]);
+						}
+					}
+				}
+				
+			}
+//-------------------------------- Search Engine --------------------------------------					
+			
+		]]>
+	</mx:Script>
+
+	<mx:DataGrid height="396" dataProvider="{_DataResult}" id="_dataList"  width="619" x="10" y="70">
+		<mx:columns>			
+			<mx:DataGridColumn headerText="Código" dataField="_codigo" width="40"/>
+			<mx:DataGridColumn headerText="Nombre" dataField="_nombre"/>				
+			<mx:DataGridColumn headerText="Costo" dataField="_costo" width="40" labelFunction="Converter.columStringNumberConverter"/>	
+		</mx:columns>		
+	</mx:DataGrid>
+	<mx:Button label="Regresar" click="closeWindow();" width="137" x="492" y="472"/>
+	<mx:Button label="Seleccionar" click="selectService();" width="199" x="10" y="472"/>
+
+	<mx:ComboBox 	x="85" id="_searchType" 	dataProvider="{_searchTypes}" 	width="235" y="10" change="filterData();" labelField="_nombre"/>
+	<mx:TextInput 	x="85" id="_searchField" 	change="search();" 		width="541" y="40"/>
+	<mx:Label x="10" text="Filtrar por :" textAlign="right" y="12"/>
+	<mx:Label x="27" text="Buscar :" textAlign="right" y="42"/>
+	
+</mx:TitleWindow>

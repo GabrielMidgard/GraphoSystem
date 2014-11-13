@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" 
+	layout="absolute" width="394" height="430" 
+	title="Communication Manager" 
+	showCloseButton="true" 
+	close="changeState()"
+	status="{red5Client.red5Status}">
+	<mx:states>
+		<mx:State name="small">
+			<mx:SetProperty name="height" value="34"/>
+		</mx:State>
+	</mx:states>
+	<mx:Script>
+		<![CDATA[
+			import mx.random.red5.Red5Message;
+			import mx.random.web.WebApplication;
+			import mx.random.events.StaticEvent;
+			import mx.random.events.Red5Event;
+			import mx.random.red5.Red5Client;
+			import flash.external.ExternalInterface;
+			
+			
+[Bindable]	private var red5Client:Red5Client;
+[Bindable]	private var userBorder:uint = 0x000000;			
+
+			private var _webApplication:WebApplication;
+			private var _workManager:Object 		= new Object();
+			private var _windowState:Boolean = true;
+
+ //---------------------------- Context ---------------------------------------------  	      
+
+   			public function set context(contextObj:Object):void{
+				for( var p:String in contextObj){
+					if(this.hasOwnProperty(p)){
+						this[p] = contextObj[p];
+					}
+				}
+			}
+
+			public function set workManager(value:Object):void{
+				_workManager = value;
+			}			
+
+			public function set webApplication(value:WebApplication):void{
+				_webApplication = value;
+				initView();
+			}
+			public function get webApplication():WebApplication{ return _webApplication; } 
+						
+//---------------------------- Context ---------------------------------------------  			
+			
+			private function initView():void{				
+				red5Client = new Red5Client("LTPV","rtmp://latranquila.com.mx/oflaDemo",_webApplication);
+				red5Client.connect();
+				StaticEvent.removeEventListener(Red5Event.RED5_USER_MESSAGE,updateOutput)
+				StaticEvent.addEventListener(Red5Event.RED5_USER_MESSAGE,updateOutput);
+				ExternalInterface.addCallback("myFlexFunction",logOutUser);
+			}
+			
+			private function updateOutput(e:Red5Event):void{
+				var msg:Red5Message = e.red5Message;
+				var msgColor:String	= "FFFFFF";
+				if(msg.destinationUsers!=null){
+					msgColor	= "ffb6b6";
+				}
+				msgOut.htmlText += "<font color='#"+msgColor+"' size='10'><b> - "+msg.userName+" : </b><br><li><font color='#FFFFFF' size='10'>" + msg.message+"</font></li><br>";
+				msgOut.validateNow();
+				msgOut.verticalScrollPosition = msgOut.maxVerticalScrollPosition;				
+			}
+			
+			private function sendMessage():void{
+				red5Client.sendTextMessage(msgText.text,_userList.selectedItems);
+				msgText.text = ''
+			}
+			
+			private function changeState():void{
+				_windowState = !_windowState;
+				if(_windowState){
+					currentState = "";
+				}else{
+					currentState = "small";
+				}
+			}
+			
+			
+			public function logOutUser():void{
+				red5Client.disconnect();
+			}
+			
+			public function usersSelection():void{
+				if(_userList.selectedItems.length==0){
+					userBorder = 0x000000;
+				}else{
+					userBorder = 0xFF6F6F;
+				}
+			}
+			
+		]]>
+	</mx:Script>
+	<mx:TextArea x="10" y="10" height="280" width="235" id="msgOut" editable="false" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5" borderStyle="solid" borderThickness="1"/>
+	<mx:TextInput x="10" y="298" id="msgText" width="235"/>
+	<mx:Button x="10" y="328" label="Send" width="235" click="sendMessage()" enabled="{red5Client.connected}"/>
+	<mx:CheckBox x="162" y="361" label="Connected" id="connected" selected="{red5Client.connected}" enabled="false"/>
+	<mx:Button x="253" y="330" label="Connect" width="129" enabled="{!red5Client.connected}" click="red5Client.connect()"/>
+	<mx:Button x="253" y="360" label="Disconnect" width="129" click="red5Client.disconnect()" enabled="{red5Client.connected}"/>
+	<mx:Button x="10" y="360" label="Limpiar" width="129" click="red5Client.clearUsers()" enabled="{red5Client.connected}"/>
+	<mx:List x="253" y="10" height="312" dataProvider="{red5Client.userList}" labelField="userName" width="129" paddingLeft="5" paddingRight="5" paddingTop="5" paddingBottom="5" id="_userList" borderColor="{userBorder}" change="usersSelection()" allowMultipleSelection="true"></mx:List>
+</mx:TitleWindow>

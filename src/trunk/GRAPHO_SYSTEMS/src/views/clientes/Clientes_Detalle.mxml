@@ -1,0 +1,642 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow 
+	xmlns:mx="http://www.adobe.com/2006/mxml" 
+	width="1080" height="586" 
+	layout="absolute" 
+	horizontalCenter="0" 
+	title="Detalle del Cliente" 
+	verticalCenter="0"
+	verticalScrollPolicy="off"
+	horizontalScrollPolicy="off"
+	showCloseButton="true">
+
+	<mx:Script>
+		<![CDATA[
+			import mx.random.events.StaticEvent;
+			import mx.random.events.PaymentEvent;
+			import mx.random.ventas.Vendedores;
+			import mx.controls.dataGridClasses.DataGridColumn;
+			import mx.random.clientes.ClientData;
+			import mx.random.constants.SystemGlobals;			
+			import mx.random.constants.Catalogs;
+			import mx.random.constants.ConstantData;
+			import mx.random.constants.Constantes;			
+			import mx.random.windowManagers.PopManager;
+			import mx.random.constants.Languages;
+			import mx.random.forms.Validator;
+			import mx.random.dataManagers.EventManager;
+			import mx.random.converters.Converter;
+			import mx.random.dataManagers.DataManager;
+			import mx.random.web.WebApplication;
+			import mx.managers.PopUpManager;
+			import mx.collections.ArrayCollection;
+			import mx.events.CloseEvent;
+			import mx.controls.Alert;
+			import mx.rpc.remoting.RemoteObject;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			
+
+			private var _webApplication:WebApplication;
+			private var Valid:Validator 			= new Validator();
+			private var _workManager:Object 		= new Object();
+			private var _MainService:RemoteObject 		= new RemoteObject();
+[Bindable]	private var _Data:DataManager 				= new DataManager(this);
+[Bindable]	private var _DataResult:ArrayCollection 		= new ArrayCollection();			
+			private var _eventManager:EventManager 		= new EventManager(this);
+			private var _dataIndex:Number 			= 0;
+			
+			//-----------Event Manager -----------
+[Bindable]	public var _dataReady:Boolean 			= false;
+[Bindable]	public var _newData:Boolean 			= false;
+[Bindable]	public var _updateData:Boolean 			= false;
+[Bindable]	private var _productos:ArrayCollection;
+			//-----------Event Manager -----------
+			
+			
+			//-----------Local Vars -----------			
+			private var _selectedId:Number 			= 0;
+			private var _selectedName:String 		= "";
+			private var _serviceName  				= "Clientes";
+			private var _mainId  					= "_idCliente";
+			private var _mainFocusField:String      = "_nombre";
+[Bindable]	private var _idCliente:Number			= 0;
+[Bindable]	private var _selectedTool:String 		= "Details";
+			//-----------Local Vars -----------
+			
+//---------------------------- Context ---------------------------------------------            
+
+   			public function set context(contextObj:Object):void{
+				for( var p:String in contextObj){
+					if(this.hasOwnProperty(p)){
+						this[p] = contextObj[p];
+					}
+				}
+				initView();
+			}
+
+			public function set workManager(value:Object):void{
+				_workManager = value;
+			}
+			
+			public function set idCliente(value:Number):void{
+				_idCliente = value;
+			}
+
+			public function set webApplication(value:WebApplication):void{
+				_webApplication = value;
+				
+			}
+			public function get webApplication():WebApplication{ return _webApplication; } 
+						
+//---------------------------- Context ---------------------------------------------  
+
+//-------------------------------- MainInit --------------------------------------
+			// ------------------- View Extra Data -------------------------------
+			
+			private function get viewContext():Object{
+				var cliente:ClientData = new ClientData();
+				
+				cliente.idCliente 		= _idCliente;
+				cliente.nombre 			= _nombre.text+" "+_paterno.text+" "+_materno.text;
+				cliente.numeroCliente 	= _idCliente.toString();// OJO
+				cliente.ventaData	    = _productosCliente.selectedItem;
+				return {
+						relationIdValue: _idCliente,
+						idCliente: _idCliente,
+						nombreCliente:	_nombre.text+" "+_paterno.text+" "+_materno.text,
+						numeroCliente:	_idCliente,  // OJO
+						webApplication: _webApplication,
+						workManager: this,
+						cliente:cliente,
+						selectedItem: _idCliente
+						}					
+			}
+
+			private function addValidations():void{
+				Valid.changeLanguage(Languages.SPANISH);
+				
+
+				
+				//Valid.addComboVal(_idOcupacion,"Ocupación");
+				Valid.addComboVal(_day,"Día de Nacimiento");
+				Valid.addComboVal(_month,"Mes de Nacimiento");
+				Valid.addComboVal(_year,"Año de Nacimiento");
+				Valid.addComboVal(_pais,"País");
+			
+				
+				Valid.addPhoneVal(_telefonoCasa,true,false,"Teléfono de casa");
+				Valid.addPhoneVal(_telefonoMovil,true,false,"Teléfono móvil");
+				Valid.addPhoneVal(_telefonoOficina,true,false,"Teléfono de oficina");
+				
+				Valid.addSomeRequired([_telefonoCasa,_telefonoMovil,_telefonoOficina],"Teléfonos");
+				Valid.addSomeEquals(_telefonoCasa,_telefonoMovil,"Los Telefonos no pueden ser iguales",true);
+				Valid.addSomeEquals(_telefonoMovil,_telefonoOficina,"Los Telefonos no pueden ser iguales",true);
+				Valid.addSomeEquals(_telefonoCasa,_telefonoOficina,"Los Telefonos no pueden ser iguales",true);
+				//Valid.addSomeRequired(_telefonoMovil,"Teléfono móvil")
+				//Valid.addSomeRequired(_telefonoOficina,"Teléfono de oficina");
+				
+				Valid.addMailVal(_mailPrincipal,false,"Mail Principal");
+				Valid.addMailVal(_mailSecundario,false,"Mail Secundario");
+				Valid.addSomeRequired([_mailPrincipal,_mailSecundario],"E-Mails");
+				Valid.addSomeEquals(_mailPrincipal,_mailSecundario,"Los E-Mails no pueden ser iguales",true);
+				//Valid.addSomeEquals(_mailPrincipal,_mailSecundario,"Los E-Mails no pueden ser diferentes",false);
+				
+				Valid.addStringVal(_nombre,3,50,"Nombre");
+				Valid.addStringVal(_materno,3,50,"Apellido Materno");
+				Valid.addStringVal(_paterno,3,50,"Apellido Paterno");
+				
+				
+				Valid.addStringVal(_calle,5,255,"Calle");
+				Valid.addStringVal(_numeroExterior,1,8,"Número Exterior");
+				Valid.addStringVal(_ciudad,2,50,"Ciudad");
+				Valid.addStringVal(_colonia,2,50,"Colonia");
+				Valid.addStringVal(_estado,2,50,"Estado");
+				Valid.addStringVal(_cp,5,5,"Código Postal");
+				
+				var validFields:ArrayCollection = Valid.validFields;
+				for(var n:Number = 0;n<validFields.length;n++){					
+					this[validFields[n].obj.name].addEventListener(Event.CHANGE,onFocusOut);
+				}
+				
+				Valid.setErrorKnot(Validator.CIRCLE_KNOT,0xFF0000);
+			}
+			
+			private function onFocusOut(e:Event):void{
+				if(_newData||_updateData) Valid.validateAll();//Valid.validateOne(e.currentTarget.name);
+			}
+			
+			private function extraCreateData(params:Object):Object{
+				//params["_newsImage"] = _image;
+				//params['_idPropietario'] 	= 0;
+				params['_fechaNacimiento'] 	= _year.selectedItem.label+'-'+_month.selectedItem.value+'-'+_day.selectedItem.value;
+				//params['_fechaAniversario'] = _yearAniv.selectedItem.label+'-'+_monthAniv.selectedItem.value+'-'+_dayAniv.selectedItem.value;
+				return params;
+			}
+			
+			private function createRecordExtras():void{				
+				//_image = "defaultNew.jpg";
+				_day.selectedIndex 	= 0;
+				_month.selectedIndex = 0;
+				_year.selectedIndex 	= 0;	
+				//_dayAniv.selectedIndex 	= 0;
+				//_monthAniv.selectedIndex = 0;
+				//_yearAniv.selectedIndex 	= 0;				
+				_tieneCuentasBancarias.selected = false;
+				_tieneFamiliares.selected = false;
+				_tienePreferencias.selected = false;				
+			}
+			
+			private function extraUpdateData(params:Object):Object{	
+				params['_fechaNacimiento'] = _year.selectedItem.label+'-'+_month.selectedItem.value+'-'+_day.selectedItem.value;
+				//params['_fechaAniversario'] = _yearAniv.selectedItem.label+'-'+_monthAniv.selectedItem.value+'-'+_dayAniv.selectedItem.value;			
+				return params;
+			}
+			
+			private function loadExtraFields(params:Object):void{
+				//_image = params["_newsImage"];
+				var tempDate:String = params["_fechaNacimiento"];
+				var temp:Array;
+				
+				if(tempDate){
+					temp		 		 = tempDate.split('-');
+					_day.selectedIndex 	 = parseInt(temp[2]);
+					_month.selectedIndex = parseInt(temp[1]);
+					_year.selectedIndex  = ConstantData.FindYearindex(temp[0]);
+				}else{
+					_day.selectedIndex 		= 0;
+					_month.selectedIndex 	= 0;
+					_year.selectedIndex 	= 0;
+				}
+				/*
+				tempDate = params["_fechaAniversario"];
+				
+				if(tempDate){
+					temp		   		 	 = tempDate.split('-');
+					_dayAniv.selectedIndex 	 = parseInt(temp[2]);
+					_monthAniv.selectedIndex = parseInt(temp[1]);
+					_yearAniv.selectedIndex  = ConstantData.FindYearindex(temp[0]);
+				}else{
+					_dayAniv.selectedIndex 		= 0;
+					_monthAniv.selectedIndex 	= 0;
+					_yearAniv.selectedIndex 	= 0;
+				}*/
+			}
+			
+			private function forceImports():void{
+				
+			}
+			
+			public function initView():void{
+				forceImports();
+				_MainService = _webApplication.getService(_serviceName);
+				_Data.exceptions = ["_idCliente","_fechaNacimiento","_idSucursal","_idCompania","_idEmpleado","_codigoPrograma","_codigoMembresia","_folio","_idOcupacion","_ingresos"];
+				_MainService.addEventListener(FaultEvent.FAULT,onFault);
+				initData();
+				addValidations();
+				loadScroll();
+				StaticEvent.removeAllListenersByCaller("PaymentDetail");
+				StaticEvent.addEventListener(PaymentEvent.PAYMETN_COMPLETE,updatePayments,"PaymentDetail");				
+			}
+			
+		
+			
+
+			// ------------------- View Extra Data -------------------------------
+
+			private function loadScroll():void{
+				/*_dataList.visible = false;
+				for(var n:Number = 0;n<100;n++){
+					_DataResult.addItem({i:0});
+				}*/
+			}
+
+			private function initData():void{
+				_MainService.getFields();
+				_MainService.getFields.addEventListener(ResultEvent.RESULT,onGetFieldsResult);
+				_dataReady = false;
+			}
+			
+			public function closeWindow():void{
+            		dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
+            		PopUpManager.removePopUp(this);
+            }
+            
+//-------------------------------- MainInit --------------------------------------
+			
+			private function newData():void{
+				_Data.clear();
+				_newData = true;
+				_updateData = false;				
+				this[_mainFocusField].setFocus();
+				createRecordExtras();
+				Valid.validateAll();
+			}
+			
+			private function createData():void{
+				if(Valid.validateAll()){
+					_dataReady = false;
+					var params:Object = extraCreateData(_Data.makeData());
+					_MainService.createRecord(params);
+					_MainService.createRecord.addEventListener(ResultEvent.RESULT,onCreateComplete);
+				}else{
+					Alert.show(Valid.errors,"Error");
+				}
+			}
+
+			private function updateData():void{
+				if(Valid.validateAll()){
+					_dataReady = false;
+					var params:Object = extraUpdateData(_Data.makeData());
+					params[_mainId] = this[_mainId];
+					_MainService.updateRecord(params);
+					_MainService.updateRecord.addEventListener(ResultEvent.RESULT,onUpdateComplete);
+					//_dataIndex =_dataList.selectedIndex;
+				}else{
+					Alert.show(Valid.errors,"Error");
+				}
+			}
+			
+			private function deleteDataAlert():void{
+				/*if(_dataList.selectedIndex!=-1){
+					Alert.show("Desea borrar el registro seleccionado?","Atención",Alert.YES|Alert.CANCEL,this,deleteData);
+				}else{
+					Alert.show("No hay registro selecionado","Error");
+				}*/
+			}
+			
+			private function deleteData(e:CloseEvent):void{
+				/*if(e.detail==Alert.YES){
+					var params:Object = new Object();
+					params[_mainId] = _dataList.selectedItem[_mainId];
+					_MainService.deleteRecord(params);
+					_MainService.deleteRecord.addEventListener(ResultEvent.RESULT,onDeleteComplete);
+					_dataReady = false;
+				}*/
+			}
+			
+			private function cancel():void{
+				onDataSelect();
+				resetBooleans();				
+				Valid.validateAll();
+				Valid.removeAllKnots();				
+			}
+			
+			private function resetBooleans():void{
+				_newData = false;
+				_updateData = false;
+			}
+
+			private function dataChange():void{				
+				_updateData = true;				
+			}
+
+			
+			private function openContratos():void{
+				openPopUp("contratos.Contratos",true);
+			}
+			
+		
+			private function openFamiliares():void{
+				openPopUp("clientes.Clientes_Familiares",true);
+			}
+			
+			private function openPreferencias():void{
+				openPopUp("clientes.Clientes_Preferencias",true);
+			}
+			
+			private function openCuentas():void{
+				openPopUp("clientes.Clientes_Cuentas_Bancarias",true);
+			}
+			
+			private function openProductos():void{
+				openPopUp("clientes.Clientes_Cuentas_Bancarias",true);
+			}
+			
+			
+			private function openInternalBlog():void{
+				openPopUp("comunicaciones.Comunicaciones_Interna",true);
+			}
+			
+			private function openPaymentsTerminal():void{
+				openPopUp("pagos.Pagos_Vista_General",true);
+			}
+			
+			
+//-------------------------------- ResultsEvents --------------------------------------		
+			
+			private function onGetFieldsResult(e:ResultEvent):void{
+				_MainService.getFields.removeEventListener(ResultEvent.RESULT,onGetFieldsResult);
+				if(e){
+					if(e.result) {
+						_Data.createFields(Converter.arrayConverter(e.result));
+						getData();
+					}
+				}else{
+					Alert.show("Error al cargar los datos","Error");
+					_dataReady = false;
+				}
+				_DataResult= new ArrayCollection();
+				//_dataList.visible = true;
+				_MainService.getClientProducts({_idCliente:_idCliente});
+				_MainService.addEventListener(ResultEvent.RESULT,onProductoready);
+				
+			}
+			
+			public function updatePayments(e:PaymentEvent):void{				
+				_MainService.getClientProducts({_idCliente:_idCliente});
+				_MainService.addEventListener(ResultEvent.RESULT,onProductoready);
+			}
+			
+			public function onProductoready(e:ResultEvent):void{
+				_MainService.removeEventListener(ResultEvent.RESULT,onProductoready);
+				if(e){
+					if(e.result) {
+						_productos = Converter.arrayConverter(e.result);					
+					}
+				}else{
+					Alert.show("No Hay Productos para este cliente","Error");					
+				}
+			}
+			
+			public function getData():void{
+				_MainService.getRecordsById(_idCliente);
+				_MainService.getRecordsById.addEventListener(ResultEvent.RESULT,onGetDataResult);
+			}
+			
+			private function onGetDataResult(e:ResultEvent):void{
+				_MainService.getRecordsById.removeEventListener(ResultEvent.RESULT,onGetDataResult);
+				_DataResult = Converter.arrayConverter(e.result);
+				if(_DataResult.length==0) {
+					Alert.show("No hay registros en la base de datos","Atención")
+				}else{
+					if(_dataIndex<0) _dataIndex = 0;
+					_Data.loadData(_DataResult[_dataIndex]);
+					//_dataList.selectedIndex = _dataIndex;
+					//_dataList.scrollToIndex(_dataList.selectedIndex);
+					loadExtraFields(_DataResult[_dataIndex]);
+					Valid.validateAll();
+					Valid.removeAllKnots();
+				}
+				_dataReady = true;
+				resetBooleans();
+			}
+			
+			private function onFault(e:FaultEvent):void{
+				Alert.show(e.fault.faultString,"Error");
+			}
+
+			private function onDataSelect():void{
+				/*if(_dataList.selectedIndex!=-1) {
+					_Data.loadData(_dataList.selectedItem);
+					_dataIndex =_dataList.selectedIndex;
+					loadExtraFields(_dataList.selectedItem);
+					_selectedId = _dataList.selectedItem[_mainId];
+				}*/
+			}
+			
+			private function onCreateComplete(e:ResultEvent):void{				
+				_MainService.createRecord.removeEventListener(ResultEvent.RESULT,onCreateComplete);
+				_dataIndex = _DataResult.length;
+				getData();
+			}
+			
+			private function onUpdateComplete(e:ResultEvent):void{
+				_MainService.updateRecord.removeEventListener(ResultEvent.RESULT,onUpdateComplete);
+				getData();
+			}
+			
+			private function onDeleteComplete(e:ResultEvent):void{
+				_MainService.deleteRecord.removeEventListener(ResultEvent.RESULT,onDeleteComplete);
+				_dataIndex = _DataResult.length-2;
+				getData();
+			}
+			
+//-------------------------------- ResultsEvents --------------------------------------	
+
+//-------------------------------- POP UP WINDOW --------------------------------------	
+			public function openPopUp(popUpName:String,modal:Boolean = false):void{
+				var pop:TitleWindow = PopUpManager.createPopUp(SystemGlobals.mainStage as DisplayObject, getDefinitionByName("views."+popUpName) as Class, modal) as TitleWindow;
+				pop.name = popUpName;
+				pop.addEventListener(CloseEvent.CLOSE, closePopup);
+				if(pop.hasOwnProperty("context")){
+					Object(pop).context = viewContext;
+				}
+				PopUpManager.centerPopUp(pop);
+			}
+			
+			private function closePopup(e:CloseEvent):void{
+	            PopUpManager.removePopUp(e.target as TitleWindow);
+			}
+//-------------------------------- POP UP WINDOW --------------------------------------
+
+//-------------------------------- Search Engine --------------------------------------
+
+			private function searchFilter():void{
+           			//_DataResult.filterFunction = vlidateSearch;
+           			//_DataResult.refresh();
+       		}
+      
+       		private function vlidateSearch(item:Object):Boolean{
+           		var isMatch:Boolean = false;           
+           		/*if(item[_searchType.selectedItem.value].toLowerCase().search(_searchFilter.toLowerCase()) != -1){
+               			isMatch = true
+           		}  */             
+           		return isMatch;             
+       		}
+       	
+       		private function search():void{
+				/*_searchFilter = _searchField.text;
+				searchFilter();*/
+			}
+				
+				
+			private var _searchFilter:String 			= new String();
+[Bindable]	private var _searchTypes:ArrayCollection 	= new ArrayCollection([	{label:"Número de Cliente", value:"_numeroCliente"},
+																				{label:"Nombre",     		value:"_nombre"},
+																				{label:"Paterno",     		value:"_ap"},
+																				{label:"Materno",     		value:"_am"}
+																				]);
+
+//-------------------------------- Search Engine --------------------------------------					
+		
+			private function ProductConverter(item:Object,dg:DataGridColumn):String{
+				var result:String = "";
+					if(item[dg.dataField]){
+						result = Converter.findLabel(SystemGlobals.PRODUCTOS,"_idProducto","_nombre",item[dg.dataField]);
+						
+					}
+				return result;
+			}
+			
+			private function productosChange():void{
+				if(_productosCliente.selectedIndex!=-1){
+					var item:Object = _productosCliente.selectedItem;
+					_fechaVenta.text = Converter.systemToViewDate(item._fechaVenta);
+					_fechaRenovacion.text = Converter.systemToViewDate(item._fechaRenovacion);
+					_fechaVencimiento.text = Converter.systemToViewDate(item._fechaVencimiento);
+					_sucursal.text = Converter.findLabel(SystemGlobals.SUCURSALES,"_idSucursal","_nombre",item._idSucursal);
+					Vendedores.getVendor(item._idEmpleado);
+				}
+			}
+		
+			
+		]]>
+	</mx:Script>
+<mx:Label y="27" text="Cliente :" x="102"/>
+	<mx:Label y="46" text="nombre(s)"  fontSize="9" color="#CECECE" fontStyle="italic" x="163"/>
+	<mx:Label y="47" text="apellido paterno"  fontSize="9" color="#CECECE" fontStyle="italic" x="334"/>
+	<mx:Label y="47" text="apellido materno"  fontSize="9" color="#CECECE" fontStyle="italic" x="499"/>
+	<mx:Label y="10" text="NUMERO"  fontSize="9" color="#CECECE" fontStyle="italic" x="163"/>
+	<mx:Label y="10" text="inscripción"  fontSize="9" color="#CECECE" fontStyle="italic" x="333"/>
+<mx:TextInput y="63" id="_nombre" change="dataChange();" width="161" maxChars="50" tabIndex="1" x="164" restrict="A-Z 0-9"/>
+	<mx:TextInput y="310" id="_sucursal" width="366" tabIndex="1" x="700" editable="false" enabled="false"/>
+	<mx:TextInput y="348" id="_vendedor" width="366" tabIndex="1" x="700" editable="false" enabled="false" text="{Vendedores.nombre}"/>
+<mx:TextInput y="63" id="_paterno" change="dataChange();" width="156" maxChars="50" tabIndex="2" x="333" restrict="A-Z 0-9"/>
+<mx:TextInput y="63" id="_materno" change="dataChange();" width="180.5" maxChars="50" tabIndex="3" x="499" restrict="A-Z 0-9"/>
+<mx:DateField y="25" id="_fechaInicio" formatString="DD/MM/YYYY" change="dataChange();" width="103" x="333"/>
+	<mx:TextInput y="25" change="dataChange();" width="162" editable="false" x="163" text="{_idCliente}" enabled="false"/>
+	<mx:Button label="Regresar" click="closeWindow();" width="180.5"  enabled="{!_newData}" x="499" y="522"/>
+	<mx:VRule x="68" y="10" height="535"/>
+	<mx:Button x="10" y="11" width="50" height="50" icon="@Embed(source='../../assets/CRM/Payments.png')" click="openPaymentsTerminal();" selected="{_selectedTool=='Payments'}" enabled="{_dataReady&amp;&amp;_productosCliente.selectedIndex!=-1}"/>
+	<mx:Button x="10" y="202" width="50" height="50" icon="@Embed(source='../../assets/CRM/Details.png')" selected="{_selectedTool=='Details'}" enabled="false"/>
+	<mx:Button x="10" y="69" width="50" height="50" icon="@Embed(source='../../assets/CRM/Chat.png')" click="openInternalBlog();" selected="{_selectedTool=='Chat'}" enabled="{_dataReady}"/>
+	<mx:Button x="10" y="371" width="50" height="50" icon="@Embed(source='../../assets/CRM/Service.png')" click="_selectedTool='Service'" selected="{_selectedTool=='Service'}" enabled="false"/>
+	<mx:Button x="10" y="429" width="50" height="50" icon="@Embed(source='../../assets/CRM/Mail.png')" click="_selectedTool='Mail'" selected="{_selectedTool=='Mail'}" enabled="false"/>
+	<mx:Button x="10" y="313" width="50" height="50" icon="@Embed(source='../../assets/CRM/Stats.png')" click="_selectedTool='Stats'" selected="{_selectedTool=='Stats'}" enabled="false"/>
+	<mx:Button x="10" y="260" width="50" height="50" icon="@Embed(source='../../assets/CRM/Docs.png')" click="_selectedTool='Docs'" selected="{_selectedTool=='Docs'}" enabled="false"/>
+	<mx:ComboBox y="109" id="_day" change="dataChange();" width="60" dataProvider="{ConstantData.Days}" labelField="label" tabIndex="4" x="164"/>
+	<mx:ComboBox y="109" id="_month" change="dataChange();" width="93" dataProvider="{ConstantData.Months}" labelField="label"  tabIndex="5" x="232"/>
+	<mx:ComboBox y="109" id="_year" change="dataChange();" width="64" dataProvider="{ConstantData.Years}" labelField="label" tabIndex="6" x="333"/>
+	<mx:Label y="150" text="calle"  fontSize="9" color="#CECECE" fontStyle="italic" x="164"/>
+	<mx:Label y="185" text="ciudad"  fontSize="9" color="#CECECE" fontStyle="italic" x="164"/>
+	<mx:Label y="261" text="casa"  fontSize="9" color="#CECECE" fontStyle="italic" x="163"/>
+	<mx:Label y="299" text=" principal"  fontSize="9" color="#CECECE" fontStyle="italic" x="161"/>
+	<mx:Label y="299" text="secundario"  fontSize="9" color="#CECECE" fontStyle="italic" x="331"/>
+	<mx:Label y="261" text="movil"  fontSize="9" color="#CECECE" fontStyle="italic" x="331"/>
+	<mx:Label y="93" text="día"  fontSize="9" color="#CECECE" fontStyle="italic" x="164"/>
+	<mx:Label y="294" text="sucursal"  fontSize="9" color="#CECECE" fontStyle="italic" x="700"/>
+	<mx:Label y="332" text="vendedor"  fontSize="9" color="#CECECE" fontStyle="italic" x="700"/>
+	<mx:Label y="93" text="mes"  fontSize="9" color="#CECECE" fontStyle="italic" x="232"/>
+	<mx:Label y="93" text="año"  fontSize="9" color="#CECECE" fontStyle="italic" x="333"/>
+	<mx:Label y="221" text="estado"  fontSize="9" color="#CECECE" fontStyle="italic" x="164"/>
+	<mx:Label y="221" text=" país"  fontSize="9" color="#CECECE" fontStyle="italic" x="330"/>
+	<mx:Label y="150" text="número"  fontSize="9" color="#CECECE" fontStyle="italic" x="499"/>
+	<mx:Label y="150" text="interior"  fontSize="9" color="#CECECE" fontStyle="italic" x="556"/>
+	<mx:Label y="150" text="c.p."  fontSize="9" color="#CECECE" fontStyle="italic" x="601"/>
+	<mx:Label y="168" text="Dirección :" x="99"/>
+	<mx:TextInput y="166" id="_calle" change="dataChange();" width="325" maxChars="255" tabIndex="7" x="164" restrict="A-Z 0-9"/>
+	<mx:TextInput y="166" id="_numeroExterior" change="dataChange();" width="48" maxChars="10" tabIndex="8" restrict="0-9" x="499"/>
+	<mx:TextInput y="166" id="_numeroInterior" change="dataChange();" width="40" maxChars="5" tabIndex="9" x="555" restrict="0-9 A-Z "/>
+	<mx:TextInput y="166" id="_cp" change="dataChange();" width="79.5" restrict="0-9" maxChars="5" tabIndex="10" x="600"/>
+	<mx:TextInput y="201" id="_ciudad" change="dataChange();" width="159" tabIndex="11" x="164" restrict="A-Z 0-9"/>
+	<mx:ComboBox y="237" id="_pais" change="dataChange();" width="156" dataProvider="{ConstantData.ShortCountries}" labelField="label" tabIndex="13" x="333"/>
+	<mx:Label y="279" text="Teléfonos :" x="93"/>
+	<mx:Label y="111" text="Fecha Nac. :" x="89"/>
+	<mx:Label y="314" text="E- Mail :" x="111"/>
+	<mx:TextInput y="277" id="_telefonoCasa" change="dataChange();" width="160" tabIndex="14" x="163" restrict="0-9 "/>
+	<mx:TextInput y="277" id="_telefonoMovil" change="dataChange();" width="160" tabIndex="15" x="331" restrict="0-9 "/>
+	<mx:TextInput y="315" id="_mailPrincipal" change="dataChange();" width="160" tabIndex="17" x="163"/>
+	<mx:TextInput y="315" id="_mailSecundario" change="dataChange();" width="160" tabIndex="18" x="331"/>
+	<mx:Label y="348" text="Comentarios :" x="77"/>
+	<mx:TextArea y="348" id="_comentarios" change="dataChange();" width="327" height="157" tabIndex="21" x="164"/>
+	<mx:HRule y="141" width="491" height="1" strokeColor="#000000" alpha="0.5" x="164"/>
+	<mx:Button y="379" label="  Datos Familiares" width="180.5" click="openFamiliares();" textAlign="left" enabled="{_dataReady&amp;&amp;!_newData}" x="499"/>
+	<mx:Button y="407" label="  Preferencias" width="180.5" click="openPreferencias();" textAlign="left" enabled="{_dataReady&amp;&amp;!_newData}" x="499"/>
+	<mx:CheckBox y="410" enabled="false" id="_tienePreferencias" x="503"/>
+	<mx:CheckBox y="382" enabled="false" id="_tieneFamiliares" x="503"/>
+	<mx:Button y="348" label="  Cuentas Bancarias" width="180.5" click="openCuentas();" textAlign="left" enabled="{_dataReady&amp;&amp;!_newData}" x="499"/>
+	<mx:CheckBox y="351" enabled="false" id="_tieneCuentasBancarias" x="503"/>
+	<mx:Button label="Cancelar" width="80" enabled="{_dataReady}" visible="{_newData||_updateData}" click="cancel();" x="252" y="522"/>
+	<mx:Button label="Actualizar" width="80" enabled="{_dataReady&amp;&amp;!_newData&amp;&amp;_updateData}" visible="{_updateData&amp;&amp;!_newData}" click="updateData();" x="164" y="522"/>
+	<mx:Label x="700" y="7" text="Productos :" />
+	<mx:DataGrid x="700" y="24" width="366" height="216" id="_productosCliente" dataProvider="{_productos}" change="productosChange()">
+		<mx:columns>
+			<mx:DataGridColumn headerText="EST" width="40" >			
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:HBox width="100%"  verticalAlign="middle" horizontalAlign="center" mouseOver="init()">
+							<mx:Script>
+								<![CDATA[
+									import mx.random.converters.Converter;
+									[Bindable]	private var _toolTip:String = "";
+									
+									private function init():void{
+										_toolTip = "Pagos   : "+		data._pagos+"\n"+
+												   "Abonos : "+		Converter.numberFormat(data._monto)+"\n"+	 
+												   "Saldo    : "+ 	Converter.numberFormat(data._costo-data._monto);										
+									}
+								]]>
+							</mx:Script>
+							<mx:Image source="assets/Icons/Status/{data._estatus}.png"  
+								width="13" height="13" 
+								scaleContent="false" 
+								toolTip="{_toolTip}"
+								/>
+						</mx:HBox>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn headerText="Venta" 		dataField="_idVenta" width="40"/>
+			<mx:DataGridColumn headerText="Producto" 	dataField="_idProducto" labelFunction="ProductConverter"/>								
+			<mx:DataGridColumn headerText="Prog" 	    dataField="_codigoPrograma" width="40"/>
+			<mx:DataGridColumn headerText="Folio" 		dataField="_folio" width="70"/>
+			<mx:DataGridColumn headerText="Costo" 	    dataField="_costo" labelFunction="Converter.columNumberConverter" width="70" textAlign="right"/>
+		</mx:columns>
+	</mx:DataGrid>
+	<mx:VRule x="687.5" y="11" width="1" height="534"/>
+	<mx:TextInput y="264" id="_fechaVencimiento" width="100" tabIndex="1" x="830" editable="false" enabled="false"/>
+	<mx:TextInput y="264" id="_fechaVenta" width="100" tabIndex="1" x="700" editable="false" enabled="false"/>
+	<mx:TextInput y="264" id="_fechaRenovacion" width="100" tabIndex="1" x="966" editable="false" enabled="false"/>
+	<mx:Label y="248" text="fecha de venta"  fontSize="9" color="#CECECE" fontStyle="italic" x="700"/>
+	<mx:Label y="248" text="fecha de renovación"  fontSize="9" color="#CECECE" fontStyle="italic" x="966"/>
+	<mx:Label y="248" text="fecha devencimiento"  fontSize="9" color="#CECECE" fontStyle="italic" x="830"/>
+	<mx:Label x="332" y="185" text="colonia"  fontSize="9" color="#CECECE" fontStyle="italic"/>
+	<mx:TextInput x="332" y="201" id="_colonia" change="dataChange();" width="159" tabIndex="11" restrict="A-Z 0-9"/>
+	<mx:ComboBox  x="163" y="237" id="_estado" change="dataChange();" width="156" dataProvider="{ConstantData.NationalStates}" labelField="label" tabIndex="13"/>
+	<mx:Label x="499" y="261" text="oficina"  fontSize="9" color="#CECECE" fontStyle="italic"/>
+	<mx:Label x="620.5" y="261" text="ext."  fontSize="9" color="#CECECE" fontStyle="italic"/>
+	<mx:TextInput x="621" y="277" id="_ext" change="dataChange();" width="58.5" maxChars="5" tabIndex="9" restrict="0-9 A-Z "/>
+	<mx:TextInput x="499" y="277" id="_telefonoOficina" change="dataChange();" width="116" tabIndex="16" restrict="0-9 "/>
+	
+</mx:TitleWindow>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- http://blog.flexexamples.com/2010/01/27/creating-a-fancy-spark-list-control-item-renderer-in-flex-4/ -->
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009"
+				xmlns:s="library://ns.adobe.com/flex/spark"
+				width="524" height="50" autoDrawBackground="true" contentBackgroundAlpha="0.47"
+				name="CustomListItemRenderer">
+	<s:layout>
+		<s:BasicLayout/>
+	</s:layout>
+	<s:states>
+		<s:State name="normal" />
+		<s:State name="hovered" />
+		<s:State name="selected" />
+	</s:states>
+	
+	
+	<s:Image x="6" y="10" width="30" height="30" scaleMode="letterbox" smooth="true"
+			 smoothingQuality="high"
+			 source="assets/Icons/MailStatus/MailIconStatus_{data._status}.png"/>
+	<s:Label left="35" right="10" top="19" fontSize="10" fontWeight="bold" maxDisplayedLines="1"
+			 paddingLeft="5" showTruncationTip="true" text="{data._from}"/>
+	<s:Label left="35" right="10" top="7" fontSize="10" fontWeight="bold" maxDisplayedLines="1"
+			 paddingLeft="5" showTruncationTip="true" text="{data._date}"/>
+	
+	<s:Label left="35" right="10" top="32" color="#A0A0A0" fontSize="10" fontStyle="italic"
+			 maxDisplayedLines="1" paddingLeft="5" showTruncationTip="true" text="{data._subject}"/>
+ 	<s:Line width="100%" bottom="0" left="0">
+		<s:stroke>
+			<s:SolidColorStroke color="#c6c6c6" weight="1" caps="square"/>
+		</s:stroke>
+	</s:Line>
+	
+</s:ItemRenderer>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="init()" horizontalScrollPolicy="off" verticalScrollPolicy="off" width="100%" height="100%">
+	
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.random.converters.Converter;
+			import mx.collections.ArrayCollection;
+			import mx.random.constants.SystemGlobals;
+			
+			
+[Bindable]	private var items:ArrayCollection = new ArrayCollection();
+			private var itemList:Array = new Array();
+			
+			
+			
+			private function init():void{
+				this._grid.removeAllChildren();
+				for(var n:Number = 0; n<SystemGlobals.CONCEPTOS_CHECK.length;n++){
+					items.addItem({_idCaptura:SystemGlobals.CONCEPTOS_CHECK[n]._idCaptura,_nombre:SystemGlobals.CONCEPTOS_CHECK[n]._nombre,_estatus:false}); 
+					var item:ServiceCheck_Item = new ServiceCheck_Item();
+					item.context 	= items[n];
+					itemList.push(item);
+					this._grid.addChild(item);
+				}
+			}
+			
+			public function get componentData():String{
+				var result:ArrayCollection = new ArrayCollection();
+				for(var n:Number = 0; n<itemList.length;n++){					
+					result.addItem({_idCaptura:itemList[n]._idCaptura,_nombre:itemList[n]._nombre,_estatus:itemList[n]._estatus}); 
+				}
+				
+				var resultData:String = Converter.arrayToBase64(result);; 
+				return resultData;
+			} 
+			
+			public function set componentData(itemData:String):void{
+				var itemArray:ArrayCollection = Converter.base64ToArray(itemData);				
+				for(var n:Number = 0; n<itemArray.length;n++){	
+					for(var m:Number = 0; m<itemList.length;m++){
+						if(itemList[m]._idCaptura==itemArray[n]._idCaptura){
+							itemList[m].context = itemArray[n];
+							//itemList[m].estatus = itemArray[n]._estatus;
+							break;
+						}
+					}																		
+				}				
+			}
+
+			public function reset():void{
+				init();
+			}
+			
+			
+		]]>
+	</mx:Script>
+	<mx:Tile x="0" y="0" width="100%" height="100%" id="_grid" direction="horizontal" verticalGap="2" horizontalGap="2">
+	</mx:Tile>
+	
+	
+	
+</mx:Canvas>

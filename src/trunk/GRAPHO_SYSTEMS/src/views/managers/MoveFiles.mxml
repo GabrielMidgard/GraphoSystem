@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="640" height="372" title="Multiple File Delete" showCloseButton="true" close="closeWindow()">
+	<mx:Script>
+		<![CDATA[
+			import mx.collections.XMLListCollection;
+			import mx.controls.Alert;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.random.converters.Converter;
+			import mx.collections.ArrayCollection;
+			import mx.managers.PopUpManager;
+			import mx.rpc.remoting.RemoteObject;
+			import mx.random.web.WebApplication;
+			
+	        
+			private var _moveService:RemoteObject;
+			private var _webApplication:WebApplication;
+			private var _workManager:Object;
+[Bindable]	private var _filesToMove:ArrayCollection;
+			private var _index:Number = 0;
+			private var _errors:Number = 0;
+[Bindable]	private var _files:XMLListCollection;			
+			
+			[Bindable]
+	        [Embed(source="assets/Files/fld.png")] 
+	        public var __fld:Class;
+	        
+	        [Bindable]
+	        [Embed(source="assets/Files/fldc.png")] 
+	        public var __fldc:Class;
+			
+//---------------------------- Context ---------------------------------------------            
+
+            public function set context(contextObj:Object):void{
+				for( var p:String in contextObj){
+					if(this.hasOwnProperty(p)){
+						this[p] 	= contextObj[p];
+					}
+				}				
+				
+			}
+
+			public function set workManager(value:Object):void{
+				_workManager 		= value;
+			}
+
+			
+			public function set webApplication(value:WebApplication):void{
+				_webApplication 	= value;
+				initView();
+			}
+			
+			public function set filesToMove(value:ArrayCollection):void{
+				_filesToMove = value;
+			}
+//---------------------------- Context ---------------------------------------------  
+			
+			
+			public function initView():void{
+				_moveService = _webApplication.getService("Directorios");
+				_moveService.startReadDirs("/");
+				_moveService.addEventListener(FaultEvent.FAULT,onFault);
+				_moveService.startReadDirs.addEventListener(ResultEvent.RESULT,onResult);
+				
+			}    
+			
+			    
+			
+			private function onFault(e:FaultEvent):void{
+				_moveService.removeEventListener(FaultEvent.FAULT,onFault);
+				Alert.show(e.fault.faultString,"Server Error");
+			}
+			
+			private function onResult(e:ResultEvent):void{
+				_moveService.startReadDirs.removeEventListener(ResultEvent.RESULT,onResult);			
+				_files = new XMLListCollection(new XMLList(e.result));	
+				filesDir.openItems = [];						
+			}
+			
+			
+			private function closeWindow():void{
+				PopUpManager.removePopUp(this);
+			}	
+			
+			 private function openDir():void{
+			 	
+			 }
+			
+			private function doMove():void{
+				var params:Object = {	file:_filesToMove[_index].file,
+										newFile:filesDir.selectedItem.@path+_filesToMove[_index].fileName,
+										path:filesDir.selectedItem.@path.toString()};
+				_moveService.moveFile(params);
+				_moveService.moveFile.addEventListener(ResultEvent.RESULT,moveFileready);
+			}
+			
+			private function moveFileready(e:ResultEvent):void{
+				_moveService.moveFile.removeEventListener(ResultEvent.RESULT,moveFileready);
+				if(e.result){
+					_filesToMove[_index].estatus = "Moved";
+				}else{
+					_filesToMove[_index].estatus = "Error";
+					_errors++;
+				}	
+				_filesToMove.refresh();			
+				_index++;
+				if((_index)<_filesToMove.length){
+					doMove();
+				}else{
+					if(_errors==0){
+						Alert.show("Move Complete","Success");
+						_workManager.initView();						
+					}else{
+						Alert.show("Move Complete with "+_errors+" Errors","Alert");
+						_workManager.initView();
+					}
+					moveBt.visible = false;
+					closeBt.label = "Back"
+					closeBt.enabled = true;
+				}
+			}	
+						
+			
+			
+			
+		]]>
+	</mx:Script>
+	<mx:Label x="280" y="10" text="Files and Directories Selected:"/>
+	<mx:Button x="517" y="308" label="Cancel" width="107" click="closeWindow()" id="closeBt"/>
+	<mx:Button x="393" y="308" label="Move" width="115" id="moveBt" click="doMove();"/>
+	<mx:DataGrid x="280" y="27" width="344" height="273" id="files" dataProvider="{_filesToMove}">
+		<mx:columns>
+			<mx:DataGridColumn headerText="" dataField="type" width="20" textAlign="center">
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:HBox width="100%" horizontalAlign="center">
+							<mx:Image source="assets/{data.type}.png" width="16" height="16" autoLoad="true"/>
+						</mx:HBox>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn headerText="File" dataField="file"/>
+			<mx:DataGridColumn headerText="Status" dataField="estatus" width="80" textAlign="right"/>
+		</mx:columns>
+	</mx:DataGrid>
+	<mx:Tree x="10" y="27" height="273" width="251" id="filesDir" dataProvider="{_files}" 
+		iconField="@icon"
+		labelField="@name" 
+	 	folderOpenIcon="{__fld}"
+	 	folderClosedIcon="{__fldc}"
+	    change="openDir();"
+	    showRoot="false"
+	     allowMultipleSelection="true"></mx:Tree>
+	<mx:Label x="10" y="10" text="Server Folders:"/>
+</mx:TitleWindow>

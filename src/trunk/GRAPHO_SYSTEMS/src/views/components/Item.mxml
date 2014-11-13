@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="170" 
+	 shadowDirection="right"
+	 shadowDistance="5"
+	 dropShadowEnabled="true" 
+	 dropShadowColor="0x333333"
+	 creationComplete="ini()" 
+	 backgroundColor="#FFFFFF" 
+	 backgroundAlpha="0.0" 
+	 cornerRadius="10" 
+	 height="50"
+	 horizontalScrollPolicy="off"
+	 verticalScrollPolicy="off"
+	 clipContent="true">
+	<mx:VBox  id="mainBox" borderStyle="solid" 
+		x="0" y="0" width="100%" height="100%" alpha="1.0"
+		borderColor="{_bdColor}" 
+		borderThickness="{_bdThickness}"  
+		cornerRadius="{_bdCorner}" 
+		backgroundColor="{_bgColor}" 
+		backgroundAlpha="{_bgAlpha}" 
+		dropShadowEnabled="{_dropShadow}" 
+		dropShadowColor="{_dropShadowColor}" 
+		shadowDirection="right" verticalGap="0">
+		<mx:Text text="{_mainTitle}" width="100%" textAlign="center" fontWeight="bold" color="{_TtColor}" selectable="false" fontSize="8" height="100%" paddingTop="5"/>
+		<mx:Text text="{_description}" width="100%" color="{_DsColor}" textAlign="center" selectable="false" id="_descriptionArea" fontSize="8"/>
+	</mx:VBox>
+	<mx:Script>
+		<![CDATA[
+			import mx.random.events.ConfigEvent;
+			import mx.random.drawing.DrawingObjects;
+			import mx.random.managers.SelectionManager;
+			import mx.random.events.SelectionEvent;
+			import mx.random.handlers.HanlderEvent;
+			import mx.random.events.StaticEvent;
+			import mx.random.handlers.Handler;
+
+			import mx.random.tools.ToolManager;
+			import mx.collections.ArrayCollection;
+			import mx.core.UIComponent;				
+
+			public 	var Main:Object = new Object();	
+			private var _handler:Handler;
+			private var _selected:Boolean;
+			private var _uniqueId:Number = 0;
+			private var _ref:DrawingObjects = new DrawingObjects();
+
+
+			private var offSet:Number = 10;				
+			private var rectTop:Rectangle;
+			private var rectRight:Rectangle;
+			private var rectLeft:Rectangle;
+			private var rectBot:Rectangle;
+			public var outType:String;
+			public var inType:String;
+			private var _mousePressed:Boolean = false;
+			
+[Bindable]	public var _bgColor:uint 		= 0xFFFFFF;
+[Bindable]	public var _bgAlpha:Number 		= 0.8;
+[Bindable]	public var _TtColor:uint 		= 0x000000;
+[Bindable]	public var _DsColor:uint 		= 0x727171;
+[Bindable]	public var _bdColor:uint 		= 0xFFFFFF;
+[Bindable]	public var _bdAlpha:Number 		= 0.5; 
+[Bindable]	public var _bdThickness:Number 	= 3;
+[Bindable]	public var _bdCorner:Number 	= 5;
+
+[Bindable]	public var _mainTitle:String 	= "Título";
+[Bindable]	public var _description:String 	= "Descripción";
+
+[Bindable]	private var _dropShadow:Boolean = true;
+[Bindable]	private var _dropShadowColor:uint = 0x2D2D2D;
+			private var _showDescription = true;
+					
+			public function set uniqueId(value:Number):void { _uniqueId = value };
+			public function get uniqueId():Number { return _uniqueId };
+			
+			private var _routh:UIComponent = new UIComponent();
+			
+			private function ini():void{					
+				ToolManager.currentTool = ToolManager.PICK_TOOL;		
+				addEventListener(Event.ENTER_FRAME,actualizarSeleccion);
+				addEventListener(MouseEvent.MOUSE_DOWN,mouseControl);
+				addEventListener(MouseEvent.MOUSE_UP,mouseControl);
+				addEventListener(MouseEvent.MOUSE_OVER,mouseControl);
+				addEventListener(MouseEvent.MOUSE_MOVE,mouseControl);
+				Main.currentSelect = this;	
+				StaticEvent.dispatchEvent(new HanlderEvent(HanlderEvent.UPDATE_HANDLER_REF,this));
+				StaticEvent.addEventListener(SelectionEvent.SELECTION_COMPLETE,staticSelection);
+				StaticEvent.addEventListener(SelectionEvent.SELECTION_RESET,staticSelection);	
+				_ref.ref(0,0);	
+				this.addChild(_ref);
+				_ref.visible = false;
+				this.addChild(_routh);
+				dispatchEvent(new SelectionEvent(SelectionEvent.SELECTION_COMPLETE));
+			}
+				
+			
+			public function removeDescription():void{
+				_showDescription = false;				
+			}
+			
+			
+			public function traceLinkRouth(top:Number,color:Number,thickness:Number = 1,alpha:Number = 1):void{		
+				_routh.graphics.clear();
+				_routh.graphics.lineStyle(thickness, color, alpha);
+				_routh.graphics.moveTo(0,this.height/2);
+				_routh.graphics.lineTo(-10,this.height/2);
+				_routh.graphics.lineTo(-10,(0-this.y)+top);
+			}
+			
+			public function setProperties(props:Object):void{
+				_bgColor		= props.bgColor;
+				_bgAlpha 		= props.bgAlpha;
+				_TtColor 		= props.TtColor;
+				_DsColor 		= props.DsColor;
+				_bdColor 		= props.bdColor;
+				_bdAlpha 		= props.bdAlpha;
+				_bdThickness 	= props.bdThickness;
+				_bdCorner 		= props.bdCorner;
+				_mainTitle 		= props.mainTitle;
+				_description 	= props.description;
+			}
+			
+			public function getProperties():Object{
+				var props:Object = new Object();
+				props.bgColor		= _bgColor;
+				props.bgAlpha 		= _bgAlpha;
+				props.TtColor 		= _TtColor;
+				props.DsColor 		= _DsColor;
+				props.bdColor 		= _bdColor;
+				props.bdAlpha 		= _bdAlpha;
+				props.bdThickness 	= _bdThickness;
+				props.bdCorner 		= _bdCorner;
+				props.mainTitle 	= _mainTitle;
+				props.description 	= _description;
+				return props;
+			}
+			
+			private function dummies():void{
+				var dummie:MovieClip = new MovieClip();
+				dummie.graphics.beginFill(0xff0000,.2);
+				dummie.graphics.drawRect(rectTop.x,rectTop.y,rectTop.width,rectTop.height);
+				dummie.graphics.drawRect(rectBot.x,rectBot.y,rectBot.width,rectBot.height);
+				dummie.graphics.drawRect(rectLeft.x,rectLeft.y,rectLeft.width,rectLeft.height);
+				dummie.graphics.drawRect(rectRight.x,rectRight.y,rectRight.width,rectRight.height);
+				var uiDummie:UIComponent = new UIComponent();
+				uiDummie.addChild(dummie);
+				this.addChild(uiDummie);
+			}
+			
+			private function drawArea():void{
+				rectTop 	= new Rectangle(offSet,0,width-(offSet*2),offSet);
+				rectRight 	= new Rectangle(width-offSet,offSet,offSet,height-(offSet*2));
+				rectLeft 	= new Rectangle(0,offSet,offSet,height-(offSet*2));
+				rectBot 	= new Rectangle(offSet,height-offSet,width-(offSet*2),offSet);
+			}
+							
+				
+			private function mouseControl(e:MouseEvent):void{	
+				drawArea();		
+				switch(e.type){
+					case MouseEvent.MOUSE_DOWN:
+						_mousePressed =  true;
+						switch(ToolManager.currentTool){
+							case ToolManager.MOVE_TOOL:	
+								SelectionManager.setSingleSelection(this);				
+								this.startDrag();
+								break;
+							case ToolManager.PICK_TOOL:
+								if(_selected){
+									if(!e.shiftKey){
+										SelectionManager.MainPick = this;
+										SelectionManager.loadDrags();
+									}else{
+										SelectionManager.removeItem(this);
+									}
+								}else{
+									if(e.shiftKey){
+										SelectionManager.Selection.addItem(this);
+									}else{							
+										SelectionManager.setSingleSelection(this);
+									}
+									
+								}
+								StaticEvent.dispatchEvent(new SelectionEvent(SelectionEvent.SELECTION_COMPLETE));
+								//this.startDrag();
+								break;
+							case ToolManager.DRAW_TOOL:
+								if(outType!=""){
+									StaticEvent.dispatchEvent(new SelectionEvent(SelectionEvent.SELECTION_SOURCE,{item:this,outType:outType}))
+								}
+							break;
+						}	
+						StaticEvent.dispatchEvent(new HanlderEvent(HanlderEvent.HANDLER_HIDE));
+						StaticEvent.dispatchEvent(new HanlderEvent(HanlderEvent.UPDATE_HANDLER_REF,this));
+						break;
+						
+						
+						
+					case MouseEvent.MOUSE_UP:
+						_mousePressed =  false;
+						this.stopDrag();
+						if(Handler.Snap){
+							x = Math.floor(x/Handler.SnapValue)*Handler.SnapValue;
+							y = Math.floor(y/Handler.SnapValue)*Handler.SnapValue;				
+						}
+						switch(ToolManager.currentTool){
+							case ToolManager.MOVE_TOOL:
+								StaticEvent.dispatchEvent(new HanlderEvent(HanlderEvent.UPDATE_HANDLER_REF,this));
+								StaticEvent.dispatchEvent(new HanlderEvent(HanlderEvent.HANDLER_SHOW));
+								break;
+							case ToolManager.PICK_TOOL:
+								break;
+							case ToolManager.DRAW_TOOL:
+								if(outType!=""){
+									StaticEvent.dispatchEvent(new SelectionEvent(SelectionEvent.SELECTION_TARGET,{item:this,outType:outType}));									
+								}
+						}	
+						break;
+					
+					case MouseEvent.MOUSE_MOVE:
+							
+							switch(ToolManager.currentTool){
+								case ToolManager.DRAW_TOOL:
+									outType = "";
+									var checkPoint:Point = new Point(mouseX,mouseY);
+									_ref.visible = false;
+									if(rectTop.containsPoint(checkPoint)){
+										_ref.x = (width/2);
+										_ref.y = 3;
+										_ref.visible = true;
+										outType = "T";
+									}
+									if(rectBot.containsPoint(checkPoint)){
+										_ref.x = (width/2);
+										_ref.y = height - 3;
+										_ref.visible = true;
+										outType = "B";
+									}
+									if(rectRight.containsPoint(checkPoint)){
+										_ref.x = width - 3;
+										_ref.y = (height/2);
+										_ref.visible = true;
+										outType = "R";
+									}
+									if(rectLeft.containsPoint(checkPoint)){
+										_ref.x = 3;
+										_ref.y = (height/2);
+										_ref.visible = true;
+										outType = "L";
+									}
+									break
+							}
+							if(_mousePressed) StaticEvent.dispatchEvent(new SelectionEvent(SelectionEvent.SELECTION_UPDATE));
+						break;
+				}	
+			}
+								
+	
+			private function actualizarSeleccion(e:Event):void{	
+				if(_selected){
+					//this.mainBox.setStyle("borderColor","#8094f8");
+					//_dropShadow = true;
+					_dropShadowColor = 0xff0000;
+				}else{
+					//this.mainBox.setStyle("borderColor",_bdColor);
+					//_dropShadow = false;
+					_dropShadowColor = 0x2D2D2D;				
+				}					
+			}	
+			
+			private function staticSelection(e:SelectionEvent):void{
+				_selected = false;
+				if(e.type == SelectionEvent.SELECTION_COMPLETE){
+					for(var n:Number = 0;n<SelectionManager.Selection.length;n++){
+						if(SelectionManager.Selection[n] == this){
+							_selected = true;
+						}
+					}
+				}
+			}
+		
+		]]>
+	</mx:Script>	
+</mx:Canvas>

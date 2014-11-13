@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="498" height="274" title="Nuevo Comentario" showCloseButton="true">
+	<mx:Label x="23.5" y="30" text="Usuario :"/>
+	<mx:Label x="310" y="12" text="fecha" fontStyle="italic" fontSize="9" color="#C1C1C1"/>
+	<mx:Label x="84" y="12" text="nombre" fontStyle="italic" fontSize="9" color="#C1C1C1"/>
+	<mx:Label x="406" y="12" text="hora" fontStyle="italic" fontSize="9" color="#C1C1C1"/>
+	<mx:Label x="23.5" y="59" text="Adjunto :"/>
+	<mx:Label x="7.5" y="87" text="Cometario :"/>
+	<mx:TextInput x="83" y="28" width="219" text="{_nombreEmpleado}" editable="false"/>
+	<mx:TextInput x="310" y="28" width="88" id="_fecha" editable="false"/>
+	<mx:TextInput x="406" y="28" width="78" id="_hora" editable="false"/>
+	<mx:TextInput x="83" y="57" width="282.5" id="_adjunto" editable="false" enabled="{_dataReady}"/>
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.random.red5.Red5MessageDetail;
+			import views.managers.Red5Manager;
+			import mx.random.red5.Red5Message;
+			import mx.random.events.Red5Event;
+			import mx.random.events.BlogEvent;
+			import mx.random.constants.ConstantData;
+			import mx.random.events.SelectionEvent;
+			import mx.random.events.StaticEvent;
+			
+			import mx.random.constants.Catalogs;
+			import mx.random.windowManagers.PopManager;
+			import mx.random.constants.Languages;
+			import mx.random.forms.Validator;
+			import mx.random.dataManagers.EventManager;
+			import mx.random.converters.Converter;
+			import mx.random.dataManagers.DataManager;
+			import mx.random.web.WebApplication;
+			import mx.managers.PopUpManager;
+			import mx.collections.ArrayCollection;
+			import mx.events.CloseEvent;
+			import mx.controls.Alert;
+			import mx.rpc.remoting.RemoteObject;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+
+			private var _webApplication:WebApplication;
+			private var Valid:Validator 			= new Validator();
+			private var _workManager:Object 		= new Object();
+			private var _MainService:RemoteObject 		= new RemoteObject();
+[Bindable]	private var _Data:DataManager 				= new DataManager(this);
+[Bindable]	private var _DataResult:ArrayCollection 		= new ArrayCollection();			
+			private var _eventManager:EventManager 		= new EventManager(this);
+			private var _dataIndex:Number 			= 0;
+			
+			//-----------Event Manager -----------
+
+[Bindable]	public var _dataReady:Boolean 			= false;
+[Bindable]	public var _newData:Boolean 			= false;
+[Bindable]	public var _updateData:Boolean 			= false;
+[Bindable]	private var _selectionMode:Boolean		= false;
+[Bindable]	private var _multipleSelection:Boolean	= false;
+
+			//-----------Event Manager -----------
+			
+			
+			//-----------Local Vars -----------
+			
+			private var _selectedId:Number 			= 0;
+			private var _selectedName:String 		= "";
+			private var _serviceName  				= "Comunicaciones_Blog";
+			private var _mainId  					= "_idComentario";
+
+			
+			private var _idCliente:Number			= 0;
+[Bindable]	private var _nombreCliente:String		= "";	
+[Bindable]	private var _nombreEmpleado:String		= "";
+[Bindable]	private var _numeroCliente:String		= "";	
+			private var _idBlog:Number				= 0;	
+			
+			//-----------Local Vars -----------
+			
+			
+			public function set idCliente(value:Number):void{
+				_idCliente = value;
+			}
+			
+			public function set idBlog(value:Number):void{
+				_idBlog = value;
+			}
+			
+			public function set numeroCliente(value:String):void{
+				_numeroCliente = value;
+			}
+			
+			public function set nombreCliente(value:String):void{
+				_nombreCliente = value;
+			}
+			
+//---------------------------- Context ---------------------------------------------            
+
+   			public function set context(contextObj:Object):void{
+				for( var p:String in contextObj){
+					if(this.hasOwnProperty(p)){
+						this[p] = contextObj[p];
+					}
+				}
+				initView();
+			}
+
+			public function set workManager(value:Object):void{
+				_workManager = value;
+			}
+
+			public function set selectionMode(value:Boolean):void{
+				_selectionMode = value;
+			}
+			
+			public function set multipleSelection(value:Boolean):void{
+				_multipleSelection = value;
+			}
+
+			public function set webApplication(value:WebApplication):void{
+				_webApplication = value;				
+			}
+			public function get webApplication():WebApplication{ return _webApplication; } 
+						
+//---------------------------- Context ---------------------------------------------  
+
+//-------------------------------- MainInit --------------------------------------
+			// ------------------- View Extra Data -------------------------------
+			
+			private function get viewContext():Object{
+				return {
+						url:"/___COMS/"+_idCliente+"/",
+						relationIdValue: _idCliente,
+						nombreCliente:	_nombreCliente,
+						numeroCliente:	_numeroCliente,
+						webApplication: _webApplication,
+						workManager: this,
+						selectedItem: _idCliente
+						}					
+			}
+
+
+			private function addValidations():void{
+				Valid.changeLanguage(Languages.SPANISH);
+				
+				var validFields:ArrayCollection = Valid.validFields;
+				for(var n:Number = 0;n<validFields.length;n++){					
+					this[validFields[n].obj.name].addEventListener(Event.CHANGE,onFocusOut);
+				}
+				Valid.setErrorKnot(Validator.CIRCLE_KNOT,0xFF0000);
+			}
+			
+			private function onFocusOut(e:Event):void{
+				if(_newData||_updateData) Valid.validateAll();//Valid.validateOne(e.currentTarget.name);
+			}
+			
+			private function initView():void{
+				_MainService = _webApplication.getService("Comunicaciones_Blog");
+				_nombreEmpleado = _webApplication.user.fullName;
+				var date:Date = new Date();
+				_fecha.text = Converter.dateToView(date);
+				_hora.text = date.getHours()+":"+date.getMinutes()+":"+date.getSeconds();
+				_dataReady = true;
+			}
+			
+			private function sendMessage():void{
+				var params:Object 			= new Object();				
+				params["_comentario"]   	= _comentario.text;
+				params["_idBlog"]			= _idBlog;
+				params["_idCliente"]		= _idCliente;
+				params["_fecha"]			= Converter.viewToSystemDate(_fecha.text);
+				params["_hora"]				= _hora.text;
+				params["_nombreEmpleado"]	= _nombreEmpleado;
+				params["_idEmpleado"]		= _webApplication.user.idEmpleado;
+				
+				_MainService.sendMessage(params);
+				_MainService.addEventListener(ResultEvent.RESULT,onSendMessageComplete);
+			}
+			
+			private function onSendMessageComplete(e:ResultEvent):void{
+				StaticEvent.dispatchEvent(new BlogEvent(BlogEvent.SEND_MESSAGE_COMPLETE));
+				sendRed5Notification()
+				closeWindow();
+			}
+			
+			
+			private function sendRed5Notification():void{
+				var msg:Red5MessageDetail = new Red5MessageDetail();
+				msg.recordId = _idBlog;
+				msg.targetName = "Blog";
+				var red5Message:Red5Message = new Red5Message(_nombreEmpleado,new Number(_webApplication.user.idEmpleado),"",Red5Event.RED5_USER_RECORD_UPDATE,msg);
+				StaticEvent.dispatchEvent(new Red5Event(Red5Event.RED5_USER_RECORD_UPDATE,red5Message));
+			}
+//-------------------------------- MainInit --------------------------------------			
+
+			
+			public function closeWindow():void{					
+            		dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
+            		PopUpManager.removePopUp(this);
+            }
+			
+			
+			private function openFileManager():void{
+				openPopUp("managers.UploadManager",true);
+			}
+			
+//-------------------------------- POP UP WINDOW --------------------------------------	
+			public function openPopUp(popUpName:String,modal:Boolean=false):void{
+				var pop:TitleWindow = PopUpManager.createPopUp(this, getDefinitionByName("views."+popUpName) as Class, modal) as TitleWindow;
+				pop.name = popUpName;
+				pop.addEventListener(CloseEvent.CLOSE, closePopup);
+				if(pop.hasOwnProperty("context")){
+					Object(pop).context = viewContext;
+				}
+				PopUpManager.centerPopUp(pop);
+			}
+			
+			private function closePopup(e:CloseEvent):void{			
+	            		PopUpManager.removePopUp(e.target as TitleWindow);
+			}
+//-------------------------------- POP UP WINDOW --------------------------------------
+			
+		]]>
+	</mx:Script>
+	<mx:Button x="373.5" y="56" label="Agregar" width="113" enabled="{_dataReady}" click="openFileManager();"/>
+	<mx:TextArea x="83" y="87" width="403.5" height="120" id="_comentario" enabled="{_dataReady}"/>
+	<mx:Button x="83" y="215" label="Enviar" width="214.5" click="sendMessage()" enabled="{_dataReady}">
+		<mx:icon>@Embed(source='../../assets/Icons/Buttons/Start.png')</mx:icon>
+	</mx:Button>
+	<mx:Button x="373.5" y="215" label="Regresar" width="113" click="closeWindow();" enabled="{_dataReady}"/>
+	
+</mx:TitleWindow>

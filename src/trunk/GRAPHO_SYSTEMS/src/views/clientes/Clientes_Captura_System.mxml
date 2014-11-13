@@ -1,0 +1,444 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow 
+	xmlns:mx="http://www.adobe.com/2006/mxml" 
+	width="602" height="606" 
+	layout="absolute" 
+	horizontalCenter="0" 
+	title="Administración de Socios " 
+	verticalCenter="0"
+	verticalScrollPolicy="off"
+	horizontalScrollPolicy="off"
+	showCloseButton="true">
+
+	<mx:Script>
+		<![CDATA[
+			import mx.binding.utils.BindingUtils;
+			import mx.binding.utils.ChangeWatcher;
+			import mx.random.events.ClientEvent;
+			import mx.random.events.StaticEvent;
+			import views.ventas.Ventas_Productos;
+			import mx.random.clientes.ClientData;
+			import mx.random.userAuth.User;
+			import mx.random.constants.SystemGlobals;
+			import mx.random.constants.GlobalData;
+			import mx.random.constants.Catalogs;
+			import mx.random.constants.ConstantData;
+			import mx.random.constants.Constantes;
+			
+			import mx.random.windowManagers.PopManager;
+			import mx.random.constants.Languages;
+			import mx.random.forms.Validator;
+			import mx.random.dataManagers.EventManager;
+			import mx.random.converters.Converter;
+			import mx.random.dataManagers.DataManager;
+			import mx.random.web.WebApplication;
+			import mx.managers.PopUpManager;
+			import mx.collections.ArrayCollection;
+			import mx.events.CloseEvent;
+			import mx.controls.Alert;
+			import mx.rpc.remoting.RemoteObject;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+
+			private var _webApplication:WebApplication;
+			private var Valid:Validator 			= new Validator();
+			private var _workManager:Object 		= new Object();
+			private var _MainService:RemoteObject 		= new RemoteObject();
+			private var _SaleService:RemoteObject 		= new RemoteObject();
+[Bindable]	private var _Data:DataManager 				= new DataManager(this);
+[Bindable]	private var _DataResult:ArrayCollection 		= new ArrayCollection();			
+			private var _eventManager:EventManager 		= new EventManager(this);
+			private var _dataIndex:Number 			= 0;
+			
+			//-----------Event Manager -----------
+
+[Bindable]	public var _dataReady:Boolean 			= false;
+[Bindable]	public var _newData:Boolean 			= false;
+[Bindable]	public var _updateData:Boolean 			= false;
+
+			//-----------Event Manager -----------
+			
+			
+			//-----------Local Vars -----------
+			
+			private var _selectedId:Number = 0;
+			private var _selectedName:String = "";
+			private var _serviceName  		= "Clientes";
+			private var _mainId  			= "_idCliente";
+			private var _mainFocusField:String      = "_nombre";
+
+[Bindable]	private var _filterData:ArrayCollection = new ArrayCollection();	
+[Bindable]	private var _vendedores:ArrayCollection = new ArrayCollection();
+[Bindable]	private var _sucursalesData:ArrayCollection = new ArrayCollection()
+
+			private var _idCliente:Number;
+		
+			//-----------Local Vars -----------
+			
+//---------------------------- Context ---------------------------------------------            
+
+   			public function set context(contextObj:Object):void{
+				for( var p:String in contextObj){
+					if(this.hasOwnProperty(p)){
+						this[p] = contextObj[p];
+					}
+				}
+				initView();
+			}
+
+			public function set workManager(value:Object):void{
+				_workManager = value;
+			}
+
+			public function set webApplication(value:WebApplication):void{
+				_webApplication = value;
+				
+			}
+			public function get webApplication():WebApplication{ return _webApplication; } 
+						
+//---------------------------- Context ---------------------------------------------  
+
+//-------------------------------- MainInit --------------------------------------
+			// ------------------- View Extra Data -------------------------------
+			
+			private function get viewContext():Object{
+				var cliente:ClientData = new ClientData();				
+				cliente.idCliente 		= _idCliente;
+				cliente.nombre 			= _nombre.text+" "+_paterno.text+" "+_materno.text;				
+				cliente.tipoVenta		= 1;
+				return {
+						relationIdValue: _idCliente,
+						idCliente: _idCliente,
+						nombreCliente:	_nombre.text+" "+_paterno.text+" "+_materno.text,						
+						webApplication: _webApplication,
+						workManager: this,
+						cliente:cliente,
+						selectedItem: _idCliente
+						}					
+			}
+
+			private function addValidations():void{
+				Valid.changeLanguage(Languages.SPANISH);
+				Valid.addComboVal(_day,"Día de Nacimiento");
+				Valid.addComboVal(_month,"Mes de Nacimiento");
+				Valid.addComboVal(_year,"Año de Nacimiento");
+				Valid.addComboVal(_pais,"País");
+				Valid.addPhoneVal(_telefonoCasa,true,false,"Teléfono de casa");
+				Valid.addPhoneVal(_telefonoMovil,true,false,"Teléfono móvil");
+				Valid.addPhoneVal(_telefonoOficina,true,false,"Teléfono de oficina");				
+				Valid.addSomeRequired([_telefonoCasa,_telefonoMovil,_telefonoOficina],"Teléfonos");
+				Valid.addSomeEquals(_telefonoCasa,_telefonoMovil,"Los Telefonos no pueden ser iguales",true);
+				Valid.addSomeEquals(_telefonoMovil,_telefonoOficina,"Los Telefonos no pueden ser iguales",true);
+				Valid.addSomeEquals(_telefonoCasa,_telefonoOficina,"Los Telefonos no pueden ser iguales",true);				
+				Valid.addMailVal(_mailPrincipal,false,"Mail Principal");
+				Valid.addMailVal(_mailSecundario,false,"Mail Secundario");
+				Valid.addSomeRequired([_mailPrincipal,_mailSecundario],"E-Mails");
+				Valid.addSomeEquals(_mailPrincipal,_mailSecundario,"Los E-Mails no pueden ser iguales",true);				
+				Valid.addStringVal(_nombre,3,50,"Nombre");
+				Valid.addStringVal(_paterno,3,50,"Apellido Paterno");
+				Valid.addStringVal(_calle,5,255,"Calle");
+				Valid.addStringVal(_numeroExterior,1,8,"Número Exterior");
+				Valid.addStringVal(_ciudad,2,50,"Ciudad");
+				Valid.addStringVal(_colonia,2,50,"Colonia");
+				Valid.addStringVal(_estado,2,50,"Estado");
+				Valid.addStringVal(_cp,5,5,"Código Postal");
+				
+				var validFields:ArrayCollection = Valid.validFields;
+				for(var n:Number = 0;n<validFields.length;n++){					
+					this[validFields[n].obj.name].addEventListener(Event.CHANGE,onFocusOut);
+				}
+				
+				Valid.setErrorKnot(Validator.CIRCLE_KNOT,0xFF0000);
+			}
+			
+			private function onFocusOut(e:Event):void{
+				if(_newData||_updateData) Valid.validateAll();
+			}
+			
+			private function extraCreateData(params:Object):Object{
+				if(_webApplication.user.accessType!=-1){
+					params['_idEmpleado'] 		= _webApplication.user.idEmpleado;
+					params['_idSucursal'] 		= _webApplication.user.idSucursal;
+				}else{
+					params['_idEmpleado'] 		= _vendedor.selectedItem._idEmpleado;
+					params['_idSucursal'] 		= _vendedor.selectedItem._idSucursal;
+				}
+				params['_idCompania'] 		= _webApplication.user.idCompania;
+				params['_fechaNacimiento'] 	= _year.selectedItem.label+'-'+_month.selectedItem.value+'-'+_day.selectedItem.value;
+				return params;							
+			}
+			
+			private function createRecordExtras():void{				
+				_day.selectedIndex 	= 0;
+				_month.selectedIndex = 0;
+				_year.selectedIndex 	= 0;				
+			}
+			
+			private function extraUpdateData(params:Object):Object{	
+				params['_fechaNacimiento'] = _year.selectedItem.label+'-'+_month.selectedItem.value+'-'+_day.selectedItem.value;			
+				return params;
+			}
+			
+			private function loadExtraFields(params:Object):void{
+				var tempDate:String = params["_fechaNacimiento"];
+				
+				if(tempDate){
+					var temp:Array 		 = tempDate.split('-');
+					_day.selectedIndex 	 = parseInt(temp[2]);
+					_month.selectedIndex = parseInt(temp[1]);
+					_year.selectedIndex  = ConstantData.FindYearindex(temp[0]);
+				}else{
+					_day.selectedIndex 		= 0;
+					_month.selectedIndex 	= 0;
+					_year.selectedIndex 	= 0;
+				}
+			}
+			
+			private function forceImports():void{
+				Clientes_CoPropietarios;
+				Ventas_Productos;
+			}
+			
+								
+			public function initView():void{				
+				_SaleService = _webApplication.getService(_serviceName);								
+				_vendedor.enabled = true;				
+				Valid.addComboVal(_vendedor,"Vendedor");					
+								
+				forceImports();				
+				_filterData.addItem({_codigo:"00",_nombre:"TODOS"});
+				
+				for(var n:Number = 0;n<SystemGlobals.PRODUCTOS.length;n++){
+					_filterData.addItem({_codigo:SystemGlobals.PRODUCTOS[n]._codigo,_nombre:SystemGlobals.PRODUCTOS[n]._nombre});
+				}
+				
+				_MainService = _webApplication.getService(_serviceName);
+				_Data.exceptions = ["_idCliente","_fechaNacimiento","_idSucursal","_idCompania","_idEmpleado","_fechaInicio"];
+				_MainService.addEventListener(FaultEvent.FAULT,onFault);
+				initData();
+				addValidations();
+				//_idCliente = 3139;
+				//getData()
+				
+				_sucursalesData = SystemGlobals.SUCURSALES;
+				_sucursalesData.addItemAt({_nombre:"Seleccionar",_idSucursal:0},0);
+				_sucursal.selectedIndex = 0;
+				
+			}
+			
+			private function sucursalChange():void{				
+				_SaleService.getSellers(15,_sucursal.selectedItem._idSucursal);
+				_SaleService.addEventListener(FaultEvent.FAULT,onFault);
+				_SaleService.getSellers.addEventListener(ResultEvent.RESULT,onSalesReady);
+			}
+			
+			
+			
+			private function onSalesReady(e:ResultEvent):void{
+				
+				_SaleService.getSellers.removeEventListener(ResultEvent.RESULT,onSalesReady);
+				_vendedores = new ArrayCollection();
+				_vendedores.addItem({_idEmpleado:"00",_nombre:"Seleccionar"});
+				var _sallers:ArrayCollection = Converter.arrayConverter(e.result);
+				for(var n:Number = 0;n<_sallers.length;n++){					
+					_vendedores.addItem({_idEmpleado:_sallers[n]._idEmpleado,_nombre:_sallers[n]._nombre+" "+_sallers[n]._paterno+" "+_sallers[n]._materno});
+				}				
+				_vendedor.selectedIndex = 0;
+				//_vendedor.enabled = true;	
+				_vendedores.refresh();			
+			}
+		
+			
+
+			// ------------------- View Extra Data -------------------------------
+
+
+			private function initData():void{
+				_MainService.getFields();
+				_MainService.getFields.addEventListener(ResultEvent.RESULT,onGetFieldsResult);
+				_dataReady = false;
+			}
+			
+			public function closeWindow():void{
+            		dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
+            		PopUpManager.removePopUp(this);
+            }
+            
+//-------------------------------- MainInit --------------------------------------
+			
+			private function newData():void{
+				_Data.clear();
+				_newData = true;
+				_updateData = false;				
+				this[_mainFocusField].setFocus();
+				createRecordExtras();
+				Valid.validateAll();				
+			}
+			
+			private function createData():void{
+				if(Valid.validateAll()){
+					_dataReady = false;
+					var params:Object = extraCreateData(_Data.makeData());
+					_MainService.createRecord(params);
+					_MainService.createRecord.addEventListener(ResultEvent.RESULT,onCreateComplete);
+				}else{
+					Alert.show(Valid.errors,"Error");
+				}
+			}
+						
+			private function cancel():void{
+				resetBooleans();				
+				Valid.validateAll();
+				Valid.removeAllKnots();				
+			}
+			
+			private function resetBooleans():void{
+				_newData = false;
+				_updateData = false;
+			}
+
+			private function dataChange():void{				
+				_updateData = true;				
+			}
+			
+			private function onPaymentsComplete(e:ClientEvent):void{
+				StaticEvent.removeEventListener(ClientEvent.CLIENT_PAYMENTS_COMPLETE,onPaymentsComplete);
+				_Data.clear();
+				resetBooleans();
+			}
+
+//-------------------------------- ResultsEvents --------------------------------------		
+			
+			private function onFilterChange():void{
+				_dataIndex = -1;
+				getData();
+			}
+			
+			private function onGetFieldsResult(e:ResultEvent):void{
+				_MainService.getFields.removeEventListener(ResultEvent.RESULT,onGetFieldsResult);
+				if(e){
+					if(e.result) {
+						_Data.createFields(Converter.arrayConverter(e.result));
+						_dataReady = true;
+					}
+				}else{
+					Alert.show("Error al cargar los datos","Error");
+					_dataReady = false;
+				}	
+			}
+			
+			private function getData():void{						
+				_MainService.getRecordsByClient(_idCliente);
+				_MainService.getRecordsByClient.addEventListener(ResultEvent.RESULT,onGetDataResult);
+			}
+			
+			private function onGetDataResult(e:ResultEvent):void{
+				_MainService.getRecordsByClient.removeEventListener(ResultEvent.RESULT,onGetDataResult);
+				_DataResult = Converter.arrayConverter(e.result);
+				if(_DataResult.length==0) {
+					Alert.show("No hay registros en la base de datos","Atención")
+				}else{					
+					_Data.loadData(_DataResult[_dataIndex]);					
+					loadExtraFields(_DataResult[_dataIndex]);
+					Valid.validateAll();
+					Valid.removeAllKnots();
+					openPopUp("ventas.Ventas_Productos",true);
+					StaticEvent.addEventListener(ClientEvent.CLIENT_PAYMENTS_COMPLETE,onPaymentsComplete);
+				}
+				_dataReady = true;						
+			}
+			
+			private function onFault(e:FaultEvent):void{
+				Alert.show(e.fault.faultString,"Error");
+			}
+			
+			private function onCreateComplete(e:ResultEvent):void{				
+				_MainService.createRecord.removeEventListener(ResultEvent.RESULT,onCreateComplete);
+				_idCliente = Number(e.result);
+				getData();					
+			}
+			
+			
+//-------------------------------- ResultsEvents --------------------------------------	
+
+//-------------------------------- POP UP WINDOW --------------------------------------	
+			public function openPopUp(popUpName:String,modal:Boolean = false):void{
+				var pop:TitleWindow = PopUpManager.createPopUp(this, getDefinitionByName("views."+popUpName) as Class, modal) as TitleWindow;
+				pop.name = popUpName;
+				pop.addEventListener(CloseEvent.CLOSE, closePopup);
+				if(pop.hasOwnProperty("context")){
+					Object(pop).context = viewContext;
+				}
+				PopUpManager.centerPopUp(pop);
+			}
+			
+			private function closePopup(e:CloseEvent):void{
+	            PopUpManager.removePopUp(e.target as TitleWindow);
+			}
+//-------------------------------- POP UP WINDOW --------------------------------------
+
+
+		]]>
+	</mx:Script>
+<mx:Label x="16" y="372" text="Vendedor :" />
+	<mx:ComboBox  x="97" y="65" id="_day" change="dataChange();" width="60" dataProvider="{ConstantData.Days}" labelField="label" tabIndex="4"/>
+	<mx:ComboBox  x="165" y="65" id="_month" change="dataChange();" width="93" dataProvider="{ConstantData.Months}" labelField="label"  tabIndex="5"/>
+	<mx:ComboBox  x="266" y="65" id="_year" change="dataChange();" width="64" dataProvider="{ConstantData.Years}" labelField="label" tabIndex="6"/>
+	<mx:ComboBox  x="90" y="370" id="_vendedor" change="dataChange();" width="492.5" dataProvider="{_vendedores}" labelField="_nombre" tabIndex="22"/>
+	<mx:Label x="20.75" y="342" text="Sucursal :" />
+	<mx:ComboBox  x="89.75" y="340" id="_sucursal" change="sucursalChange();" width="492.5" dataProvider="{_sucursalesData}" labelField="_nombre" tabIndex="21"  />
+<mx:Label x="39" y="29" text="Cliente :" />
+	<mx:Label x="96" y="10" text="nombre(s)"  fontSize="9" color="#CECECE" fontStyle="italic"/>
+	<mx:Label x="97" y="101" text="calle"  fontSize="9" color="#CECECE" fontStyle="italic"/>
+	<mx:Label x="97" y="136" text="ciudad"  fontSize="9" color="#CECECE" fontStyle="italic"/>
+	<mx:Label x="264" y="136" text="colonia"  fontSize="9" color="#CECECE" fontStyle="italic"/>
+	<mx:TextInput x="97" y="152" id="_ciudad" change="dataChange();" width="159" tabIndex="11" restrict="A-Z " enabled="{_newData}"/>
+	<mx:Label x="94.5" y="233" text="casa"  fontSize="9" color="#CECECE" fontStyle="italic"/>
+	<mx:Label x="92.5" y="271" text=" principal"  fontSize="9" color="#CECECE" fontStyle="italic"/>
+	<mx:Label x="262.5" y="271" text="secundario"  fontSize="9" color="#CECECE" fontStyle="italic"/>
+	<mx:Label x="262.5" y="233" text="movil"  fontSize="9" color="#CECECE" fontStyle="italic"/>
+	<mx:Label x="430.5" y="233" text="oficina"  fontSize="9" color="#CECECE" fontStyle="italic"/>
+	<mx:Label x="552" y="233" text="ext."  fontSize="9" color="#CECECE" fontStyle="italic"/>
+	<mx:Label x="97" y="49" text="día"  fontSize="9" color="#CECECE" fontStyle="italic"/>
+	<mx:Label x="165" y="49" text="mes"  fontSize="9" color="#CECECE" fontStyle="italic"/>
+	<mx:Label x="266" y="49" text="año"  fontSize="9" color="#CECECE" fontStyle="italic"/>
+	<mx:Label x="97" y="175" text="estado"  fontSize="9" color="#CECECE" fontStyle="italic"/>
+	<mx:Label x="261" y="175" text=" país"  fontSize="9" color="#CECECE" fontStyle="italic"/>
+	<mx:Label x="432" y="101" text="número"  fontSize="9" color="#CECECE" fontStyle="italic"/>
+	<mx:Label x="489" y="101" text="interior"  fontSize="9" color="#CECECE" fontStyle="italic"/>
+	<mx:Label x="489" y="101" text="interior"  fontSize="9" color="#CECECE" fontStyle="italic"/>
+	<mx:TextInput x="488" y="117" id="_numeroInterior" change="dataChange();" width="40" maxChars="5" tabIndex="9" restrict="0-9 A-Z " enabled="{_newData}"/>
+	<mx:Label x="534" y="101" text="c.p."  fontSize="9" color="#CECECE" fontStyle="italic"/>
+	<mx:Label x="267" y="11" text="apellido paterno"  fontSize="9" color="#CECECE" fontStyle="italic"/>
+	<mx:Label x="432" y="11" text="apellido materno"  fontSize="9" color="#CECECE" fontStyle="italic"/>
+<mx:TextInput x="97" y="27" id="_nombre" change="dataChange();" width="161" maxChars="50" tabIndex="1" restrict="A-Z Ñ" enabled="{_newData}"/>
+<mx:TextInput x="266" y="27" id="_paterno" change="dataChange();" width="156" maxChars="50" tabIndex="2" restrict="A-Z " enabled="{_newData}"/>
+<mx:TextInput x="432" y="27" id="_materno" change="dataChange();" width="156" maxChars="50" tabIndex="3" restrict="A-Z " enabled="{_newData}"/>
+<mx:Label x="29" y="119" text="Dirección :" />
+<mx:TextInput x="97" y="117" id="_calle" change="dataChange();" width="325" maxChars="255" tabIndex="7" restrict="A-Z 0-9" enabled="{_newData}"/>
+<mx:TextInput x="432" y="117" id="_numeroExterior" change="dataChange();" width="48" maxChars="10" tabIndex="8" restrict="0-9 " enabled="{_newData}"/>
+<mx:TextInput x="552.5" y="249" id="_ext" change="dataChange();" width="33.5" maxChars="5" tabIndex="18" restrict="0-9 A-Z " enabled="{_newData}"/>
+<mx:TextInput x="533" y="117" id="_cp" change="dataChange();" width="55" restrict="0-9 " maxChars="5" tabIndex="10" enabled="{_newData}"/>
+<mx:TextInput x="264" y="152" id="_colonia" change="dataChange();" width="159" tabIndex="12" restrict="A-Z " enabled="{_newData}"/>
+<mx:ComboBox  x="265" y="191" id="_pais" change="dataChange();" width="156" dataProvider="{ConstantData.ShortCountries}" labelField="label" tabIndex="14"/>
+<mx:Label x="21.5" y="251" text="Teléfonos :" />
+	<mx:Label x="19" y="69" text="Fecha Nac. :" />
+	<mx:Label x="39.5" y="286" text="E- Mail :" />
+<mx:TextInput x="94.5" y="249" id="_telefonoCasa" change="dataChange();" width="160" tabIndex="15" restrict="0-9 " enabled="{_newData}"/>
+<mx:TextInput x="262.5" y="249" id="_telefonoMovil" change="dataChange();" width="160" tabIndex="16" restrict="0-9 " enabled="{_newData}"/>
+<mx:TextInput x="430.5" y="249" id="_telefonoOficina" change="dataChange();" width="116" tabIndex="17" restrict="0-9 " enabled="{_newData}"/>
+<mx:TextInput x="94.5" y="287" id="_mailPrincipal" change="dataChange();" width="160" tabIndex="19" enabled="{_newData}"/>
+<mx:TextInput x="262.5" y="287" id="_mailSecundario" change="dataChange();" width="160" tabIndex="20" enabled="{_newData}"/>
+<mx:Label x="0" y="400" text="Comentarios :" />
+<mx:TextArea x="93" y="400" id="_comentarios" change="dataChange();" width="488" height="132" tabIndex="23"/>
+	<mx:Button label="Nuevo" width="80" enabled="{_dataReady}" visible="{!_newData&amp;&amp;!_updateData}" click="newData();" x="93" y="540"/>
+	<mx:Button label="Cancelar" width="80" enabled="{_dataReady}" visible="{_newData||_updateData}" click="cancel();" x="181" y="542"/>
+	<mx:Button label="Aceptar" width="80" enabled="{_dataReady}" visible="{_newData}" click="createData();" x="93" y="540"/>
+	<mx:Button label="Regresar" click="closeWindow();" width="137"  enabled="{!_newData}" x="447" y="538"/>
+	<mx:HRule x="97" y="95" width="491" height="1" strokeColor="#000000" alpha="0.5"/>
+	<mx:HRule x="97" y="225" width="491" height="1" strokeColor="#000000" alpha="0.5"/>
+	<mx:HRule x="94.5" y="317" width="491" height="1" strokeColor="#000000" alpha="0.5"/>
+	<mx:Button x="432" y="64" label="Co-Titular" width="153" click="openPopUp(&quot;clientes.Clientes_CoPropietarios&quot;)"/>
+	<mx:ComboBox  x="97" y="191" id="_estado" change="dataChange();" width="156" dataProvider="{ConstantData.NationalStates}" labelField="label" tabIndex="13"/>
+	
+</mx:TitleWindow>

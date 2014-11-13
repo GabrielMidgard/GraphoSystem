@@ -1,0 +1,537 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow 
+	xmlns:mx="http://www.adobe.com/2006/mxml" 
+	width="574" height="634" 
+	layout="absolute" 
+	horizontalCenter="0" 
+	title="Administración de Productos" 
+	verticalCenter="0"
+	verticalScrollPolicy="off"
+	horizontalScrollPolicy="off"
+	showCloseButton="false"
+	creationComplete="updateView()">
+
+	<mx:Script>
+		<![CDATA[
+			import views.clientes.Clientes_Ventas_Detalle;
+			import views.pagos.Pagos_Seleccion_Tipo;
+			import views.pagos.Pagos_Vista_General;
+			import mx.random.constants.ConstantData;
+			import mx.random.constants.SystemGlobals;
+			import mx.random.clientes.ClientData;
+			import mx.random.events.SelectionEvent;
+			import mx.random.events.StaticEvent;
+			
+			import mx.random.constants.Catalogs;
+			import mx.random.windowManagers.PopManager;
+			import mx.random.constants.Languages;
+			import mx.random.forms.Validator;
+			import mx.random.dataManagers.EventManager;
+			import mx.random.converters.Converter;
+			import mx.random.dataManagers.DataManager;
+			import mx.random.web.WebApplication;
+			import mx.managers.PopUpManager;
+			import mx.collections.ArrayCollection;
+			import mx.events.CloseEvent;
+			import mx.controls.Alert;
+			import mx.rpc.remoting.RemoteObject;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+
+			private var _webApplication:WebApplication;
+			private var Valid:Validator 			= new Validator();
+			private var _workManager:Object 		= new Object();
+			private var _MainService:RemoteObject 		= new RemoteObject();
+			private var _SaleService:RemoteObject 		= new RemoteObject();
+[Bindable]	private var _Data:DataManager 				= new DataManager(this);
+[Bindable]	private var _DataResult:ArrayCollection 		= new ArrayCollection();			
+			private var _eventManager:EventManager 		= new EventManager(this);
+			private var _dataIndex:Number 			= 0;
+			
+			//-----------Event Manager -----------
+
+[Bindable]	public var _dataReady:Boolean 			= false;
+[Bindable]	public var _newData:Boolean 			= false;
+[Bindable]	public var _updateData:Boolean 			= false;
+[Bindable]	private var _selectionMode:Boolean		= false;
+[Bindable]	private var _multipleSelection:Boolean	= false;
+[Bindable]	private var _cliente:ClientData = new ClientData();
+			//-----------Event Manager -----------
+			
+			
+			//-----------Local Vars -----------
+[Bindable]	private var _vendedores:ArrayCollection = new ArrayCollection();	
+[Bindable]	private var _productos:ArrayCollection = new ArrayCollection();		
+			private var _selectedId:Number 			= 0;
+			private var _selectedName:String 		= "";
+			private var _serviceName  				= "Ventas";
+			private var _mainId  					= "_idVenta";
+			private var _mainFocusField:String      = "_idCliente";
+[Bindable]	private var _esVendedor:Boolean			= false;
+			
+			private var _idEmpleado:Number = 0;			
+			//-----------Local Vars -----------
+			
+//---------------------------- Context ---------------------------------------------            
+
+   			public function set context(contextObj:Object):void{
+				for( var p:String in contextObj){
+					if(this.hasOwnProperty(p)){
+						this[p] = contextObj[p];
+					}
+				}
+				initView();
+			}
+
+			public function set workManager(value:Object):void{
+				_workManager = value;
+			}
+
+			public function set selectionMode(value:Boolean):void{
+				_selectionMode = value;
+			}
+			
+			public function set multipleSelection(value:Boolean):void{
+				_multipleSelection = value;
+			}
+
+			public function set webApplication(value:WebApplication):void{
+				_webApplication = value;
+				
+			}
+			public function get webApplication():WebApplication{ return _webApplication; } 
+			
+			public function set cliente(value:ClientData):void{
+				_cliente = value;
+			}
+			
+			public function set idEmpleado(value:Number):void{
+				_idEmpleado = value;
+			}
+			
+						
+//---------------------------- Context ---------------------------------------------  
+
+//-------------------------------- MainInit --------------------------------------
+			// ------------------- View Extra Data -------------------------------
+			
+			private function get viewContext():Object{				
+				_cliente.ventaData	    = _dataList.selectedItem;
+				return {webApplication: _webApplication,
+						workManager: this,
+						relationIdValue: _cliente.idCliente,
+						idCliente: _cliente.idCliente,
+						nombreCliente:	_cliente.nombre,
+						numeroCliente:	_cliente.numeroCliente,
+						cliente:_cliente,						
+						selectmode:true
+						}						
+			}
+
+			private function addValidations():void{
+				Valid.changeLanguage(Languages.SPANISH);
+				
+
+				var validFields:ArrayCollection = Valid.validFields;
+				for(var n:Number = 0;n<validFields.length;n++){					
+					this[validFields[n].obj.name].addEventListener(Event.CHANGE,onFocusOut);
+				}
+				Valid.setErrorKnot(Validator.CIRCLE_KNOT,0xFF0000);
+			}
+
+			private function onFocusOut(e:Event):void{
+				if(_newData||_updateData) Valid.validateAll();//Valid.validateOne(e.currentTarget.name);
+			}
+			
+			private function extraCreateData(params:Object):Object{
+				var prods:Array = new Array();
+				for(var n:Number = 0;n<_DataResult.length;n++){
+					var data:Object = _DataResult[n];
+					data["_fechaVencimiento"] = Converter.dateToSQL(Converter.addDays(new Date(),356*Number(_DataResult[n]._vencimiento)));
+					data["_codigoPrograma"]   = Converter.findLabel(SystemGlobals.PROGRAMAS,"_idPrograma","_codigo",_DataResult[n]._idPrograma);
+					prods.push(data);
+				}
+				params["info"] = prods;
+				return params;
+			}
+			
+			private function createRecordExtras():void{
+				//_image = "defaultNew.jpg";
+				/*_day.selectedIndex 	= 0;
+				_month.selectedIndex 	= 0;
+				_year.selectedIndex 	= 0;*/
+			}
+			
+			private function extraUpdateData(params:Object):Object{	
+				//params['_fechaNacimiento'] = _year.selectedItem.label+'-'+_month.selectedItem.value+'-'+_day.selectedItem.value;			
+				return params;
+			}
+			
+			private function loadExtraFields(params:Object):void{
+				//_image = params["_newsImage"];
+				/*
+				if(tempDate){
+					var temp:Array 		 = tempDate.split('-');
+					_day.selectedIndex 	 = parseInt(temp[2]);
+					_month.selectedIndex = parseInt(temp[1]);
+					_year.selectedIndex  = ConstantData.FindYearindex(temp[0]);
+				}else{
+					_day.selectedIndex 		= 0;
+					_month.selectedIndex 	= 0;
+					_year.selectedIndex 	= 0;
+				}*/
+			}
+			
+			private function forceImports():void{
+				Catalogs;
+			}
+			
+			private function updateView():void{
+				_vendedor.enabled = !_esVendedor;
+				_idPeriodo.enabled = !_esVendedor;
+			}
+			
+			public function initView():void{
+				forceImports();
+				_MainService = _webApplication.getService(_serviceName);
+				_Data.exceptions = ["_idVenta"];
+				_MainService.addEventListener(FaultEvent.FAULT,onFault);
+				//initData();
+				addValidations();
+				//loadScroll();
+				
+				if(_webApplication.user.accessType==2||_webApplication.user.accessType==3||_webApplication.user.accessType==4){
+					_SaleService = _webApplication.getService("Clientes");
+					Valid.addComboVal(_vendedor,"Vendedor");
+					_esVendedor = false;
+					_SaleService.getSellers(15);
+					_SaleService.addEventListener(FaultEvent.FAULT,onFault);
+					_SaleService.getSellers.addEventListener(ResultEvent.RESULT,onSalesReady);
+				}else{
+					_vendedores.addItem({_idEmpleado:_webApplication.user.idEmpleado,_nombre:_webApplication.user.fullName});
+					_esVendedor = true;
+				}	
+				_fechaVenta.selectedDate = new Date()
+				updateProduct();			
+			}
+			
+			private function onSalesReady(e:ResultEvent):void{
+				_SaleService.getSellers.removeEventListener(ResultEvent.RESULT,onSalesReady);
+				_vendedores = new ArrayCollection();
+				_vendedores.addItem({_idEmpleado:"00",_nombre:"Seleccionar"});
+				var _sallers:ArrayCollection = Converter.arrayConverter(e.result);
+				for(var n:Number = 0;n<_sallers.length;n++){
+					_vendedores.addItem({_idEmpleado:_sallers[n]._idEmpleado,_nombre:_sallers[n]._nombre+" "+_sallers[n]._paterno+" "+_sallers[n]._materno});
+				}
+				_vendedor.selectedIndex = Converter.findIndex(_vendedores,"_idEmpleado",_idEmpleado);
+			}
+			
+			public function imageUploadReady(data:Object):void{
+				
+			}
+
+			// ------------------- View Extra Data -------------------------------
+
+			private function loadScroll():void{
+				_dataList.visible = false;
+				for(var n:Number = 0;n<100;n++){
+					_DataResult.addItem({i:0});
+				}
+			}
+
+			private function initData():void{
+				_MainService.getFields();
+				_MainService.getFields.addEventListener(ResultEvent.RESULT,onGetFieldsResult);
+				_dataReady = false;
+			}
+			
+			public function closeWindow():void{
+					Alert.show("Cerrar Ventana?\nSe Perderán todos los productos capturados","Atención",Alert.YES|Alert.NO,this,closeConfirm);
+            }
+            
+            public function closeConfirm(e:CloseEvent):void{
+            	if(e.detail==Alert.YES){
+            		if(_selectionMode&&_dataList.selectedIndex!=-1) StaticEvent.dispatchEvent(new SelectionEvent(SelectionEvent.SELECTION_COMPLETE,_dataList.selectedItems));
+            		dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
+            		PopUpManager.removePopUp(this);
+            	}
+            }
+            
+//-------------------------------- MainInit --------------------------------------
+			
+			private function newData():void{
+				_Data.clear();
+				_newData = true;
+				_updateData = false;				
+				this[_mainFocusField].setFocus();
+				createRecordExtras();
+				Valid.validateAll();
+			}
+			
+			private function createData():void{
+				//openPaymentsSelectionl();
+				if(_DataResult.length!=0){					
+					var params:Object = extraCreateData(new Object());
+					params["_idCliente"] = _cliente.idCliente;
+					params["_idSucursal"] = _webApplication.user.idSucursal;
+					params["_idCompania"] = _webApplication.user.idCompania;
+					params["_idEmpleado"] = _vendedor.selectedItem._idEmpleado;
+					_MainService.addProducts(params);
+					_MainService.addProducts.addEventListener(ResultEvent.RESULT,onCreateComplete);
+				}else{
+					Alert.show("No existen productos a agregar","Error");
+				}
+			}
+
+			private function updateData():void{
+				if(Valid.validateAll()){
+					_dataReady = false;
+					var params:Object = extraUpdateData(_Data.makeData());
+					params[_mainId] = _dataList.selectedItem[_mainId];
+					_MainService.updateRecord(params);
+					_MainService.updateRecord.addEventListener(ResultEvent.RESULT,onUpdateComplete);
+					_dataIndex =_dataList.selectedIndex;
+				}else{
+					Alert.show(Valid.errors,"Error");
+				}
+			}
+			
+			private function deleteDataAlert():void{
+				if(_dataList.selectedIndex!=-1){
+					Alert.show("Desea borrar el registro seleccionado?","Atenci�n",Alert.YES|Alert.CANCEL,this,deleteData);
+				}else{
+					Alert.show("No hay registro selecionado","Error");
+				}
+			}
+			
+			private function deleteData(e:CloseEvent):void{
+				if(e.detail==Alert.YES){
+					var params:Object = new Object();
+					params[_mainId] = _dataList.selectedItem[_mainId];
+					_MainService.deleteRecord(params);
+					_MainService.deleteRecord.addEventListener(ResultEvent.RESULT,onDeleteComplete);
+					_dataReady = false;
+				}
+			}
+			
+			private function cancel():void{
+				onDataSelect();
+				resetBooleans();
+				Valid.validateAll();
+			}
+			
+			private function resetBooleans():void{
+				_newData = false;
+				_updateData = false;
+			}
+
+			private function dataChange():void{
+				_updateData = true;
+				updateProductData();
+			}
+
+			private function openImageEditor():void{
+				if(_dataList.selectedIndex!=-1){
+					//_newsIdNumber 	= new Number(_dataList.selectedItem._blogId);
+					openPopUp("managers.ImageManager")
+				}else{
+					Alert.show("No hay registro selecionado","Error");
+				}
+			}
+//-------------------------------- ResultsEvents --------------------------------------		
+			
+			private function onGetFieldsResult(e:ResultEvent):void{
+				_MainService.getFields.removeEventListener(ResultEvent.RESULT,onGetFieldsResult);
+				if(e){
+					if(e.result) {
+						_Data.createFields(Converter.arrayConverter(e.result));
+						getData();
+					}
+				}else{
+					Alert.show("Error al cargar los datos","Error");
+					_dataReady = false;
+				}
+				_DataResult= new ArrayCollection();
+				_dataList.visible = true;
+				
+			}
+			
+			private function getData():void{
+				_MainService.getRecords();
+				_MainService.getRecords.addEventListener(ResultEvent.RESULT,onGetDataResult);
+			}
+			
+			private function onGetDataResult(e:ResultEvent):void{
+				_MainService.getRecords.removeEventListener(ResultEvent.RESULT,onGetDataResult);
+				_DataResult = Converter.arrayConverter(e.result);
+				if(_DataResult.length==0) {
+					Alert.show("No hay registros en la base de datos","Atenci�n")
+				}else{
+					if(_dataIndex<0) _dataIndex = 0;
+					_Data.loadData(_DataResult[_dataIndex]);
+					_dataList.selectedIndex = _dataIndex;
+					_dataList.scrollToIndex(_dataList.selectedIndex);
+					loadExtraFields(_DataResult[_dataIndex]);
+				}
+				_dataReady = true;
+				resetBooleans();
+			}
+			
+			private function onFault(e:FaultEvent):void{
+				Alert.show(e.fault.faultString,"Error");
+			}
+
+			private function onDataSelect():void{
+				if(_dataList.selectedIndex!=-1) {
+					_Data.loadData(_dataList.selectedItem);
+					_dataIndex =_dataList.selectedIndex;
+					loadExtraFields(_dataList.selectedItem);
+					_selectedId = _dataList.selectedItem[_mainId];
+				}
+			}
+			
+			private function onCreateComplete(e:ResultEvent):void{				
+				_MainService.addProducts.removeEventListener(ResultEvent.RESULT,onCreateComplete);
+				Alert.show("Productos Agregados con éxito","Atención");
+				openPaymentsSelectionl();				
+			}
+			
+			private function onUpdateComplete(e:ResultEvent):void{
+				_MainService.updateRecord.removeEventListener(ResultEvent.RESULT,onUpdateComplete);
+				getData();
+			}
+			
+			private function onDeleteComplete(e:ResultEvent):void{
+				_MainService.deleteRecord.removeEventListener(ResultEvent.RESULT,onDeleteComplete);
+				_dataIndex = _DataResult.length-2;
+				getData();
+			}
+			
+//-------------------------------- ResultsEvents --------------------------------------	
+
+//-------------------------------- POP UP WINDOW --------------------------------------	
+			public function openPopUp(popUpName:String,modal:Boolean=false):void{
+				var pop:TitleWindow = PopUpManager.createPopUp(this, getDefinitionByName("views."+popUpName) as Class, modal) as TitleWindow;
+				pop.name = popUpName;
+				pop.addEventListener(CloseEvent.CLOSE, closePopup);
+				if(pop.hasOwnProperty("context")){
+					Object(pop).context = viewContext;
+				}
+				PopUpManager.centerPopUp(pop);
+			}
+			
+			private function closePopup(e:CloseEvent):void{			
+	            		PopUpManager.removePopUp(e.target as TitleWindow);
+			}
+//-------------------------------- POP UP WINDOW --------------------------------------
+
+//-------------------------------- Search Engine --------------------------------------
+
+		
+//-------------------------------- Search Engine --------------------------------------					
+			
+			private function updateProduct():void{
+				_productos = new ArrayCollection();
+				_productos = Converter.filterArray(SystemGlobals.PRODUCTOS,"_idPrograma",_idPrograma.selectedItem._idPrograma);
+				if(_productos.length>0){					
+					_product.enabled = true;
+					_addBt.enabled = true;
+					updateProductData();
+				}else{
+					_product.enabled = false;
+					_fechaVencimiento.text = "";
+					_vigencia.text = "";
+					_idPeriodo.selectedIndex = 0;
+					_costo.text = "0.00";
+					_addBt.enabled = false
+				}
+			}
+			
+			private function updateProductData():void{
+				if(_product.selectedItem){
+					_idPeriodo.selectedIndex 	= Converter.findIndex(ConstantData.LongPeriods,"value",_product.selectedItem._idPeriodo);
+					_costo.text 				= _product.selectedItem._costo;
+					_vigencia.text 				= _product.selectedItem._vencimiento;
+					_descripcion.text			= _product.selectedItem._descripcion;
+					//_idPeriodo.enabled = false;
+	
+					var days:Number = 0;
+					switch(_idPeriodo.selectedIndex){
+						case 0:
+							days = 0;
+							break;
+						case 1:
+							days = Number(_product.selectedItem._vencimiento);
+							break;
+						case 2:
+							days = Math.floor(Number(_product.selectedItem._vencimiento)*30.5);
+							break;
+						case 3:
+							days = Number(_product.selectedItem._vencimiento)*365;
+							break;
+					}				
+					_fechaVencimiento.text = Converter.dateToView(Converter.addDays(_fechaVenta.selectedDate,days));
+				}
+			}
+			
+			private function addProduct():void{				
+				_DataResult.addItem(_product.selectedItem);
+			}
+			
+			private function deleteProduct():void{
+				if(_dataList.selectedIndex!=-1){
+					_DataResult.removeItemAt(_dataList.selectedIndex);
+				}else{
+					Alert.show("No hay registro seleccionado","Error");
+				}
+			}
+			
+			private function openPaymentsSelectionl():void{							
+				openPopUp("clientes.Clientes_Ventas_Detalle",true);
+				if(_selectionMode&&_dataList.selectedIndex!=-1) StaticEvent.dispatchEvent(new SelectionEvent(SelectionEvent.SELECTION_COMPLETE,_dataList.selectedItems));
+        		dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
+        		PopUpManager.removePopUp(this);					
+			}
+			
+			
+		]]>
+	</mx:Script>
+<mx:Label x="73" y="193" text="Fecha :" textAlign="right"/>
+<mx:DateField  x="126" y="191" id="_fechaVenta" formatString="DD/MM/YYYY" change="dataChange();" width="110" showToday="true" enabled="{!_dataReady}"/>
+<mx:Label x="59" y="146" text="Vigencia :" textAlign="right"/>
+<mx:TextInput x="127" y="144" id="_vigencia" change="dataChange();" width="38" editable="false" enabled="{!_dataReady}"/>
+<mx:Label x="73" y="334" text="Costo :" textAlign="right"/>
+<mx:TextInput x="127" y="332" id="_costo" change="dataChange();" width="160" editable="false"/>
+	<mx:TextInput x="311" y="191" id="_fechaVencimiento" change="dataChange();" width="94" editable="false" enabled="{!_dataReady}"/>
+
+	<mx:DataGrid height="199" dataProvider="{_DataResult}" id="_dataList" allowMultipleSelection="{_multipleSelection}" y="362" width="435" x="127" enabled="true">
+		<mx:columns>						
+			<mx:DataGridColumn headerText="Programa" dataField="_idPrograma"/>
+			<mx:DataGridColumn headerText="Producto" dataField="_nombre"/>
+			<mx:DataGridColumn headerText="Costo" dataField="_costo"/>
+		</mx:columns>
+	</mx:DataGrid>
+	<mx:Button label="Cancelar" click="closeWindow();" width="145"  enabled="{!_newData}" y="569" x="417"/>
+	<mx:TextInput x="196" y="27" width="364" text="{_cliente.nombre}" />
+	<mx:TextInput x="125" y="27" width="63" text="{_cliente.idCliente}"  />
+	<mx:Label x="66" y="29" text="Cliente :"/>
+	<mx:Label y="10" text="nombre"  fontSize="9" color="#CECECE" fontStyle="italic" x="196"/>
+	<mx:Label y="10" text="id"  fontSize="9" color="#CECECE" fontStyle="italic" x="125"/>
+	<mx:Label y="174" text="venta"  fontSize="9" color="#CECECE" fontStyle="italic" x="126" width="48"/>
+	<mx:Label y="174" text="vencimiento"  fontSize="9" color="#CECECE" fontStyle="italic" x="311" width="73"/>
+	<mx:ComboBox y="111" id="_product" width="147" labelField="_nombre" dataProvider="{_productos}" x="413" change="updateProductData()"/>
+	<mx:Label y="94" text="producto"  fontSize="9" color="#CECECE" fontStyle="italic" x="413"/>
+	<mx:Label y="94" text="nombre"  fontSize="9" color="#CECECE" fontStyle="italic" x="125"/>
+	<mx:ComboBox  x="125" y="111" id="_idPrograma" width="280" dataProvider="{SystemGlobals.PROGRAMAS}" labelField="_nombre"  change="updateProduct()"/>
+	<mx:Label x="51" y="113" text="Programa :" />
+	<mx:Label x="52" y="57" text="Vendedor :" />
+	<mx:ComboBox  x="124" y="55" id="_vendedor" change="dataChange();" width="436" dataProvider="{_vendedores}" labelField="_nombre" tabIndex="19" enabled="true"/>
+	<mx:Button x="311" y="331" label="Agregar Producto" click="addProduct();" id="_addBt" enabled="{!_dataReady}"/>
+	<mx:Button x="440" y="331" label="Eliminar Producto" id="_deleteBt" enabled="{!_dataReady}" click="deleteProduct()"/>
+	<mx:ComboBox x="173" y="144" width="114" id="_idPeriodo" dataProvider="{ConstantData.LongPeriods}" labelField="label" change="dataChange();"></mx:ComboBox>
+	<mx:HRule x="10" y="83" width="559" height="3"/>
+	<mx:Label x="43" y="224" text="Descripcion :" textAlign="right"/>
+	<mx:TextArea x="127" y="224" id="_descripcion" change="dataChange();" width="433" height="99" enabled="{!_dataReady}"/>
+	<mx:Button x="127" y="570" label="Generar Ventas" width="160" click="createData()" enabled="{!_dataReady}"/>
+	
+</mx:TitleWindow>

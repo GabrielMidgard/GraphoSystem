@@ -1,0 +1,605 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   width="978" height="724" skinClass="skins.Custom_TileWindow_Skin"
+			   title="Administración de Puestos">
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.managers.PopUpManager;
+			import mx.random.constants.Catalogs;
+			import mx.random.constants.Languages;
+			import mx.random.constants.SystemGlobals;
+			import mx.random.converters.Converter;
+			import mx.random.dataManagers.DataManager;
+			import mx.random.dataManagers.EventManager;
+			import mx.random.events.SelectionEvent;
+			import mx.random.events.StaticEvent;
+			import mx.random.forms.Validator;
+			import mx.random.web.WebApplication;
+			import mx.random.windowManagers.PopManager;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.remoting.RemoteObject;
+			
+			private var _webApplication:WebApplication;
+			private var Valid:Validator 				= new Validator();
+			private var _workManager:Object 			= new Object();
+			private var _MainService:RemoteObject 		= new RemoteObject();
+			[Bindable]	private var _Data:DataManager 	= new DataManager(this);
+			[Bindable]	private var _DataResult:ArrayCollection 		= new ArrayCollection();			
+			private var _eventManager:EventManager 		= new EventManager(this);
+			private var _dataIndex:Number 				= 0;
+			
+			
+			
+			//-----------Event Manager -----------
+			
+			[Bindable]	public var _dataReady:Boolean 			= false;
+			[Bindable]	public var _newData:Boolean 			= false;
+			[Bindable]	public var _updateData:Boolean 			= false;
+			[Bindable]	public var _selectMode:Boolean 			= false;
+			//-----------Event Manager -----------
+			
+			
+			//-----------Local Vars -----------
+			
+			private var _selectedId:Number = 0;
+			private var _selectedName:String = "";
+			private var _serviceName  		= "Puestos";
+			private var _mainId  			= "_idPuesto";
+			private var _mainFocusField:String      = "_nombre";
+			[Bindable]	private var _deptos:ArrayCollection;
+			[Bindable]	private var _areas:ArrayCollection;
+			private var _selectionMode:Boolean = false;
+			private var _idPuestoSuperior:Number =0 ;
+			private var _puestoSeleccionado:Number = 0;
+			private var _completeData:ArrayCollection = new ArrayCollection();
+			private var _extraData:Object;
+			//-----------Local Vars -----------
+			
+			//---------------------------- Context ---------------------------------------------            
+			
+			public function set context(contextObj:Object):void{
+				for( var p:String in contextObj){
+					if(this.hasOwnProperty(p)){
+						this[p] = contextObj[p];
+					}
+				}
+				initView();
+			}
+			
+			public function set dataObject(value:Object):void{
+				_puestoSeleccionado = Number(value._idPuesto);
+			}
+			
+			public function set workManager(value:Object):void{
+				_workManager = value;
+			}
+			
+			public function set selectionMode(value:Boolean):void{
+				_selectionMode = value;
+				_backBT.label = "Seleccionar";
+			}
+			
+			public function set webApplication(value:WebApplication):void{
+				_webApplication = value;				
+			}
+			public function get webApplication():WebApplication{ return _webApplication; } 
+			
+			//---------------------------- Context ---------------------------------------------  
+			
+			//-------------------------------- MainInit --------------------------------------
+			// ------------------- View Extra Data -------------------------------
+			
+			private function get viewContext():Object{
+				
+				return {selectionMode:	_selectMode,
+					webApplication: _webApplication,
+					dataObject: _dataList.selectedItem,
+						relationIdValue:_dataList.selectedItem._idPuesto,
+						workManager: this
+				}					
+			}
+			
+			private function addValidations():void{
+				Valid.changeLanguage(Languages.SPANISH);
+				Valid.setErrorKnot(Validator.CIRCLE_KNOT,0xFF0000);
+				Valid.validateOnChange = true;
+				//----------- Validaciones ---------------------------
+				
+				Valid.addStringVal(_nombre,3,100,"Nombre");
+				
+				//----------- Validaciones ---------------------------
+				
+				
+			}
+			
+			
+			
+			private function extraCreateData(params:Object):Object{
+				params["_idPuestoSuperior"] = _idPuestoSuperior;				
+				return params;
+			}
+			
+			private function createRecordExtras():void{
+				_idPuestoSuperior = 0;
+				_puestoInmediato.text = ""
+			}
+			
+			private function extraUpdateData(params:Object):Object{	
+				params["_idPuestoSuperior"] = _idPuestoSuperior;			
+				return params;
+			}
+			
+			private function loadExtraFields(params:Object):void{
+				_deptos.filterFunction=deptosFilter;
+				_deptos.refresh();
+				_idDepartamento.selectedIndex = findIndex(_dataList.selectedItem._idDepartamento);				
+				_idPuestoSuperior = params["_idPuestoSuperior"];
+				var idpuesto:Number = findIndexPuesto(_idPuestoSuperior);
+				if(idpuesto!=-1){
+					_puestoInmediato.text = _DataResult[idpuesto]._nombre;
+				}else{
+					_puestoInmediato.text = "";
+				}
+				_MainService.getExtraData(_dataList.selectedItem._idPuesto);
+				_MainService.getExtraData.addEventListener(ResultEvent.RESULT,onExtraDataReady);
+			}
+			
+			private function onExtraDataReady(e:ResultEvent):void{
+				_MainService.getExtraData.removeEventListener(ResultEvent.RESULT,onExtraDataReady);
+				if(e.result){
+					var data:Object = e.result as Object;
+					_extraData = data;					
+					for( var prop:String in data){
+						if(this.hasOwnProperty(prop)){
+							this[prop].selected = Converter.bool(data[prop]);
+						}
+					}
+				}
+				_dataReady = true;
+			}
+			
+			
+			
+			
+			private function findIndex(value:Number):Number{
+				var res:Number = -1;
+				for(var n:Number = 0;n<_deptos.length;n++){
+					if(_deptos[n]._idDepartamento==value) res = n;
+				}
+				return res;
+			}
+			
+			
+			
+			private function findIndexPuesto(value:Number):Number{
+				var res:Number = -1;
+				for(var n:Number = 0;n<_completeData.length;n++){
+					if(_completeData[n]._idPuesto==value) res = n;
+				}
+				return res;
+			}
+			
+			private function forceImports():void{
+				Empresa_Cecos;
+				Empresa_Categorias;
+				Empresa_Areas;
+				Empresa_Departamentos;
+				Empresa_Companias;
+				Empresa_Sucursales;
+				Empresa_Puesto_Inmediato;
+			}
+			
+			public function initView():void{	
+				_areas = SystemGlobals.AREAS;
+				_deptos = SystemGlobals.DEPARTAMENTOS;						
+				_MainService = _webApplication.getService(_serviceName);
+				_Data.exceptions = ["_idPuesto","_idPuestoSuperior"];
+				_MainService.addEventListener(FaultEvent.FAULT,onFault);
+				forceImports();
+				initData();
+				addValidations();				
+				_searchType.selectedIndex = 1;
+			}
+			
+			public function imageUploadReady(data:Object):void{
+				
+			}
+			
+			// ------------------- View Extra Data -------------------------------
+		
+			
+			private function initData():void{
+				_MainService.getFields();
+				_MainService.getFields.addEventListener(ResultEvent.RESULT,onGetFieldsResult);
+				_dataReady = false;
+			}
+			
+			public function closeWindow():void{
+				if(_selectionMode&&_dataList.selectedIndex!=-1) StaticEvent.dispatchEvent(new SelectionEvent(SelectionEvent.SELECTION_COMPLETE,_dataList.selectedItem));
+				dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
+				PopUpManager.removePopUp(this);
+			}
+			
+			//-------------------------------- MainInit --------------------------------------
+			
+			private function newData():void{
+				_Data.clear();
+				_newData = true;
+				_updateData = false;
+				Valid.validateAll();
+				this[_mainFocusField].setFocus();
+				createRecordExtras();
+			}
+			
+			private function createData():void{
+				if(Valid.validateAll()){
+					_dataReady = false;
+					var params:Object = extraCreateData(_Data.makeData());
+					_MainService.createRecord(params);
+					_MainService.createRecord.addEventListener(ResultEvent.RESULT,onCreateComplete);
+				}else{
+					Alert.show(Valid.errors,"Error");
+				}
+			}
+			
+			private function updateData():void{
+				if(Valid.validateAll()){
+					_dataReady = false;
+					var params:Object = extraUpdateData(_Data.makeData());
+					params[_mainId] = _dataList.selectedItem[_mainId];
+					_MainService.updateRecord(params);
+					_MainService.updateRecord.addEventListener(ResultEvent.RESULT,onUpdateComplete);
+					_dataIndex =_dataList.selectedIndex;
+				}else{
+					Alert.show(Valid.errors,"Error");
+				}
+			}
+			
+			private function deleteDataAlert():void{
+				if(_dataList.selectedIndex!=-1){
+					Alert.show("Desea borrar el registro seleccionado?","Atención",Alert.YES|Alert.CANCEL,this,deleteData);
+				}else{
+					Alert.show("No hay registro selecionado","Error");
+				}
+			}
+			
+			private function deleteData(e:CloseEvent):void{
+				if(e.detail==Alert.YES){
+					var params:Object = new Object();
+					params[_mainId] = _dataList.selectedItem[_mainId];
+					_MainService.deleteRecord(params);
+					_MainService.deleteRecord.addEventListener(ResultEvent.RESULT,onDeleteComplete);
+					_dataReady = false;
+				}
+			}
+			
+			private function cancel():void{
+				onDataSelect();
+				resetBooleans();
+				Valid.validateAll();
+			}
+			
+			private function resetBooleans():void{
+				_newData = false;
+				_updateData = false;
+			}
+			
+			private function dataChange():void{				
+				_updateData = true;
+			}
+			
+			private function openImageEditor():void{
+				if(_dataList.selectedIndex!=-1){
+					//_newsIdNumber 	= new Number(_dataList.selectedItem._blogId);
+					openPopUp("managers.ImageManager")
+				}else{
+					Alert.show("No hay registro selecionado","Error");
+				}
+			}
+			
+			
+			//-------------------------------- ResultsEvents --------------------------------------		
+			
+			private function onGetFieldsResult(e:ResultEvent):void{
+				_MainService.getFields.removeEventListener(ResultEvent.RESULT,onGetFieldsResult);
+				if(e){
+					if(e.result) {
+						_Data.createFields(Converter.arrayConverter(e.result));
+						getData();
+					}
+				}else{
+					Alert.show("Error al cargar los datos","Error");
+					_dataReady = false;
+				}
+				_DataResult= new ArrayCollection();
+				_dataList.visible = true;
+				
+			}
+			
+			private function getData():void{
+				_MainService.getRecords();
+				_MainService.getRecords.addEventListener(ResultEvent.RESULT,onGetDataResult);
+			}
+			
+			private function onGetDataResult(e:ResultEvent):void{
+				_MainService.getRecords.removeEventListener(ResultEvent.RESULT,onGetDataResult);
+				_DataResult = Converter.arrayConverter(e.result);
+				_completeData = Converter.arrayConverter(e.result);
+				if(_DataResult.length==0) {
+					Alert.show("No hay registros en la base de datos","Atención")
+				}else{
+					if(_selectionMode){
+						_dataIndex = findPuestoIndex(_completeData);
+					}
+					if(_dataIndex<0) _dataIndex = 0;
+					_Data.loadData(_DataResult[_dataIndex]);					
+					
+					_dataList.selectedIndex = _dataIndex;
+					_dataList.setSelectedIndex(_dataList.selectedIndex);
+					loadExtraFields(_DataResult[_dataIndex]);
+				}
+				_dataReady = true;
+				resetBooleans();
+			}
+			
+			
+			private function findPuestoIndex(puestos:ArrayCollection):Number{
+				var found:Boolean = false;
+				for(var n:Number = 0;n<puestos.length;n++){
+					if(puestos[n]._idPuesto==_puestoSeleccionado){
+						found = true;
+						break;
+					}
+				}
+				if(found){
+					return n;
+				}else{
+					return 0;
+				}
+				
+			}
+			
+			private function onFault(e:FaultEvent):void{
+				Alert.show(e.fault.faultString,"Error");
+			}
+			
+			private function onDataSelect():void{
+				if(_dataList.selectedIndex!=-1) {					
+					_Data.loadData(_dataList.selectedItem);
+					_dataIndex =_dataList.selectedIndex;
+					loadExtraFields(_dataList.selectedItem);
+					_selectedId = _dataList.selectedItem[_mainId];
+				}
+			}
+			
+			private function onCreateComplete(e:ResultEvent):void{				
+				_MainService.createRecord.removeEventListener(ResultEvent.RESULT,onCreateComplete);
+				_dataIndex = _DataResult.length;
+				getData();
+			}
+			
+			private function onUpdateComplete(e:ResultEvent):void{
+				_MainService.updateRecord.removeEventListener(ResultEvent.RESULT,onUpdateComplete);
+				getData();
+			}
+			
+			private function onDeleteComplete(e:ResultEvent):void{
+				_MainService.deleteRecord.removeEventListener(ResultEvent.RESULT,onDeleteComplete);
+				_dataIndex = _DataResult.length-2;
+				getData();
+			}
+			
+			//-------------------------------- ResultsEvents --------------------------------------	
+			
+			//-------------------------------- POP UP WINDOW --------------------------------------	
+			public function openPopUp(popUpName:String,modal:Boolean = true):void{
+				var pop:TitleWindow = PopUpManager.createPopUp(this, getDefinitionByName("views."+popUpName) as Class, modal) as TitleWindow;
+				pop.name = popUpName;
+				pop.addEventListener(CloseEvent.CLOSE, closePopup);
+				if(pop.hasOwnProperty("context")){
+					Object(pop).context = viewContext;
+				}
+				PopUpManager.centerPopUp(pop);
+			}
+			
+			private function closePopup(e:CloseEvent):void{
+				PopUpManager.removePopUp(e.target as TitleWindow);
+			}
+			//-------------------------------- POP UP WINDOW --------------------------------------
+			
+			//-------------------------------- Search Engine --------------------------------------
+			
+			private function searchFilter():void{
+				_DataResult.filterFunction = vlidateSearch;
+				_DataResult.refresh();
+			}
+			
+			private function vlidateSearch(item:Object):Boolean{
+				var isMatch:Boolean = false;           
+				if(item[_searchType.selectedItem.value].toLowerCase().search(_searchFilter.toLowerCase()) != -1){
+					isMatch = true
+				}              
+				return isMatch;              
+			}
+			
+			private function search():void{
+				_searchFilter = _searchField.text;
+				searchFilter();
+			}
+			private var _searchFilter:String 			= new String();
+			[Bindable]	private var _searchTypes:ArrayCollection 	= new ArrayCollection([{label:"Id",     	value:"_idPuesto"},{label:"Puesto",     	value:"_nombre"}]);
+			
+			private function  selectPuesto():void{
+				StaticEvent.addEventListener(SelectionEvent.SELECTION_COMPLETE,onPuestoSelect);
+				_selectMode = true;				
+				openPopUp("empresa.Empresa_Puesto_Inmediato");				
+			}
+			
+			private function onPuestoSelect(e:SelectionEvent):void{
+				StaticEvent.removeEventListener(SelectionEvent.SELECTION_COMPLETE,onPuestoSelect);
+				_idPuestoSuperior = e.itemData['_idPuesto'];	
+				_puestoInmediato.text = _completeData[findIndexPuesto(_idPuestoSuperior)]._nombre;
+				dataChange();
+			}
+			//-------------------------------- Search Engine --------------------------------------					
+			
+					
+			private function companiaChange():void{
+				_areas.filterFunction=areaFilter;
+				_areas.refresh();
+				_idArea.selectedIndex = 0;
+				areaChange()
+			}      
+			
+			public function areaFilter(item:Object):Boolean{
+				var result:Boolean=false;    
+				if (!item._idCompania.length|| item._idCompania==_idCompania.selectedItem._idCompania) result=true;      
+				return result;
+			}
+			
+			private function areaChange():void{
+				_deptos.filterFunction=deptosFilter;
+				_deptos.refresh();
+				_idDepartamento.selectedIndex = 0;
+			}      
+			
+			public function deptosFilter(item:Object):Boolean{
+				var result:Boolean=false;    
+				if (!item._idArea.length|| item._idArea==_idArea.selectedItem._idArea) result=true;      
+				return result;
+			}
+			//----
+			private function functionArea(item:Object,dg:GridColumn):String{
+				var index:Number = findComboIndex(item[dg.dataField],dg.dataField,SystemGlobals.AREAS);
+				var res:String = "";
+				if(index!=-1) res = SystemGlobals.AREAS[index]._nombre;
+				return res;
+			}
+			
+			
+			// ------------------ Cambiar a Converter.FindIndex Funvtionv
+			private function functionDepto(item:Object,dg:GridColumn):String{
+				var index:Number = findComboIndex(item[dg.dataField],dg.dataField,SystemGlobals.DEPARTAMENTOS);
+				var res:String = "";// ------------------ Cambiar a Converter.FindIndex Funvtion
+				if(index!=-1) res = SystemGlobals.DEPARTAMENTOS[index]._nombre;
+				return res;
+			}
+			// ------------------ Cambiar a Converter.FindIndex Funvtion
+			
+			
+			private function findComboIndex(value:Number,prop:String,catalog:Object):Number{
+				var res:Number = -1;
+				for(var n:Number = 0;n<catalog.length;n++){
+					if(catalog[n][prop]== value ) res = n;
+				}
+				return res;
+			}
+			
+			
+			
+		]]>
+	</fx:Script>
+	
+	<s:Label x="433" y="248" text="Jefe Inmediato :" />
+	<s:TextInput x="527" y="244" id="_puestoInmediato" change="dataChange();" width="401" editable="false" tabIndex="4"/>
+	<s:Label x="407" y="17" text="Nombre del Puesto :" />
+	<s:TextInput x="527" y="10" id="_nombre" change="dataChange();" width="439" tabIndex="1"/>
+	
+	<s:DataGrid height="309" dataProvider="{_DataResult}" id="_dataList" selectionChange="onDataSelect();" enabled="{_dataReady&amp;&amp;!_newData&amp;&amp;!_updateData}" width="956" x="10" y="324" tabIndex="7">
+		<s:columns>	
+			<s:ArrayList>						
+				<s:GridColumn headerText="Id" dataField="_idPuesto" width="40"/>
+				<s:GridColumn headerText="Puesto" dataField="_nombre" width="280"/>
+				<s:GridColumn headerText="Depto." dataField="_idDepartamento" labelFunction="functionDepto"/>
+				<s:GridColumn headerText="Área" dataField="_idArea" labelFunction="functionArea" />
+			</s:ArrayList>
+		</s:columns>
+	</s:DataGrid>
+	<s:Button label="Nuevo" width="80" enabled="{_dataReady}" visible="{!_newData&amp;&amp;!_updateData}" click="newData();" x="10" y="641"/>
+	<s:Button label="Cancelar" width="80" enabled="{_dataReady}" visible="{_newData||_updateData}" click="cancel();" x="98" y="641"/>
+	<s:Button label="Aceptar" width="80" enabled="{_dataReady}" visible="{_newData}" click="createData();" x="10" y="641"/>
+	<s:Button label="Eliminar" width="80" enabled="{_dataReady&amp;&amp;!_newData}" visible="{!_newData&amp;&amp;!_updateData}" click="deleteDataAlert();" x="98" y="641"/>
+	<s:Button label="Actualizar" width="80" enabled="{_dataReady&amp;&amp;!_newData&amp;&amp;_updateData}" visible="{_updateData&amp;&amp;!_newData}" click="updateData();" x="10" y="641"/>
+	<s:Button label="Regresar" click="closeWindow();" width="164"  enabled="{!_newData}" x="801" y="642" id="_backBT"/>
+	
+	<s:ComboBox 	x="85" id="_searchType" 	dataProvider="{_searchTypes}" 	width="152" y="294" tabIndex="5"/>
+	<s:TextInput 	x="245" id="_searchField" 	change="search();" 		width="721" enabled="{!_newData}" y="294" tabIndex="6"/>
+	<s:Label x="10" text="Filtrar por :" textAlign="right" y="300"/>
+	<s:Button x="936" y="243" width="30" height="23" click="selectPuesto()"
+			  enabled="{!_selectionMode}" icon="@Embed(source='../assets/Icons/Buttons/Search.png')"
+			  skinClass="spark.skins.spark.ButtonSkin"/>
+	
+	<s:Label x="486" y="120" text="Area :" />
+	<s:ComboBox  x="527" y="113" id="_idArea" change="dataChange();areaChange();" width="401" dataProvider="{_areas}" labelField="_nombre" tabIndex="2"/>
+	<s:Button x="936" y="112" width="30" height="23" click="openPopUp('empresa.Empresa_Areas',true)"
+			  icon="@Embed(source='../assets/Icons/Buttons/Edit.png')"
+			  skinClass="spark.skins.spark.ButtonSkin"/>
+	<s:Label x="436" y="148" text="Departamento :" />
+	<s:ComboBox  x="527" y="142" id="_idDepartamento" change="dataChange();" width="401" dataProvider="{_deptos}" labelField="_nombre" tabIndex="3"/>
+	<s:Button x="936" y="141" width="30" height="23" click="openPopUp('empresa.Empresa_Departamentos',true)"
+			  icon="@Embed(source='../assets/Icons/Buttons/Edit.png')"
+			  skinClass="spark.skins.spark.ButtonSkin"/>
+	<s:Label x="477" y="189" text="CECO :" />
+	<s:ComboBox  x="527" y="182" id="_idCECO" change="dataChange();" width="401" dataProvider="{SystemGlobals.CECO}" labelField="_nombre" tabIndex="3"/>
+	<s:Button x="936" y="181" width="30" height="23" click="openPopUp('empresa.Empresa_Cecos',true)"
+			  icon="@Embed(source='../assets/Icons/Buttons/Edit.png')"
+			  skinClass="spark.skins.spark.ButtonSkin"/>
+	<s:Label x="459" y="220" text="Categoría :" />
+	<s:ComboBox  x="527" y="213" id="_idCategoria" change="dataChange();" width="401" dataProvider="{SystemGlobals.CATEGORIAS}" labelField="_nombre" tabIndex="3"/>
+	<s:Button x="936" y="212" width="30" height="23" click="openPopUp('empresa.Empresa_Categorias',true)"
+			  icon="@Embed(source='../assets/Icons/Buttons/Edit.png')"
+			  skinClass="spark.skins.spark.ButtonSkin"/>
+	<s:Label x="456" y="90" text="Compañía :" />
+	<s:ComboBox x="527" y="83" width="401" id="_idCompania" dataProvider="{SystemGlobals.COMPANIAS}" labelField="_nombre" change="dataChange();companiaChange()"></s:ComboBox>
+	<s:Button x="936" y="83" width="30" height="23" click="openPopUp('empresa.Empresa_Companias',true);"
+			  icon="@Embed(source='../assets/Icons/Buttons/Edit.png')"
+			  skinClass="spark.skins.spark.ButtonSkin"/>
+	<s:Label x="434" y="45" text="No. de Puesto :" />
+	<s:TextInput x="527" y="40" id="_idFortia" width="53"/>
+	<s:Button x="8" y="10" width="180" height="30" label="   Información del Puesto"
+			  click="openPopUp('Empresa.Empresa_Puestos_Informacion_General',true)"
+			  enabled="{_dataReady&amp;&amp;!_updateData}"/>
+	<s:Button x="8" y="86" width="180" height="30" label="   Idiomas"
+			  click="openPopUp('Empresa.Empresa_Puestos_Idiomas',true)"
+			  enabled="{_dataReady&amp;&amp;!_updateData}"/>
+	<s:Button x="8" y="124" width="180" height="30" label="   Escolaridad"
+			  enabled="{_dataReady&amp;&amp;!_updateData}">
+		<s:click>openPopUp('Empresa.Empresa_Puestos_Escolaridad',true)</s:click>
+	</s:Button>
+	<s:CheckBox x="14" y="91" enabled="false" id="_tieneIdiomas"/>
+	<s:Button x="8" y="48" width="180" height="30" label="   Generales del Aspirante"
+			  click="openPopUp('Empresa.Empresa_Puestos_Descripcion_Empleado',true)"
+			  enabled="{_dataReady&amp;&amp;!_updateData}"/>
+	<s:CheckBox x="14" y="53" enabled="false" id="_tieneDescripcionEmpleado"/>
+	<s:CheckBox x="14" y="129" enabled="false" id="_tieneEscolaridad"/>
+	<s:Button x="8" y="162" width="180" height="30" label="   Prefiles"
+			  click="openPopUp('Empresa.Empresa_Puestos_Perfil_Carrera',true)"
+			  enabled="{_dataReady&amp;&amp;!_updateData}"/>
+	<s:CheckBox x="14" y="167" enabled="false" id="_tienePerfil"/>
+	<s:CheckBox x="14" y="15" enabled="false" id="_tieneInformacionGeneral"/>
+	<s:Button x="195" y="10" width="180" height="30" label="   Competencias"
+			  click="openPopUp('Empresa.Empresa_Puestos_Competencias',true)"
+			  enabled="{_dataReady&amp;&amp;!_updateData}"/>
+	<s:Button x="195" y="48" width="180" height="30" label="   Plan de Sucesión" enabled="false"/>
+	<s:Button x="195" y="86" width="180" height="30" label="   Contactos Internos" enabled="false"/>
+	<s:CheckBox x="201" y="53" enabled="false"/>
+	<s:CheckBox x="201" y="91" enabled="false"/>
+	<s:Button x="195" y="124" width="180" height="30" label="   Relaciones Externas" enabled="false"/>
+	<s:CheckBox x="201" y="129" enabled="false"/>
+	<s:Button x="195" y="162" width="180" height="30" label="   Recusros Asignados" enabled="false"/>
+	<s:Button x="8" y="232" width="367" height="30" label="   Observaciones"
+			  click="openPopUp('Empresa.Empresa_Puestos_Observaciones',true)"
+			  enabled="{_dataReady&amp;&amp;!_updateData}"/>
+	<s:CheckBox x="14" y="237" enabled="false" id="_tieneObservaciones"/>
+	<s:CheckBox x="201" y="167" enabled="false"/>
+	<s:CheckBox x="201" y="15" enabled="false" id="_tieneCompetencias"/>
+	
+	
+</s:TitleWindow>

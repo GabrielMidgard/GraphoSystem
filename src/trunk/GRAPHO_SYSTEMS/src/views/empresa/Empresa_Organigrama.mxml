@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow 
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:mx="library://ns.adobe.com/flex/mx"
+	width="{_mainWidth}" height="{_mainHeight}" 
+	title="Organigrama DSM" 
+	>
+	
+	<s:Button x="755" y="10" icon="@Embed(source='../../assets/Icons/tools/ZoomIn.png')" width="37" click="zoomIn()"/>
+	<s:Button x="800" y="10" icon="@Embed(source='../../assets/Icons/tools/ZoomOut.png')" width="37" click="zoomOut();"/>
+	<s:Button icon="@Embed(source='../../assets/Icons/Buttons/FullScreen.png')" width="37" click="changeScreenMode();" right="10" top="10" height="31"/>
+	<s:Button x="10" y="13" icon="@Embed(source='../../assets/Icons/Buttons/refresh.png')" width="135" click="refresh()" label="Actualizar"/>
+	<s:Group contentBackgroundColor="#FFFFFF" alpha="0.0" id="_mainCanvas" right="10" left="10" top="49" bottom="10">
+		<s:Group width="5000" height="5000" contentBackgroundColor="#DADADA" alpha="0.1" id="_drawCanvas" x="0" y="0">
+		</s:Group>
+		<s:Image x="890" y="11" id="_cursor" source="assets/Icons/tools/Hand.png" width="30" height="30" visible="false"/>
+	</s:Group>
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.random.constants.SystemGlobals;
+			import mx.events.IndexChangedEvent;
+			import mx.core.UIComponent;
+			import views.components.MainCell;
+			import mx.random.events.SelectionEvent;
+			import mx.random.events.ConfigEvent;
+			import mx.random.events.StaticEvent;
+			import views.components.ItemArea;
+			import views.components.Item;
+			import mx.random.constants.Catalogs;
+			
+			import mx.random.windowManagers.PopManager;
+			import mx.random.constants.Languages;
+			import mx.random.forms.Validator;
+			import mx.random.dataManagers.EventManager;
+			import mx.random.converters.Converter;
+			import mx.random.dataManagers.DataManager;
+			import mx.random.web.WebApplication;
+			import mx.managers.PopUpManager;
+			import mx.collections.ArrayCollection;
+			import mx.events.CloseEvent;
+			import mx.controls.Alert;
+			import mx.rpc.remoting.RemoteObject;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			
+			private var _webApplication:WebApplication;
+			private var Valid:Validator 			= new Validator();
+			private var _workManager:Object 		= new Object();
+			private var _MainService:RemoteObject 		= new RemoteObject();
+			[Bindable]	private var _Data:DataManager 				= new DataManager(this);
+			[Bindable]	private var _DataResult:ArrayCollection 		= new ArrayCollection();			
+			private var _eventManager:EventManager 		= new EventManager(this);
+			private var _dataIndex:Number 			= 0;
+			
+			//-----------Event Manager -----------
+			
+			[Bindable]	public var _dataReady:Boolean 			= false;
+			[Bindable]	public var _newData:Boolean 			= false;
+			[Bindable]	public var _updateData:Boolean 			= false;
+			
+			//-----------Event Manager -----------
+			
+			
+			//-----------Local Vars -----------
+			
+			private var _selectedId:Number = 0;
+			private var _selectedName:String = "";
+			private var _serviceName  		= "Organigrama";
+			private var _mainId  			= "";
+			
+			private var _puestos:ArrayCollection = new ArrayCollection();
+			private var _departamentos:ArrayCollection = new ArrayCollection();
+			private var _areas:ArrayCollection = new ArrayCollection();
+			private var _organigrama:ArrayCollection = new ArrayCollection();
+			
+			private var _offX:Number = 50;
+			private var _offY:Number = 50;
+			private var _sepY:Number = 10;
+			private var _sepX:Number = 130;
+			private var _maxX:Number = 0;
+			private var _maxY:Number = 0;
+			
+			private var _lastItem:Object = new Object();
+			
+			//-----------Local Vars -----------
+			
+			//---------------------------- Context ---------------------------------------------            
+			
+			public function set context(contextObj:Object):void{
+				for( var p:String in contextObj){
+					if(this.hasOwnProperty(p)){
+						this[p] = contextObj[p];
+					}
+				}
+			}
+			
+			public function set workManager(value:Object):void{
+				_workManager = value;
+			}
+			
+			public function set webApplication(value:WebApplication):void{
+				_webApplication = value;
+				initView();
+			}
+			public function get webApplication():WebApplication{ return _webApplication; } 
+			
+			//---------------------------- Context ---------------------------------------------  
+			
+			private  function initView():void{
+				_MainService = _webApplication.getService(_serviceName);
+				_MainService.addEventListener(FaultEvent.FAULT,onFault);
+				_MainService.getOrg();
+				_MainService.getOrg.addEventListener(ResultEvent.RESULT,onGetRecordsResult);
+				
+				_mainCanvas.addEventListener(MouseEvent.MOUSE_OVER,mouseControl)
+				_mainCanvas.addEventListener(MouseEvent.MOUSE_OUT,mouseControl)
+				_mainCanvas.addEventListener(MouseEvent.MOUSE_DOWN,mouseControl)
+				_mainCanvas.addEventListener(MouseEvent.MOUSE_UP,mouseControl)
+				_mainCanvas.addEventListener(MouseEvent.MOUSE_MOVE,mouseControl)
+				
+			}
+			
+			private var mousePress:Boolean = false;
+			private var mouseOver:Boolean = false;
+			private var iniCoorX:Number = 0;
+			private var iniCoorY:Number = 0;
+			
+			private function mouseControl(e:MouseEvent):void{
+				
+				switch(e.type){
+					case MouseEvent.MOUSE_OVER:
+						
+						break;
+					case MouseEvent.MOUSE_OUT:
+						mousePress = false;	
+						break;
+					case MouseEvent.MOUSE_DOWN:
+						iniCoorX = _mainCanvas.mouseX-_drawCanvas.x;
+						iniCoorY = _mainCanvas.mouseY-_drawCanvas.y;
+						mousePress = true;					
+						break;
+					case MouseEvent.MOUSE_UP:
+						mousePress = false;	
+						break;
+					
+					case MouseEvent.MOUSE_MOVE:	
+						if(mousePress){															
+							if(_mainCanvas.mouseX-iniCoorX<0) _drawCanvas.x = _mainCanvas.mouseX-iniCoorX;
+							if(_mainCanvas.mouseY-iniCoorY<0) _drawCanvas.y = _mainCanvas.mouseY-iniCoorY;
+						}									
+						break;
+				}
+			}
+			
+			private function update(e:Event):void{
+				
+			}
+			
+			private function onGetRecordsResult(e:ResultEvent):void{
+				_MainService.getOrg.removeEventListener(ResultEvent.RESULT,onGetRecordsResult);
+				if(e.result){
+					_organigrama 		= Converter.arrayConverter(e.result['organigrama']);	
+					createDrawing();				
+				}		
+			}
+			
+			
+			private function refresh():void{
+				//No esta definido el método .removeAllChildren() en Group.
+				//_drawCanvas.removeAllChildren();
+				_MainService.getOrg();
+				_MainService.getOrg.addEventListener(ResultEvent.RESULT,onGetRecordsResult);	
+			}
+			
+			private function createDrawing():void{
+				var mainColor:Number;
+				for(var a:Number = 0;a<_organigrama.length;a++){
+					var maxCoorX:Number = 0;
+					var area:ItemArea = new ItemArea();			
+					
+					mainColor = Number(_organigrama[a]._color);
+					
+					area._mainTitle = _organigrama[a]._nombre;
+					area._description = "";				
+					area.x = (a*(area.width+_sepX))+_offX;
+					//area.x =_offX+maxCoorX+_sepX;
+					area.y = _offY;
+					area.removeDescription();
+					area.height = 30;
+					area.width = 150;
+					
+					//0x000000
+					area._bgAlpha = 0.7;
+					area._bgColor = mainColor;						
+					area._bdColor = mainColor;
+					
+					_drawCanvas.addChild(area);
+					var offDepto:Number = 0;
+					
+					for(var d:Number = 0;d<_organigrama[a]._deptos.length;d++){
+						
+						var depto:ItemArea = new ItemArea();
+						depto._mainTitle = _organigrama[a]._deptos[d]._nombre;						
+						if(depto._mainTitle.length < 25){
+							depto.height = 30;
+						}else{
+							depto.height = 40;
+						}
+						depto._description = "";
+						
+						depto._bgAlpha = 0.4;
+						depto._bgColor = mainColor;
+						
+						depto._bdThickness = 2;
+						
+						depto.x = area.x+20;
+						if(maxCoorX<(depto.x+depto.width)) maxCoorX = depto.x+depto.width;
+						if(d==0){
+							depto.y = area.y+50+offDepto+_sepY;
+						}else{
+							depto.y = offDepto+_sepY;
+						}														
+						
+						depto.traceLinkRouth(area.y+area.height,mainColor);
+						_drawCanvas.addChild(depto);
+						
+						
+						var puestoCoor:Number = depto.y+depto.height+_sepY;
+						for(var p:Number = 0;p<_organigrama[a]._deptos[d]._puestos.length;p++){
+							var puesto:ItemArea = new ItemArea();
+							puesto._mainTitle = _organigrama[a]._deptos[d]._puestos[p]._nombre;																
+							if(puesto._mainTitle.length < 40){
+								puesto.height = 30;
+							}else{
+								puesto.height = 40;
+							}	
+							
+							puesto._bgAlpha = 0.1;
+							puesto._bgColor = mainColor;
+							//puesto._bdColor = 0x9a9c9e;
+							puesto._bdThickness = 2;
+							
+							x += (10-x)/10				
+							
+							var empleados:Array	 = _organigrama[a]._deptos[d]._puestos[p]._empleados as Array;
+							
+							var nombreEmpleado:String = new String();
+							nombreEmpleado = "ASIGNADOS :\n"
+							
+							if(empleados.length==0) {
+								nombreEmpleado += " - Puesto sin asignar\n";
+							}else{								
+								for(var t:Number=0;t<empleados.length;t++){
+									nombreEmpleado += " - "+empleados[t]._nombre+" "+empleados[t]._paterno+" "+empleados[t]._materno+"\n";
+								}								
+							}																			
+							puesto.x = depto.x+50;
+							if(maxCoorX<(puesto.x+puesto.width)) maxCoorX = puesto.x+puesto.width;																							
+							puesto.y = puestoCoor;
+							puesto.width =200;							
+							puesto.traceLinkRouth(depto.y+depto.height,mainColor);
+							
+							//var sup:String = _organigrama[a]._deptos[d]._puestos[p]._superior; 
+							var _idPuestoSuperior:Number = _organigrama[a]._deptos[d]._puestos[p]._idPuestoSuperior;
+							var sup:String = Converter.findLabel(Converter.arrayConverter(SystemGlobals.PUESTOS),"_idPuesto","_nombre",_idPuestoSuperior);
+							if(sup == null) sup = "Superior sin asignar";	
+							
+							puesto.toolTip = nombreEmpleado+"SUPERIOR: \n"+" - "+sup;
+							_drawCanvas.addChild(puesto);
+							offDepto =	puesto.y+puesto.height;
+							puestoCoor += puesto.height+_sepY;
+							if(puesto.y+puesto.height>_maxY) _maxY = puesto.y+puesto.height;
+							if(puesto.x+puesto.width>_maxX) _maxX = puesto.x+puesto.width;
+						}
+						
+						
+					}
+				}
+				_lastItem = puesto;
+				_lastItem.addEventListener(SelectionEvent.SELECTION_COMPLETE,updateCanvas);
+			}
+			
+			private function updateCanvas(e:SelectionEvent):void{
+				_lastItem.addEventListener(SelectionEvent.SELECTION_COMPLETE,updateCanvas);
+				_drawCanvas.width = _maxX + 150;
+				_drawCanvas.height = _maxY + 150;
+			}
+			
+			
+			private function onFault(e:FaultEvent):void{
+				Alert.show(e.fault.faultString,"Error");
+			}
+			
+			private function zoomIn():void{
+				_drawCanvas.scaleX +=.1;
+				_drawCanvas.scaleY +=.1;
+			}
+			
+			private function zoomOut():void{
+				_drawCanvas.scaleX -=.1;
+				_drawCanvas.scaleY -=.1;
+			}
+			
+			private var _fullScreen:Boolean = false;
+			[Bindable]	private var _mainWidth:Number = 1120;
+			[Bindable]	private var _mainHeight:Number = 586;
+			
+			private function changeScreenMode():void{				
+				if(!_fullScreen){
+					_mainWidth = stage.width;
+					_mainHeight = stage.height;					
+				}else{
+					_mainWidth = 1120;
+					_mainHeight = 586;					
+				}
+				_fullScreen = !_fullScreen;
+				
+				PopUpManager.centerPopUp(this);
+			}
+			
+		]]>
+	</fx:Script>
+	
+</s:TitleWindow>

@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="692" height="262" showCloseButton="true" title="Captura de Firma">
+	<mx:Canvas x="10" y="10" width="668" height="183" backgroundColor="#FFFFFF" backgroundAlpha="1.0" id="signCanvas">
+		<mx:Canvas x="10" y="21" width="648" height="132" id="signCanvas0">
+		</mx:Canvas>
+	</mx:Canvas>
+	
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.random.files.PathData;
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.remoting.RemoteObject;
+			import mx.controls.Alert;
+			import mx.random.converters.Converter;
+			import mx.random.web.WebApplication;
+			import mx.core.UIComponent;
+			import mx.random.xml.XMLDataManager;
+			import mx.random.drawing.XMLSignDrawing;
+			
+
+			private var _webApplication:WebApplication;
+			private var _dataObject:Object;
+			private var _extraData:Object;
+			private var _XMLSign:XMLSignDrawing = new XMLSignDrawing();			
+			private var _loader:URLLoader = new URLLoader();
+			private var _workManager:Object;
+			private var _signData:String = "";
+			private var _singService:RemoteObject;
+[Bindable]	private var _mainPath:String 	= PathData.HOST+"/";
+[Bindable]	private var _signsPath:String 	= "PRM_Data/_firmas/";			
+			
+//---------------------------- Context ---------------------------------------------            
+
+   			public function set context(contextObj:Object):void{
+				for( var p:String in contextObj){
+					if(this.hasOwnProperty(p)){
+						this[p] = contextObj[p];
+					}
+				}
+				initView();
+			}
+
+			public function set workManager(value:Object):void{
+				_workManager = value;
+			}
+
+			public function set webApplication(value:WebApplication):void{
+				_webApplication = value;	
+				_singService = _webApplication.getService("SignManager");
+				_singService.addEventListener(FaultEvent.FAULT,onFault);		
+			}
+			
+			public function get webApplication():WebApplication{ return _webApplication; } 
+			public function set dataObject(value:Object):void { _dataObject = value ;}
+			public function set extraData(value:Object):void { _extraData = value ;}
+						
+//---------------------------- Context ---------------------------------------------  
+
+			private function onFault(e:FaultEvent):void{
+				
+			}
+			
+			private function initView():void{	
+				if(Converter.bool(_extraData._tieneFirma))	{
+					_loader.load(new URLRequest(_mainPath+_signsPath+_dataObject._idEmpleado+".xml"));
+					_loader.addEventListener(Event.COMPLETE,onLoadComplete);
+				}else{
+					Alert.show("El empleado no tiene firma","Advertencia");
+				}
+			}
+			
+			private function onLoadComplete(e:Event):void{
+				signCanvas.removeAllChildren();
+				_loader.removeEventListener(Event.COMPLETE,onLoadComplete);	
+				_XMLSign.doSign(new XML(_loader.data),1.5);				
+				signCanvas.addChild(_XMLSign);				
+			}	
+			
+			private var fileReference:FileReference;
+			
+			private function onLoadSign():void{
+	  			fileReference = new FileReference();
+	  			//var f:FileFilter = new FileFilter("Firmas",_dataObject._idEmpleado+".xml");
+	  			var f:FileFilter = new FileFilter("Firmas","*.xml");
+	  			fileReference.browse([f]);
+	  			fileReference.addEventListener(Event.SELECT,onFileSelect);
+	  			fileReference.addEventListener(Event.COMPLETE,onFileComplete);
+	  		}
+	  		private function onFileSelect(event:Event):void{
+	  			fileReference.load();
+	  		}
+	  		
+	  		private function onFileComplete(event:Event):void{
+	  			_signData = fileReference.data.readUTFBytes(fileReference.data.length);
+	  			signCanvas.removeAllChildren();
+	  			_XMLSign.doSign(new XML(fileReference.data),1.5);				
+				signCanvas.addChild(_XMLSign);	  			
+	  		}
+	  		
+	  		private function saveSign():void{
+	  			var info = {
+	  						data:_signData,
+	  						path:_signsPath,
+	  						name:_dataObject._idEmpleado+".xml"
+	  						}
+	  			_singService.uploadSign(info);
+	  			_singService.uploadSign.addEventListener(ResultEvent.RESULT,onSignReady);
+	  			_save.enabled = false;
+	  		}
+	  		
+	  		private function onSignReady(e:ResultEvent):void{
+	  			_extraData._tieneFirma = 1;
+	  			_save.enabled = true;
+	  			initView();
+	  		}
+
+						
+			
+		]]>
+	</mx:Script>
+	<mx:Button x="10" y="201" label="Abrir Firma" click="onLoadSign()"/>
+	<mx:Button x="104" y="201" label="Publicar" width="85" click="saveSign()" id="_save"/>
+</mx:TitleWindow>

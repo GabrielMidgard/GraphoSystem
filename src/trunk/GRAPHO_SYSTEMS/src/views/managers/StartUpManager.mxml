@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas 
+	xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" 
+	verticalScrollPolicy="off"
+	horizontalScrollPolicy="off" >
+
+	<mx:Metadata>
+		[Event(name="complete", type="mx.random.events.StartUpEvent")]
+		[Event(name="failure",  type="mx.random.events.StartUpEvent")]
+	</mx:Metadata>	
+
+	<mx:ProgressBar horizontalCenter="0" verticalCenter="0" 
+		id="progressBar" minimum="0" maximum="100" 
+		indeterminate="false" 
+		mode="manual"
+		 width="200" height="50" 
+		 color="#FFFFFF"/>
+
+	<mx:Script>
+	<![CDATA[
+		import mx.random.events.StartUpEvent;
+		import mx.random.utils.QueryString;
+
+		import mx.utils.StringUtil;
+		import mx.core.Application;
+		import mx.events.ModuleEvent;
+		import mx.events.StyleEvent;
+		
+		public var configXML:XML;
+		
+		// States this component can be in:
+		private static const DEFAULT:int = 0;
+		private static const LOADING:int = 1;
+		private static const LOADED:int = 2;
+		private static const FAILED:int = 3;
+		
+		// State variable to keep track of the current state - only needed to handle errors.
+		private var _state:int = DEFAULT;
+		private var _styleEvents:IEventDispatcher;
+		private var _homePath:String;
+		
+		private function handleComplete(e:Event):void {
+			_state = LOADED;
+
+			var configData:XML = new XML( e.target.data );
+			
+			if (!configData) {
+				dispatchEvent(new StartUpEvent(StartUpEvent.FAILURE, null,"No se pudo cargar la configuracion."));
+				return;
+			}
+			
+			configXML = configData.copy(); // Copy on the theory we can dispose of the swf and all its data.
+			if (!configXML){
+				dispatchEvent(new StartUpEvent(StartUpEvent.FAILURE, null,"No se pudo cargar la configuracion."));
+				return;
+			}
+			
+			//loadStyle();
+			dispatchEvent(new StartUpEvent(StartUpEvent.COMPLETE,configXML));
+		}
+		
+		private function handleError(e:IOErrorEvent):void {
+			if (_state == LOADING){
+				dispatchEvent(new StartUpEvent(StartUpEvent.FAILURE, null,"No se pudo cargar la configuracion."));
+				_state == FAILED;
+			}
+		}
+			
+		private function handleProgress(e:ProgressEvent):void {
+			var progress:Number = Math.floor(100 * e.bytesLoaded/e.bytesTotal);
+			progressBar.setProgress(progress, 100);
+			progressBar.label = "Cargando configuracion " + progress + " % listo.";
+		}
+		
+		private function handleHttpStatus(event:HTTPStatusEvent):void{
+			//trace(event.status);
+		}
+	
+	
+		public function get homePath():String {
+			return _homePath;
+		}	
+		public function set homePath (homePath:String):void {
+			//Security.allowDomain('*');
+			_homePath = homePath;
+			var queryString:QueryString = new QueryString();
+			var params:Object = queryString.parameters;
+			var configFile:String = "config/config.xml";
+			
+			var configPath:String = _homePath + configFile + "?noCache="+new Date().getTime().toString();
+			//_homePath = "http://www.conexion-canada.com/mexico_pyme_webApp/flashRemote/config/" + "config.cfc?method=getConfig&noCache="+new Date().getTime().toString();
+			
+			_state = LOADING;
+			
+			var loader:URLLoader = new URLLoader();
+			
+			loader.dataFormat = URLLoaderDataFormat.TEXT;
+			loader.addEventListener(Event.COMPLETE, handleComplete );
+			loader.addEventListener(IOErrorEvent.IO_ERROR, handleError);
+			loader.addEventListener(HTTPStatusEvent.HTTP_STATUS, handleHttpStatus);
+			loader.addEventListener(ProgressEvent.PROGRESS, handleProgress);
+			loader.load( new URLRequest( configPath ) );	
+		}
+		
+		
+		private function loadStyle():void{
+			
+			var stylePath:String = _homePath + "style/style.swf";
+			//load styles first, load config after styles loaded.
+			_styleEvents = StyleManager.loadStyleDeclarations(stylePath, true);
+			
+			//dispatchEvent(new StartUpComplete("startUpComplete",configXML));
+			
+			_styleEvents.addEventListener(StyleEvent.PROGRESS, styleProgress);
+			_styleEvents.addEventListener(StyleEvent.ERROR, styleError);
+			_styleEvents.addEventListener(StyleEvent.COMPLETE, styleComplete);
+		}
+		
+		private function styleProgress(event:StyleEvent):void {
+			var progress:Number = Math.floor(100 * event.bytesLoaded/event.bytesTotal);
+			progressBar.setProgress(progress, 100);
+			progressBar.label = "Cargando Estilo: " + progress + " % listo.";			
+		}
+		
+		private function styleComplete(event:StyleEvent):void {
+			dispatchEvent(new StartUpEvent(StartUpEvent.COMPLETE,configXML));
+		}
+		
+		private function styleError(event:StyleEvent):void {
+			if (_state != FAILED){
+				dispatchEvent(new StartUpEvent(StartUpEvent.FAILURE,null));
+				//dispatchEvent(new StartUpComplete("startUpComplete",configXML));
+				_state == FAILED;
+			}			
+		}
+		
+
+		
+		public function close():void {
+
+		}
+			
+			
+	]]>
+	</mx:Script>		
+		
+
+</mx:Canvas>

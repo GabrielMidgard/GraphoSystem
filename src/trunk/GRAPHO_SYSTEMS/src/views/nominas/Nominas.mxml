@@ -1,0 +1,756 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow 
+	xmlns:mx="http://www.adobe.com/2006/mxml" 
+	width="1250" height="662" 
+	layout="absolute" 
+	horizontalCenter="0" 
+	title="Administración de Nomina Semanal" 
+	verticalCenter="0"
+	verticalScrollPolicy="off"
+	horizontalScrollPolicy="off"
+	showCloseButton="true">
+
+	<mx:Script>
+		<![CDATA[
+			import mx.controls.dataGridClasses.DataGridColumn;
+			import mx.random.tools.DateTools;
+			import mx.random.events.SelectionEvent;
+			import mx.random.events.StaticEvent;
+			
+			import mx.random.constants.Catalogs;
+			import mx.random.windowManagers.PopManager;
+			import mx.random.constants.Languages;
+			import mx.random.forms.Validator;
+			import mx.random.dataManagers.EventManager;
+			import mx.random.converters.Converter;
+			import mx.random.dataManagers.DataManager;
+			import mx.random.web.WebApplication;
+			import mx.managers.PopUpManager;
+			import mx.collections.ArrayCollection;
+			import mx.events.CloseEvent;
+			import mx.controls.Alert;
+			import mx.rpc.remoting.RemoteObject;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+
+			private var _webApplication:WebApplication;
+			private var Valid:Validator 			= new Validator();
+			private var _workManager:Object 		= new Object();
+			private var _MainService:RemoteObject 		= new RemoteObject();
+[Bindable]	private var _Data:DataManager 				= new DataManager(this);
+[Bindable]	private var _DataResult:ArrayCollection 		= new ArrayCollection();			
+			private var _eventManager:EventManager 		= new EventManager(this);
+			private var _dataIndex:Number 			= 0;
+			
+			//-----------Event Manager -----------
+
+[Bindable]	public var _dataReady:Boolean 			= false;
+[Bindable]	public var _newData:Boolean 			= false;
+[Bindable]	public var _updateData:Boolean 			= false;
+[Bindable]	private var _selectionMode:Boolean		= false;
+[Bindable]	private var _multipleSelection:Boolean	= false;
+
+			//-----------Event Manager -----------
+			
+			
+			//-----------Local Vars -----------
+			
+			private var _selectedId:Number = 0;
+			private var _selectedName:String = "";
+			private var _serviceName  		= "Nominas";
+			private var _mainId  			= "_idNomina";
+			private var _mainFocusField:String      = "_lunes";
+[Bindable]	private var _weeks:ArrayCollection = new ArrayCollection();
+			private var _startDate:Date = new Date();
+			private var _stopDate:Date = new Date();	
+[Bindable]	private var _dom:Number = 0;
+[Bindable]	private var _lun:Number = 0;
+[Bindable]	private var _mar:Number = 0;
+[Bindable]	private var _mie:Number = 0;
+[Bindable]	private var _jue:Number = 0;
+[Bindable]	private var _vie:Number = 0;
+[Bindable]	private var _sab:Number = 0;
+						
+			//-----------Local Vars -----------
+			
+//---------------------------- Context ---------------------------------------------            
+
+   			public function set context(contextObj:Object):void{
+				for( var p:String in contextObj){
+					if(this.hasOwnProperty(p)){
+						this[p] = contextObj[p];
+					}
+				}
+				initView();
+			}
+
+			public function set workManager(value:Object):void{
+				_workManager = value;
+			}
+
+			public function set selectionMode(value:Boolean):void{
+				_selectionMode = value;
+			}
+			
+			public function set multipleSelection(value:Boolean):void{
+				_multipleSelection = value;
+			}
+
+			public function set webApplication(value:WebApplication):void{
+				_webApplication = value;				
+			}
+			public function get webApplication():WebApplication{ return _webApplication; } 
+						
+//---------------------------- Context ---------------------------------------------  
+
+//-------------------------------- MainInit --------------------------------------
+			// ------------------- View Extra Data -------------------------------
+			
+			private function get viewContext():Object{
+				return {webApplication: _webApplication,
+						workManager: this
+						}					
+			}
+
+			private function addValidations():void{
+				Valid.setErrorKnot(Validator.CIRCLE_KNOT,0xFF0000);
+				Valid.changeLanguage(Languages.SPANISH);
+				Valid.validateOnChange = true;
+				Valid.addNumberVal(_sueldoBase,true,true,2,false,"");
+				Valid.addNumberVal(_sueldoHora,true,true,2,false,"");
+				Valid.addNumberVal(_bonos,true,true,2,false,"");
+				Valid.addNumberVal(_corp,true,true,2,false,"");
+				
+				Valid.addNumberVal(_ingresosVentas,true,true,2,false,"");
+				Valid.addNumberVal(_egresosCancelacion,true,true,2,false,"");
+				Valid.addNumberVal(_porAcreditar,true,true,2,false,"");
+				Valid.addNumberVal(_totalIngresos,true,true,2,false,""); 
+				
+				Valid.addNumberVal(_comisiones,true,true,2,false,"");
+				Valid.addNumberVal(_prcComision,true,true,2,false,"");
+				Valid.addNumberVal(_infonavit,true,true,2,false,"");
+				Valid.addNumberVal(_imss,true,true,2,false,"");
+				Valid.addNumberVal(_otros,true,true,2,false,"");
+				
+				Valid.addNumberVal(_comisionesSubTotal,true,true,2,false,"");
+				Valid.addNumberVal(_comisionesIVA,true,true,2,false,"");
+				Valid.addNumberVal(_comisionesTotal,true,true,2,false,"");
+				
+				Valid.addNumberVal(_incentivosSubTotal,true,true,2,false,"");
+				Valid.addNumberVal(_incentivosIVA,true,true,2,false,"");
+				Valid.addNumberVal(_incentivosTotal,true,true,2,false,"");
+				
+				Valid.addNumberVal(_sueldoAcumulado,true,true,2,false,"");
+				Valid.addNumberVal(_sueldoTotal,true,true,2,false,"");
+				
+				Valid.addNumberVal(_subTotal,true,true,2,false,"");
+				Valid.addNumberVal(_iva,true,true,2,false,"");
+				Valid.addNumberVal(_total,true,true,2,false,"");
+				
+												
+			}
+
+			private function onFocusOut(e:Event):void{
+				if(_newData||_updateData) Valid.validateAll();//Valid.validateOne(e.currentTarget.name);
+			}
+			
+			private function extraCreateData(params:Object):Object{
+				//params["_newsImage"] = _image;
+				//params['_fechaNacimiento'] 	= _year.selectedItem.label+'-'+_month.selectedItem.value+'-'+_day.selectedItem.value;
+				return params;
+			}
+			
+			private function createRecordExtras():void{
+				//_image = "defaultNew.jpg";
+				/*_day.selectedIndex 	= 0;
+				_month.selectedIndex 	= 0;
+				_year.selectedIndex 	= 0;*/
+			}
+			
+			private function extraUpdateData(params:Object):Object{	
+				//params['_fechaNacimiento'] = _year.selectedItem.label+'-'+_month.selectedItem.value+'-'+_day.selectedItem.value;			
+				return params;
+			}
+			
+			private function loadExtraFields(params:Object):void{			
+				updateInfo();
+				Valid.validateAll();
+			}
+			
+			private function forceImports():void{
+				Catalogs;
+			}
+			
+			public function initView():void{
+				forceImports();
+				_MainService = _webApplication.getService(_serviceName);
+				_Data.exceptions = ["_idNomina","_idEmpleado","_semana","_idSucursal"];
+				_MainService.addEventListener(FaultEvent.FAULT,onFault);
+				loadWeeks();
+				initData();
+				addValidations();
+				loadScroll();
+			}
+			
+			public function imageUploadReady(data:Object):void{
+				
+			}
+
+			// ------------------- View Extra Data -------------------------------
+
+
+			
+
+			private function loadWeeks():void{
+				_weeks = DateTools.getActualWeeks();
+				_semanaSelect.selectedIndex = _weeks.length-1;
+				calculateDays();				
+			}
+			
+			private function calculateDays():void{
+				var days:Object = DateTools.getWeekDays(_semanaSelect.selectedItem.value);
+				_startDay.text 	 = days[0].day;
+				_startMonth.text = days[0].month;
+				_endDay.text 	 = days[6].day;
+				_endMonth.text   = days[6].month;
+							
+				_dom 			= days[0].day;
+				_lun 			= days[1].day;
+				_mar 			= days[2].day;
+				_mie 			= days[3].day;
+				_jue 			= days[4].day;
+				_vie 			= days[5].day;
+				_sab 			= days[6].day;
+				
+				_startDate = days[1].date;
+				_stopDate = days[6].date;
+			}
+			
+			
+			
+			
+			private var _horasTotales:Number = 0;
+			private var _retenciones:Number = 0;
+			private var _incentivos:Number = 0;
+			private var _ventas:Number = 0;
+			private var _sueldo:Number = 0;
+			private var _st:Number = 0;
+			private var _tx:Number = 0;
+			private var _tt:Number = 0;
+			private var _totalComisiones:Number = 0;
+			
+			
+			private function updateInfo():void{
+				_horasTotales = 0;
+				_retenciones  = 0;
+				_incentivos = 0;
+				_sueldo =0;
+				_ventas = 0;				
+				_st = 0;
+				_tx = 0;
+				_tt = 0;
+				
+				
+				_ventas 	= Converter.unconvertNumber(_ingresosVentas.text)-Converter.unconvertNumber(_egresosCancelacion.text);
+				
+				_retenciones += Converter.unconvertNumber(_imss.text);
+				_retenciones += Converter.unconvertNumber(_infonavit.text);
+				_retenciones += Converter.unconvertNumber(_otros.text);
+				
+				_incentivos += Converter.unconvertNumber(_bonos.text);
+				_incentivos += Converter.unconvertNumber(_corp.text);
+
+				_horasTotales += Number(_lunes.text);
+				_horasTotales += Number(_martes.text);
+				_horasTotales += Number(_miercoles.text);
+				_horasTotales += Number(_jueves.text);
+				_horasTotales += Number(_viernes.text);
+				_horasTotales += Number(_sabado.text);
+				
+				_horasTrabajadas.text 	= _horasTotales.toString();
+				_sueldo 				= _horasTotales*Converter.unconvertNumber(_sueldoHora.text);
+				_sueldoAcumulado.text 	= Converter.numberFormat(_sueldo);
+				
+				_totalIngresos.text 	= Converter.numberFormat(_ventas); 				
+				_totalComisiones 		= Converter.unconvertNumber(_comisiones.text);
+				
+				
+				_retencionesSubTotal.text 	= Converter.numberFormat(_retenciones);
+				_retencionesTotal.text 		= Converter.numberFormat(_retenciones);
+				
+				_incentivosSubTotal.text 	= Converter.numberFormat(_incentivos-(_incentivos*0.16));
+				_incentivosIVA.text 		= Converter.numberFormat(_incentivos*0.16);
+				_incentivosTotal.text 		= Converter.numberFormat(_incentivos);
+				
+				_comisionesSubTotal.text	= Converter.numberFormat(_totalComisiones); 
+				_comisionesIVA.text			= Converter.numberFormat(_totalComisiones*0.16);
+				_comisionesTotal.text		= Converter.numberFormat(_totalComisiones*1.16);  
+				
+				_sueldoTotal.text = _sueldoAcumulado.text;
+				
+				_st = _sueldo-_retenciones+_incentivos+(_totalComisiones*1.16);
+				_tx = Converter.unconvertNumber(_incentivosIVA.text)+Converter.unconvertNumber(_comisionesIVA.text);
+				_tt = _st+_tx;
+				
+				_subTotal.text		= 	Converter.numberFormat(_st)
+				_iva.text			=   Converter.numberFormat(_tx)
+				_total.text 		= 	Converter.numberFormat(_tt);
+				
+			}
+			
+			
+			
+			
+			
+			
+			
+			
+
+			private function loadScroll():void{
+				_dataList.visible = false;
+				for(var n:Number = 0;n<100;n++){
+					_DataResult.addItem({i:0});
+				}
+			}
+
+			private function initData():void{
+				_MainService.getFields();
+				_MainService.getFields.addEventListener(ResultEvent.RESULT,onGetFieldsResult);
+				_dataReady = false;
+			}
+			
+			public function closeWindow():void{
+					if(_selectionMode&&_dataList.selectedIndex!=-1) StaticEvent.dispatchEvent(new SelectionEvent(SelectionEvent.SELECTION_COMPLETE,_dataList.selectedItems));
+            		dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
+            		PopUpManager.removePopUp(this);
+            }
+            
+//-------------------------------- MainInit --------------------------------------
+			
+			private function newData():void{
+				_Data.clear();
+				_newData = true;
+				_updateData = false;				
+				this[_mainFocusField].setFocus();
+				createRecordExtras();
+				Valid.validateAll();
+			}
+			
+			private function createData():void{
+				if(Valid.validateAll()){
+					_dataReady = false;
+					var params:Object = extraCreateData(_Data.makeData());
+					_MainService.createRecord(params);
+					_MainService.createRecord.addEventListener(ResultEvent.RESULT,onCreateComplete);
+				}else{
+					Alert.show(Valid.errors,"Error");
+				}
+			}
+
+			private function updateData():void{
+				if(Valid.validateAll()){
+					_dataReady = false;
+					var params:Object = extraUpdateData(_Data.makeData());
+					params[_mainId] = _dataList.selectedItem[_mainId];
+					_MainService.updateRecord(params);
+					_MainService.updateRecord.addEventListener(ResultEvent.RESULT,onUpdateComplete);
+					_dataIndex =_dataList.selectedIndex;
+				}else{
+					Alert.show(Valid.errors,"Error");
+				}
+			}
+			
+			private function deleteDataAlert():void{
+				if(_dataList.selectedIndex!=-1){
+					Alert.show("Desea borrar el registro seleccionado?","Atención",Alert.YES|Alert.CANCEL,this,deleteData);
+				}else{
+					Alert.show("No hay registro selecionado","Error");
+				}
+			}
+			
+			private function deleteData(e:CloseEvent):void{
+				if(e.detail==Alert.YES){
+					var params:Object = new Object();
+					params[_mainId] = _dataList.selectedItem[_mainId];
+					_MainService.deleteRecord(params);
+					_MainService.deleteRecord.addEventListener(ResultEvent.RESULT,onDeleteComplete);
+					_dataReady = false;
+				}
+			}
+			
+			private function cancel():void{
+				onDataSelect();
+				resetBooleans();
+				Valid.validateAll();
+			}
+			
+			private function resetBooleans():void{
+				_newData = false;
+				_updateData = false;
+			}
+
+			private function dataChange():void{
+				_updateData = true;
+				updateInfo();
+			}
+
+			private function openImageEditor():void{
+				if(_dataList.selectedIndex!=-1){
+					//_newsIdNumber 	= new Number(_dataList.selectedItem._blogId);
+					openPopUp("managers.ImageManager")
+				}else{
+					Alert.show("No hay registro selecionado","Error");
+				}
+			}
+//-------------------------------- ResultsEvents --------------------------------------		
+			
+			private function onGetFieldsResult(e:ResultEvent):void{
+				_MainService.getFields.removeEventListener(ResultEvent.RESULT,onGetFieldsResult);
+				if(e){
+					if(e.result) {
+						_Data.createFields(Converter.arrayConverter(e.result));
+						getData();
+					}
+				}else{
+					Alert.show("Error al cargar los datos","Error");
+					_dataReady = false;
+				}
+				_DataResult= new ArrayCollection();
+				_dataList.visible = true;
+				
+			}
+			
+			private function getData():void{						
+				_MainService.getRecords(getParams());
+				_MainService.getRecords.addEventListener(ResultEvent.RESULT,onGetDataResult);
+			}
+			
+			private function onGetDataResult(e:ResultEvent):void{
+				_MainService.getRecords.removeEventListener(ResultEvent.RESULT,onGetDataResult);
+				_DataResult = Converter.arrayConverter(e.result);
+				if(_DataResult.length==0) {
+					Alert.show("No se ha creado la nómina de la semana "+_semanaSelect.selectedItem.label+"\n Crearla ahora?","Atención",Alert.YES|Alert.NO,this,getDataAlertHandler)
+				}else{
+					if(_dataIndex<0) _dataIndex = 0;
+					_Data.loadData(_DataResult[_dataIndex]);
+					_dataList.selectedIndex = _dataIndex;
+					_dataList.scrollToIndex(_dataList.selectedIndex);
+					loadExtraFields(_DataResult[_dataIndex]);
+				}
+				_dataReady = true;
+				resetBooleans();
+				
+			}
+			
+			private function getDataAlertHandler(e:CloseEvent):void{
+				if(e.detail==Alert.YES){					
+					_MainService.createWeek(getParams());
+					_MainService.createWeek.addEventListener(ResultEvent.RESULT,onCreateWeekComplete);
+				}				
+			}
+			
+			private function onCreateWeekComplete(e:ResultEvent):void{
+				_MainService.createWeek.removeEventListener(ResultEvent.RESULT,onCreateWeekComplete);
+				if(!e.result){
+					Alert.show("No se pudo crear la nómina","Error");
+				}else{
+					Alert.show("Nomina creada con éxito","Atención");
+				}
+				getData();
+			}
+			
+			private function onFault(e:FaultEvent):void{
+				Alert.show(e.fault.faultString,"Error");
+			}
+
+			private function onDataSelect():void{
+				if(_dataList.selectedIndex!=-1) {
+					_Data.loadData(_dataList.selectedItem);
+					_dataIndex =_dataList.selectedIndex;
+					loadExtraFields(_dataList.selectedItem);
+					_selectedId = _dataList.selectedItem[_mainId];
+				}
+			}
+			
+			private function onCreateComplete(e:ResultEvent):void{				
+				_MainService.createRecord.removeEventListener(ResultEvent.RESULT,onCreateComplete);
+				_dataIndex = _DataResult.length;
+				getData();
+			}
+			
+			private function onUpdateComplete(e:ResultEvent):void{
+				_MainService.updateRecord.removeEventListener(ResultEvent.RESULT,onUpdateComplete);
+				getData();
+			}
+			
+			private function onDeleteComplete(e:ResultEvent):void{
+				_MainService.deleteRecord.removeEventListener(ResultEvent.RESULT,onDeleteComplete);
+				_dataIndex = _DataResult.length-2;
+				getData();
+			}
+			
+			
+			
+			private function acutalizarComisiones():void{
+				if(_updateData){
+					Alert.show("Hay cambios sin aplicar","Error");
+				}else{
+					_dataReady = false;
+					var params:Object = getParams();
+					params["_idNomina"]  = _dataList.selectedItem._idNomina;
+					params["_idEmpleado"]  = _dataList.selectedItem._idEmpleado;
+					_MainService.updateComisiones(params);
+					_MainService.updateComisiones.addEventListener(ResultEvent.RESULT,onAcutalizarComisionesReady);
+				}
+			}
+			
+			private function onAcutalizarComisionesReady(e:ResultEvent):void{
+				_MainService.updateComisiones.removeEventListener(ResultEvent.RESULT,onAcutalizarComisionesReady);
+				getData();
+			}
+			
+			
+			private function getParams():Object{
+				var params:Object =  new Object();
+					params["idSucursal"] = _webApplication.user.idSucursal;
+					params["accessType"] = _webApplication.user.accessType;
+					params["week"] 		 = _semanaSelect.selectedItem.value + 1;
+					params["startDate"]  = Converter.dateToSQL(_startDate);
+					params["stopDate"]  = Converter.dateToSQL(_stopDate);
+					
+				return params;
+			}
+			
+//-------------------------------- ResultsEvents --------------------------------------	
+
+//-------------------------------- POP UP WINDOW --------------------------------------	
+			public function openPopUp(popUpName:String,modal:Boolean=false):void{
+				var pop:TitleWindow = PopUpManager.createPopUp(this, getDefinitionByName("views."+popUpName) as Class, modal) as TitleWindow;
+				pop.name = popUpName;
+				pop.addEventListener(CloseEvent.CLOSE, closePopup);
+				if(pop.hasOwnProperty("context")){
+					Object(pop).context = viewContext;
+				}
+				PopUpManager.centerPopUp(pop);
+			}
+			
+			private function closePopup(e:CloseEvent):void{			
+	            		PopUpManager.removePopUp(e.target as TitleWindow);
+			}
+//-------------------------------- POP UP WINDOW --------------------------------------
+
+//-------------------------------- Search Engine --------------------------------------
+
+			private function searchFilter():void{
+               			_DataResult.filterFunction = vlidateSearch;
+               			_DataResult.refresh();
+           		}
+          
+	       		private function vlidateSearch(item:Object):Boolean{
+	           		var isMatch:Boolean = false;           
+	           		if(item[_searchType.selectedItem.value].toLowerCase().search(_searchFilter.toLowerCase()) != -1){
+	               			isMatch = true
+	           		}              
+	           		return isMatch;              
+	       		}
+	       	
+	       		private function search():void{
+				_searchFilter = _searchField.text;
+				searchFilter();
+			}
+			private var _searchFilter:String 			= new String();
+[Bindable]	private var _searchTypes:ArrayCollection 	= new ArrayCollection([{label:"Empleado :",     	value:"_idEmpleado"},{label:"Nombre :",     	value:"_nombre"},{label:"Paterno :",     	value:"_paterno"},{label:"Materno :",     	value:"_materno"},{label:"Semana :",     	value:"_semana"},{label:"Lunes :",     	value:"_lunes"},{label:"Martes :",     	value:"_martes"},{label:"Miercoles :",     	value:"_miercoles"},{label:"Jueves :",     	value:"_jueves"},{label:"Viernes :",     	value:"_viernes"},{label:"Sabado :",     	value:"_sabado"},{label:"Domingo :",     	value:"_domingo"},{label:"Horas Trabajadas :",     	value:"_horasTrabajadas"},{label:"Total Ingresos :",     	value:"_totalIngresos"},{label:"Comisiones :",     	value:"_comisiones"},{label:"Bonos :",     	value:"_bonos"},{label:"Corp :",     	value:"_corp"},{label:"Imss :",     	value:"_imss"},{label:"Infonavit :",     	value:"_infonavit"},{label:"Otros :",     	value:"_otros"},{label:"Total :",     	value:"_total"}]);
+
+//-------------------------------- Search Engine --------------------------------------					
+			
+			
+			
+			/*
+					<mx:DataGridColumn headerText="L" dataField="_lunes" width="30"/>
+			<mx:DataGridColumn headerText="m" dataField="_martes" width="30"/>
+			<mx:DataGridColumn headerText="M" dataField="_miercoles" width="30"/>
+			<mx:DataGridColumn headerText="J" dataField="_jueves" width="30"/>
+			<mx:DataGridColumn headerText="V" dataField="_viernes" width="30"/>
+			<mx:DataGridColumn headerText="S" dataField="_sabado" width="30"/>
+			<mx:DataGridColumn headerText="D" dataField="_domingo" width="30"/>
+			<mx:DataGridColumn headerText="Bonos" dataField="_bonos"   width="70" labelFunction="Converter.columNumberConverter"/>
+			<mx:DataGridColumn headerText="Corp" dataField="_corp"   width="70" labelFunction="Converter.columNumberConverter"/>
+			<mx:DataGridColumn headerText="Imss" dataField="_imss"   width="70" labelFunction="Converter.columNumberConverter"/>
+			<mx:DataGridColumn headerText="Inf" dataField="_infonavit"   width="70" labelFunction="Converter.columNumberConverter"/>
+			<mx:DataGridColumn headerText="Otros" dataField="_otros"   width="70" labelFunction="Converter.columNumberConverter"/>
+			
+			*/
+			
+			
+			private function nameFunction(item:Object,dg:DataGridColumn):String{
+				var res:String = "";
+				if(item[dg.dataField]){
+					res = item[dg.dataField]+" "+item["_paterno"]+" "+item["_materno"];
+				}
+				return res;
+			}
+			
+			
+			
+			
+		]]>
+	</mx:Script>
+	<mx:Label x="38" y="66" text="Empleado :" textAlign="right"/>
+	<mx:Label x="679" y="70" text="Lista de Empleados :" textAlign="right"/>
+<mx:TextInput x="115" y="64" id="_nombre" change="dataChange();" width="172" editable="false" enabled="false" fontStyle="italic"/>
+<mx:TextInput x="295" y="64" id="_paterno" change="dataChange();" width="173" editable="false" enabled="false" fontStyle="italic"/>
+<mx:TextInput x="476" y="64" id="_materno" change="dataChange();" width="166" editable="false" enabled="false" fontStyle="italic"/>
+<mx:DateField  x="537" y="21" id="_fecha" formatString="DD/MM/YYYY" change="dataChange();" showToday="true" width="105" enabled="false"/>
+<mx:Label x="153" y="107" textAlign="center" fontStyle="italic" color="#C1C1C1" fontSize="9" width="25" text="{_lun}"/>
+<mx:TextInput x="151" y="123" id="_lunes" change="dataChange();" width="28" text="0" textAlign="center" restrict="0-9" maxChars="2"/>
+<mx:Label x="189" y="107" textAlign="center" fontStyle="italic" color="#C1C1C1" fontSize="9" width="25" text="{_mar}"/>
+<mx:TextInput x="187" y="123" id="_martes" change="dataChange();" width="28" text="0" textAlign="center" restrict="0-9" maxChars="2"/>
+<mx:Label x="225" y="107" textAlign="center" fontStyle="italic" color="#C1C1C1" fontSize="9" width="25" text="{_mie}"/>
+<mx:TextInput x="223" y="123" id="_miercoles" change="dataChange();" width="28" text="0" textAlign="center" restrict="0-9" maxChars="2"/>
+	<mx:TextInput x="323" y="21" id="_startDay" change="dataChange();" width="28" textAlign="center" enabled="false" editable="false"/>
+	<mx:TextInput x="471" y="21" id="_endDay" change="dataChange();" width="28" textAlign="center" enabled="false" editable="false"/>
+	<mx:TextInput x="233" y="21" id="_startMonth" change="dataChange();" width="87" textAlign="center" enabled="false" editable="false"/>
+	<mx:TextInput x="381" y="21" id="_endMonth" change="dataChange();" width="87" textAlign="center" enabled="false" editable="false"/>
+	<mx:Label x="362" y="23" text="a" fontStyle="italic" color="#C1C1C1"/>
+<mx:Label x="261" y="107" textAlign="center" fontStyle="italic" color="#C1C1C1" fontSize="9" width="25" text="{_jue}"/>
+<mx:TextInput x="259" y="123" id="_jueves" change="dataChange();" width="28" text="0" textAlign="center" restrict="0-9" maxChars="2"/>
+<mx:Label x="297" y="107" textAlign="center" fontStyle="italic" color="#C1C1C1" fontSize="9" width="25" text="{_vie}"/>
+<mx:TextInput x="295" y="123" id="_viernes" change="dataChange();" width="28" text="0" textAlign="center" restrict="0-9" maxChars="2"/>
+<mx:Label x="333" y="107" textAlign="center" fontStyle="italic" color="#C1C1C1" fontSize="9" width="25" text="{_sab}"/>
+<mx:TextInput x="331" y="123" id="_sabado" change="dataChange();" width="28" text="0" textAlign="center" restrict="0-9" maxChars="2"/>
+<mx:Label x="117" y="107" textAlign="center" fontStyle="italic" color="#C1C1C1" fontSize="9" width="25" text="{_dom}"/>
+	<mx:Label x="153" y="92" text="L" textAlign="center" fontStyle="italic" color="#C1C1C1" fontSize="9" width="25"/>
+	<mx:Label x="189" y="92" text="M" textAlign="center" fontStyle="italic" color="#C1C1C1" fontSize="9" width="25"/>
+	<mx:Label x="225" y="92" text="M" textAlign="center" fontStyle="italic" color="#C1C1C1" fontSize="9" width="25"/>
+	<mx:Label x="261" y="92" text="J" textAlign="center" fontStyle="italic" color="#C1C1C1" fontSize="9" width="25"/>
+	<mx:Label x="297" y="92" text="V" textAlign="center" fontStyle="italic" color="#C1C1C1" fontSize="9" width="25"/>
+	<mx:Label x="333" y="92" text="S" textAlign="center" fontStyle="italic" color="#C1C1C1" fontSize="9" width="25"/>
+	<mx:Label x="117" y="92" text="D" textAlign="center" fontStyle="italic" color="#C1C1C1" fontSize="9" width="25"/>
+	<mx:Label x="409" y="107" text="Total" textAlign="left" fontStyle="italic" color="#C1C1C1" fontSize="9" width="46"/>
+	<mx:Label x="541" y="107" text="Sistema" textAlign="left" fontStyle="italic" color="#C1C1C1" fontSize="9" width="47"/>
+	<mx:Label x="486" y="107" text="Contrato" textAlign="left" fontStyle="italic" color="#C1C1C1" fontSize="9" width="47"/>
+	<mx:TextInput x="541" y="123" id="_horasCheckClock" change="dataChange();" width="47" editable="false" enabled="false" fontStyle="italic" text="0" textAlign="center"/>
+	<mx:Label x="115" y="46" text="nombre(s)" textAlign="center" fontStyle="italic" color="#C1C1C1" fontSize="9"/>
+	<mx:Label x="295" y="46" text="paterno" textAlign="center" fontStyle="italic" color="#C1C1C1" fontSize="9"/>
+	<mx:Label x="115" y="193" text="operación" textAlign="left" fontStyle="italic" color="#C1C1C1" fontSize="9" width="84"/>
+	<mx:Label x="115" y="361" text="comisiones" textAlign="left" fontStyle="italic" color="#C1C1C1" fontSize="9" width="84"/>
+	<mx:Label x="207" y="361" text="incentivos" textAlign="left" fontStyle="italic" color="#C1C1C1" fontSize="9" width="84"/>
+	<mx:Label x="299" y="361" text="retenciones" textAlign="left" fontStyle="italic" color="#C1C1C1" fontSize="9" width="84"/>
+	<mx:Label x="393" y="361" text="sueldo" textAlign="left" fontStyle="italic" color="#C1C1C1" fontSize="9" width="84"/>
+	<mx:Label x="115" y="150" text="base" textAlign="left" fontStyle="italic" color="#C1C1C1" fontSize="9" width="84"/>
+	<mx:Label x="207" y="150" text="por hora" textAlign="left" fontStyle="italic" color="#C1C1C1" fontSize="9" width="85"/>
+	<mx:Label x="115" y="236" text="ingresos" textAlign="center" fontStyle="italic" color="#C1C1C1" fontSize="9"/>
+	<mx:Label x="115" y="276" text="total" textAlign="left" fontStyle="italic" color="#C1C1C1" fontSize="9" width="84"/>
+	<mx:Label x="207" y="276" text="prc. com." textAlign="left" fontStyle="italic" color="#C1C1C1" fontSize="9" width="84"/>
+	<mx:Label x="227" y="526" text="% nómina" textAlign="center" fontStyle="italic" color="#C1C1C1" fontSize="9"/>
+	<mx:Label x="207" y="236" text="cancelaciones" textAlign="left" fontStyle="italic" color="#C1C1C1" fontSize="9"/>
+	<mx:Label x="392" y="236" text="total" textAlign="left" fontStyle="italic" color="#C1C1C1" fontSize="9" width="85"/>
+	<mx:Label x="207" y="193" text="corporativo" textAlign="left" fontStyle="italic" color="#C1C1C1" fontSize="9" width="84"/>
+	<mx:Label x="115" y="315" text="imss" textAlign="left" fontStyle="italic" color="#C1C1C1" fontSize="9" width="84"/>
+	<mx:Label x="207" y="315" text="infonavit" textAlign="left" fontStyle="italic" color="#C1C1C1" fontSize="9" width="86"/>
+	<mx:Label x="301" y="315" text="descuentos" textAlign="left" fontStyle="italic" color="#C1C1C1" fontSize="9" width="84"/>
+	<mx:Label x="476" y="46" text="materno" textAlign="center" fontStyle="italic" color="#C1C1C1" fontSize="9"/>
+<mx:TextInput x="115" y="123" id="_domingo" change="dataChange();" width="28" text="X" textAlign="center" editable="false" enabled="false" fontStyle="italic"/>
+<mx:Label x="15" y="125" text="Horas Diarias :" textAlign="right"/>
+	<mx:Label x="36" y="211" text="Incentivos :" textAlign="right"/>
+	<mx:Label x="25" y="329" text="Retenciones :" textAlign="right"/>
+	<mx:Label x="10" y="489" text="Total de Ingresos :" textAlign="right"/>
+<mx:TextInput x="409" y="123" id="_horasTrabajadas" change="dataChange();" width="46" editable="false" enabled="false" fontStyle="italic" text="0" textAlign="center"/>
+<mx:TextInput x="486" y="123" id="_horasContrato" change="dataChange();" width="47" editable="false" enabled="false" fontStyle="italic" text="0" textAlign="center"/>
+<mx:Label x="55" y="255" text="Ventas :" textAlign="right"/>
+<mx:TextInput x="115" y="253" id="_ingresosVentas" change="dataChange();" width="84" editable="false" enabled="false" fontStyle="italic" text="0.00" textAlign="right"/>
+<mx:TextInput x="207" y="253" id="_egresosCancelacion" change="dataChange();" width="84" editable="false" enabled="false" fontStyle="italic" text="0.00" textAlign="right"/>
+	<mx:Label x="299" y="236" text="por acreditar" textAlign="left" fontStyle="italic" color="#C1C1C1" fontSize="9" width="84"/>
+	<mx:TextInput x="299" y="253" id="_porAcreditar" change="dataChange();" width="84" editable="false" enabled="true" fontStyle="italic" text="0.00" textAlign="right" color="#FC9393" fontWeight="bold"/>
+<mx:TextInput x="393" y="253" id="_totalIngresos" change="dataChange();" width="84" fontWeight="bold" editable="false" enabled="false" fontStyle="italic" text="0.00" textAlign="right"/>
+	<mx:TextInput x="115" y="166" id="_sueldoBase" change="dataChange();" width="84" fontWeight="bold" editable="false" enabled="false" fontStyle="italic" text="0.00" textAlign="right"/>
+	<mx:TextInput x="207" y="166" id="_sueldoHora" change="dataChange();" width="84" fontWeight="bold" editable="false" enabled="false" fontStyle="italic" text="0.00" textAlign="right"/>
+	<mx:TextInput x="393" y="376" id="_sueldoAcumulado" change="dataChange();" width="84" fontWeight="bold" editable="false" enabled="false" fontStyle="italic" text="0.00" textAlign="right"/>
+	<mx:TextInput x="578" y="376" id="_subTotal" change="dataChange();" width="84" fontWeight="bold" editable="false" enabled="false" fontStyle="italic" text="0.00" textAlign="right"/>
+<mx:Label x="260" y="294" text="%" textAlign="right"/>
+	<mx:Label x="277" y="545" text="%" textAlign="right"/>
+<mx:TextInput x="207" y="292" id="_prcComision" change="dataChange();" width="54" fontWeight="bold" editable="false" enabled="false" fontStyle="italic" text="0.0" textAlign="center"/>
+<mx:Label x="28" y="294" text="Comisiones :" textAlign="right"/>
+<mx:TextInput x="115" y="292" id="_comisiones" change="dataChange();" width="84" fontWeight="bold" editable="false" enabled="false" fontStyle="italic" text="0.00" textAlign="right"/>
+<mx:TextInput x="115" y="209" id="_bonos" change="dataChange();" width="84" text="0.00" textAlign="right"/>
+<mx:TextInput x="207" y="209" id="_corp" change="dataChange();" width="84" text="0.00" textAlign="right"/>
+<mx:TextInput x="115" y="331" id="_imss" change="dataChange();" width="84" editable="false" enabled="false" fontStyle="italic" text="0.00" textAlign="right"/>
+<mx:TextInput x="207" y="331" id="_infonavit" change="dataChange();" width="84" editable="false" enabled="false" fontStyle="italic" text="0.00" textAlign="right"/>
+<mx:TextInput x="301" y="331" id="_otros" change="dataChange();" width="84" text="0.00" textAlign="right"/>
+	<mx:TextInput x="130" y="487" change="dataChange();" width="89" text="0.00" textAlign="right" editable="false"/>
+	<mx:Label x="16" y="517" text="Total de Egresos :" textAlign="right"/>
+	<mx:TextInput x="130" y="515" change="dataChange();" width="89" text="0.00" textAlign="right" editable="false"/>
+	<mx:TextInput x="227" y="543" change="dataChange();" width="51" text="0.00" textAlign="center" editable="false"/>
+	<mx:Label x="130" y="470" text="ventas" textAlign="center" fontStyle="italic" color="#C1C1C1" fontSize="9"/>
+	<mx:TextInput x="227" y="487" change="dataChange();" width="100" text="0.00" textAlign="right" editable="false"/>
+	<mx:Label x="46" y="545" text="SUB-TOTAL :" textAlign="right"/>
+	<mx:TextInput x="130" y="543" change="dataChange();" width="89" text="0.00" textAlign="right" editable="false"/>
+	<mx:Label x="78" y="573" text="I.V.A. :" textAlign="right"/>
+	<mx:TextInput x="130" y="571" change="dataChange();" width="89" text="0.00" textAlign="right" editable="false"/>
+	<mx:Label x="73" y="601" text="TOTAL :" textAlign="right"/>
+	<mx:TextInput x="130" y="599" change="dataChange();" width="89" text="0.00" textAlign="right" fontWeight="bold" editable="false"/>
+<mx:Label x="68" y="437" text="total :" textAlign="right"/>
+	<mx:Label x="528" y="437" text="TOTAL :" textAlign="right" fontWeight="bold"/>
+	<mx:Label x="533" y="408" text="I.V.A :" textAlign="right" fontWeight="bold"/>
+	<mx:Label x="505" y="378" text="SUBTOTAL :" textAlign="right" fontWeight="bold"/>
+	<mx:Label x="65" y="408" text="i.v.a. :" textAlign="right"/>
+	<mx:Label x="48" y="378" text="subtotal :" textAlign="right"/>
+	<mx:TextInput x="115" y="406" id="_comisionesIVA" change="dataChange();" width="84" fontWeight="bold" editable="false" enabled="false" text="0.00" textAlign="right"/>
+	<mx:TextInput x="207" y="406" id="_incentivosIVA" change="dataChange();" width="84" fontWeight="bold" editable="false" enabled="false" text="0.00" textAlign="right"/>
+	<mx:TextInput x="578" y="406" id="_iva" change="dataChange();" width="84" fontWeight="bold" editable="false" enabled="false" text="0.00" textAlign="right"/>
+	<mx:TextInput x="115" y="435" id="_comisionesTotal" change="dataChange();" width="84" fontWeight="bold" editable="false" enabled="false" text="0.00" textAlign="right"/>
+<mx:TextInput x="115" y="376" id="_comisionesSubTotal" change="dataChange();" width="84" fontWeight="bold" editable="false" enabled="false" text="0.00" textAlign="right"/>
+	<mx:TextInput x="207" y="435" id="_incentivosTotal" change="dataChange();" width="84" fontWeight="bold" editable="false" enabled="false" text="0.00" textAlign="right"/>
+	<mx:TextInput x="299" y="435" id="_retencionesTotal" change="dataChange();" width="84" fontWeight="bold" editable="false" enabled="false" text="0.00" textAlign="right"/>
+	<mx:TextInput x="393" y="435" id="_sueldoTotal" change="dataChange();" width="84" fontWeight="bold" editable="false" enabled="false" text="0.00" textAlign="right"/>
+	<mx:TextInput x="578" y="435" id="_total" change="dataChange();" width="84" fontWeight="bold" editable="false" enabled="false" text="0.00" textAlign="right"/>
+	<mx:TextInput x="299" y="376" id="_retencionesSubTotal" change="dataChange();" width="84" fontWeight="bold" editable="false" enabled="false" text="0.00" textAlign="right"/>
+	<mx:TextInput x="207" y="376" id="_incentivosSubTotal" change="dataChange();" width="84" fontWeight="bold" editable="false" enabled="false" text="0.00" textAlign="right"/>
+
+	<mx:DataGrid height="496" dataProvider="{_DataResult}" id="_dataList" change="onDataSelect();" allowMultipleSelection="{_multipleSelection}"  enabled="{_dataReady&amp;&amp;!_newData}" y="94" width="557" x="679">
+		<mx:columns>			
+			<mx:DataGridColumn headerText="Id" dataField="_idEmpleado" width="40"/>
+			<mx:DataGridColumn headerText="Nombre" dataField="_nombre" labelFunction="nameFunction"/>
+			<mx:DataGridColumn headerText="Sem" dataField="_semana" width="40" textAlign="center"/>	
+			<mx:DataGridColumn headerText="hrs" dataField="_horasTrabajadas"  width="40" textAlign="center"/>
+			<mx:DataGridColumn headerText="Ingresos" dataField="_totalIngresos"  width="70" labelFunction="Converter.columNumberConverter" textAlign="right" paddingRight="5"/>
+			<mx:DataGridColumn headerText="Coms" dataField="_comisiones"   width="70" labelFunction="Converter.columNumberConverter" textAlign="right" paddingRight="5"/>			
+			<mx:DataGridColumn headerText="Total" dataField="_total"   width="70" labelFunction="Converter.columNumberConverter" textAlign="right" paddingRight="5"/>
+		</mx:columns>
+	</mx:DataGrid>
+	<mx:ComboBox 	x="758" id="_searchType" 	dataProvider="{_searchTypes}" 	width="160" y="40"/>
+	<mx:ComboBox 	x="758" id="_searchType0" 	dataProvider="{_searchTypes}" 	width="478" y="10"/>
+	<mx:TextInput 	x="926" id="_searchField" 	change="search();" 		width="310" enabled="{!_newData}" y="40"/>
+	<mx:Label x="679" text="Filtrar por :" textAlign="right" y="43"/>
+	<mx:Label x="686" text="Sucursal :" textAlign="right" y="12"/>
+	<mx:Button label="Nuevo" width="80" enabled="{_dataReady}" visible="{!_newData&amp;&amp;!_updateData}" click="newData();" x="679" y="598"/>
+	<mx:Button label="Cancelar" width="80" enabled="{_dataReady}" visible="{_newData||_updateData}" click="cancel();" x="767" y="598"/>
+	<mx:Button label="Aceptar" width="80" enabled="{_dataReady}" visible="{_newData}" click="createData();" x="679" y="598"/>
+	<mx:Button label="Eliminar" width="80" enabled="{_dataReady&amp;&amp;!_newData}" visible="{!_newData&amp;&amp;!_updateData}" click="deleteDataAlert();" x="767" y="598"/>
+	<mx:Button label="Actualizar" width="80" enabled="{_dataReady&amp;&amp;!_newData&amp;&amp;_updateData}" visible="{_updateData&amp;&amp;!_newData}" click="updateData();" x="679" y="598"/>
+	<mx:Button label="Regresar" click="closeWindow();" width="145"  enabled="{!_newData}" y="598" x="1091"/>
+	<mx:Label x="201" y="23" text="De :" fontStyle="italic" color="#C1C1C1"/>
+	<mx:Label x="55" y="23" text="Semana :" fontStyle="italic" color="#C1C1C1"/>
+	<mx:ComboBox x="114" y="21" id="_semanaSelect" width="64" dataProvider="{_weeks}" change="calculateDays();getData();"></mx:ComboBox>
+	<mx:TextInput x="373" y="483" width="240"/>
+	<mx:TextInput x="621" y="483" width="41"/>
+	<mx:TextInput x="621" y="521" width="41"/>
+	<mx:TextInput x="621" y="560" width="41"/>
+	<mx:TextInput x="621" y="599" width="41"/>
+	<mx:TextInput x="373" y="521" width="240"/>
+	<mx:TextInput x="373" y="560" width="240"/> 
+	<mx:TextInput x="373" y="599" width="240"/>
+	<mx:Label x="373" y="582" text="menos ingresos" textAlign="center" fontStyle="italic" color="#C1C1C1" fontSize="9"/>
+	<mx:Label x="373" y="543" text="menos ventas" textAlign="center" fontStyle="italic" color="#C1C1C1" fontSize="9"/>
+	<mx:Label x="227" y="470" text="cancelaciones" textAlign="center" fontStyle="italic" color="#C1C1C1" fontSize="9"/>
+	<mx:Label x="373" y="466" text="más ventas" textAlign="center" fontStyle="italic" color="#C1C1C1" fontSize="9"/>
+	<mx:Label x="621" y="466" text="horas" textAlign="center" fontStyle="italic" color="#C1C1C1" fontSize="9"/>
+	<mx:Label x="373" y="504" text="más ingresos" textAlign="center" fontStyle="italic" color="#C1C1C1" fontSize="9"/>
+	<mx:VRule x="670" y="10" height="611"/>
+	<mx:HRule x="10" y="465" width="652"/>
+	<mx:Label x="55" y="168" text="Sueldo :" textAlign="right"/>
+	<mx:Button x="505" y="330" width="157" click="acutalizarComisiones();" label="Actualizar">
+		<mx:icon>@Embed(source='../../assets/Icons/Buttons/refresh.png')</mx:icon>
+	</mx:Button>
+	
+</mx:TitleWindow>

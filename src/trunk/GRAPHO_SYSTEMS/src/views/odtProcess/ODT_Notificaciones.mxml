@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:ns1="views.components.*" width="500" height="100%" backgroundColor="#000000" backgroundAlpha="0.0">
+	<mx:Label 
+		x="10" y="48" 
+		text="Notificación :" 
+		color="#FFFFFF" 
+		fontFamily="ArialEmbedded" 
+		fontSize="15" 			
+		selectable="false"		/>
+	<mx:Style>
+		@font-face {
+		    src:url("../../assets/Custom/arial.ttf");        
+		    fontFamily: ArialEmbedded;
+		    advancedAntiAliasing: true;		
+		}			
+	</mx:Style> 
+	<mx:Script>
+		<![CDATA[
+			import views.components.Blog_Talk_Component_Clear;
+			import views.components.Blog_Talk_Component;
+			import mx.random.constant.ODT;
+			import mx.containers.TitleWindow;
+			import mx.random.constants.Catalogs;			
+			import mx.random.windowManagers.PopManager;
+			import mx.random.constants.Languages;
+			import mx.random.forms.Validator;
+			import mx.random.dataManagers.EventManager;
+			import mx.random.converters.Converter;
+			import mx.random.dataManagers.DataManager;
+			import mx.random.web.WebApplication;
+			import mx.managers.PopUpManager;
+			import mx.collections.ArrayCollection;
+			import mx.events.CloseEvent;
+			import mx.controls.Alert;
+			import mx.rpc.remoting.RemoteObject;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+
+			private var _webApplication:WebApplication;
+			private var Valid:Validator 			= new Validator();
+			private var _workManager:Object 		= new Object();
+			private var _MainService:RemoteObject 		= new RemoteObject();
+[Bindable]	private var _Data:DataManager 				= new DataManager(this);
+[Bindable]	private var _DataResult:ArrayCollection 		= new ArrayCollection();			
+			private var _eventManager:EventManager 		= new EventManager(this);
+			private var _dataIndex:Number 			= 0;
+			
+			//-----------Event Manager -----------
+
+[Bindable]	public var _dataReady:Boolean 			= false;
+[Bindable]	public var _newData:Boolean 			= false;
+[Bindable]	public var _updateData:Boolean 			= false;
+
+			//-----------Event Manager -----------
+			
+			
+			//-----------Local Vars -----------
+			
+			private var _selectedId:Number = 0;
+			private var _selectedName:String = "";
+			private var _serviceName:String  	= "Proceso_ODT";
+			private var _mainId:String  		= "_idODT";
+			private var _idODT:Number  			= 0;
+			private var _mainFocusField:String  = "_nombre";
+			private var _ODT:ODT = new ODT();
+			private var _odtData:Object = new Object();
+
+[Bindable]	private var _user:String = "";	
+[Bindable]	private var _estatus:String = "";	
+[Bindable]	private var _tipoCliente:String = "";
+[Bindable]	private var _servicesList:ArrayCollection = new ArrayCollection();	
+[Bindable]	private var _capturistas:ArrayCollection = new ArrayCollection();	
+[Bindable]	private var _notification:Number = 0;
+
+			//-----------Local Vars -----------
+			
+//---------------------------- Context ---------------------------------------------            
+
+   			public function set context(contextObj:Object):void{
+				for( var p:String in contextObj){
+					if(this.hasOwnProperty(p)){
+						this[p] = contextObj[p];
+					}
+				}
+				initView();
+			}
+			
+		
+			public function set odtData(value:Object):void{
+				_odtData = value;				
+			}
+			
+			public function set workManager(value:Object):void{
+				_workManager = value;
+			}
+
+			public function set webApplication(value:WebApplication):void{
+				_webApplication = value;					
+			}
+			public function get webApplication():WebApplication{ return _webApplication; } 
+						
+//---------------------------- Context ---------------------------------------------  
+
+//-------------------------------- MainInit --------------------------------------
+			// ------------------- View Extra Data -------------------------------
+			
+			private function get viewContext():Object{ 
+				return {webApplication: _webApplication,
+						workManager: this
+						}					
+			}
+
+			public function initView():void{				
+				_MainService = _webApplication.getService(_serviceName);
+				_MainService.addEventListener(FaultEvent.FAULT,onFault);
+				_ODT.context = _odtData;	
+				_user = _webApplication.user.fullName;	
+				if(_ODT._idTipoCliente==0){
+					_tipoCliente = "Persona Moral";
+				}else{
+					_tipoCliente = "Persona Física";
+				}
+				_MainService.getNotifications(_ODT._idODT);
+				_MainService.getNotifications.addEventListener(ResultEvent.RESULT,onGetNotificationsReady);						
+			}
+			
+			private function onGetNotificationsReady(e:ResultEvent):void{
+				if(e.result){
+					var notificaciones:ArrayCollection = Converter.arrayConverter(e.result);
+					
+					
+					
+					for(var n:Number = 0;n<notificaciones.length;n++){
+						var color:uint = 0xAA0000;
+						var item:Blog_Talk_Component_Clear = new Blog_Talk_Component_Clear();
+						
+						
+						switch(Number(notificaciones[n]._idNivel)){
+							case 1:
+								color = 0x00cac9;
+								break;
+							case 2:
+								color = 0x738d42;
+								break;
+							case 3:
+								color = 0x9f1d53;
+								break;
+							case 4:
+								color = 0xce7326;
+								break;
+							default:
+								color = 0xFFFFFF;
+								break;
+						}
+							
+						
+						item.titulo 			= notificaciones[n]._nombreEmpleado;
+						item.setDescripcion 	= notificaciones[n]._comentario;
+						item.files 				= notificaciones[n]._file;
+						item.autor 				= "";
+						item.fecha 				= Converter.systemToViewDate(notificaciones[n]._fecha)+" - "+notificaciones[n]._hora;;				
+						item.bgColor			= color;	
+						item.width 				= _canvas.width;
+						item.bgAlpha			= 1;
+						_canvas.addChild(item);	
+					}
+										
+				}else{
+					Alert.show("No hay notificaciones para esta Orden de Trabajo","Atención");
+				}
+			}
+			
+			private function onFault(e:FaultEvent):void{
+				Alert.show(e.fault.faultString,"Error");
+			}
+					
+		
+			private function addNotification():void{
+				var params:Object = {_notificacion:_notificacion.text,_ODT:_ODT._idODT};
+				
+				
+		
+			}
+			
+			private function closeExtraWindow():void{
+				_workManager.closeExtraCanvas();
+			}					
+			
+		]]>
+	</mx:Script>
+	<mx:HRule y="41" left="10" right="10"/>
+	<mx:TextArea y="69" right="10" left="10" height="82" id="_notificacion"/>
+	<mx:Text text="FOLIO : {_ODT._numeroODT}" 
+		width="261" height="30" 
+		fontFamily="ArialEmbedded" 
+		fontSize="18" 
+		textAlign="left" 		
+		selectable="false"
+		fontAntiAliasType="advanced" top="10" left="10"/>
+	<mx:Text text="{_tipoCliente}" 
+		width="261" height="30" 
+		fontFamily="ArialEmbedded" 
+		fontSize="18" 
+		textAlign="right" 		
+		selectable="false"
+		fontAntiAliasType="advanced" right="10" top="10"/>
+	<mx:Button y="159" label="Agregar" height="31" click="addNotification()" right="10" left="10">
+	</mx:Button>
+	<mx:Button label="Regresar" height="31" click="closeExtraWindow()" right="10" left="10" top="668">
+	</mx:Button>
+	
+	<ns1:LeftScrollCanvas backgroundColor="#000000" top="198" left="10" backgroundAlpha="0.1" horizontalScrollPolicy="off"  height="462" right="10">
+		<mx:VBox x="16" y="0" width="100%" height="100%" id="_canvas">
+		</mx:VBox>
+	</ns1:LeftScrollCanvas>
+</mx:Canvas>

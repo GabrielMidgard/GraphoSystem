@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="437" height="100%" backgroundColor="#000000" backgroundAlpha="0.0">
+	<mx:Label 
+		x="10" y="178" 
+		text="Servicios :" 
+		color="#FFFFFF" 
+		fontFamily="ArialEmbedded" 
+		fontSize="15" 			
+		selectable="false"		/>
+	<mx:Label 
+		x="10" y="552" 
+		text="Capturista 1 :" 
+		color="#FFFFFF" 
+		fontFamily="ArialEmbedded" 
+		fontSize="12" 			
+		selectable="false"		/>
+	<mx:Label 
+		x="10" y="596" 
+		text="Capturista 2 :" 
+		color="#FFFFFF" 
+		fontFamily="ArialEmbedded" 
+		fontSize="12" 			
+		selectable="false"		/>
+	<mx:Label 
+		x="10" y="394" 
+		text="Observaciones :" 
+		color="#FFFFFF" 
+		fontFamily="ArialEmbedded" 
+		fontSize="15" 			
+		selectable="false"		/>
+	<mx:Style>
+		@font-face {
+		    src:url("../../assets/Custom/arial.ttf");        
+		    fontFamily: ArialEmbedded;
+		    advancedAntiAliasing: true;		
+		}			
+	</mx:Style> 
+	<mx:Script>
+		<![CDATA[
+			import mx.random.constant.ODT;
+			import mx.containers.TitleWindow;
+			import mx.random.constants.Catalogs;			
+			import mx.random.windowManagers.PopManager;
+			import mx.random.constants.Languages;
+			import mx.random.forms.Validator;
+			import mx.random.dataManagers.EventManager;
+			import mx.random.converters.Converter;
+			import mx.random.dataManagers.DataManager;
+			import mx.random.web.WebApplication;
+			import mx.managers.PopUpManager;
+			import mx.collections.ArrayCollection;
+			import mx.events.CloseEvent;
+			import mx.controls.Alert;
+			import mx.rpc.remoting.RemoteObject;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+
+			private var _webApplication:WebApplication;
+			private var Valid:Validator 			= new Validator();
+			private var _workManager:Object 		= new Object();
+			private var _MainService:RemoteObject 		= new RemoteObject();
+[Bindable]	private var _Data:DataManager 				= new DataManager(this);
+[Bindable]	private var _DataResult:ArrayCollection 		= new ArrayCollection();			
+			private var _eventManager:EventManager 		= new EventManager(this);
+			private var _dataIndex:Number 			= 0;
+			
+			//-----------Event Manager -----------
+
+[Bindable]	public var _dataReady:Boolean 			= false;
+[Bindable]	public var _newData:Boolean 			= false;
+[Bindable]	public var _updateData:Boolean 			= false;
+
+			//-----------Event Manager -----------
+			
+			
+			//-----------Local Vars -----------
+			
+			private var _selectedId:Number = 0;
+			private var _selectedName:String = "";
+			private var _serviceName:String  	= "Proceso_ODT";
+			private var _mainId:String  		= "_idODT";
+			private var _idODT:Number  			= 0;
+			private var _mainFocusField:String  = "_nombre";
+			private var _ODT:ODT = new ODT();
+			private var _odtData:Object = new Object();
+
+[Bindable]	private var _user:String = "";	
+[Bindable]	private var _estatus:String = "";	
+[Bindable]	private var _tipoCliente:String = "";
+[Bindable]	private var _servicesList:ArrayCollection = new ArrayCollection();	
+[Bindable]	private var _capturistas:ArrayCollection = new ArrayCollection();	
+[Bindable]	private var _notification:Number = 0;
+
+			//-----------Local Vars -----------
+			
+//---------------------------- Context ---------------------------------------------            
+
+   			public function set context(contextObj:Object):void{
+				for( var p:String in contextObj){
+					if(this.hasOwnProperty(p)){
+						this[p] = contextObj[p];
+					}
+				}
+				initView();
+			}
+			
+		
+			public function set odtData(value:Object):void{
+				_odtData = value;				
+			}
+			
+			public function set workManager(value:Object):void{
+				_workManager = value;
+			}
+
+			public function set webApplication(value:WebApplication):void{
+				_webApplication = value;					
+			}
+			public function get webApplication():WebApplication{ return _webApplication; } 
+						
+//---------------------------- Context ---------------------------------------------  
+
+//-------------------------------- MainInit --------------------------------------
+			// ------------------- View Extra Data -------------------------------
+			
+			private function get viewContext():Object{ 
+				return {webApplication: _webApplication,
+						workManager: this
+						}					
+			}
+
+			
+			
+			public function initView():void{				
+				_MainService = _webApplication.getService(_serviceName);
+				_MainService.addEventListener(FaultEvent.FAULT,onFault);
+				_ODT.context = _odtData;
+				_servicesList = Converter.base64ToArray(_odtData._servicios);	
+				_user = _webApplication.user.fullName;	
+				if(_ODT._idTipoCliente==0){
+					_tipoCliente = "Persona Moral";
+				}else{
+					_tipoCliente = "Persona Física";
+				}
+				
+				switch(_ODT._idEstatus){
+					case 0:
+						_estatus = "No Procesada";
+						break;
+					case 1:
+						_estatus = "Enviada";
+						break;
+					case 2:
+						_estatus = "En Captura";
+						break;
+					case 3:
+						_estatus = "En Facturacion";
+						break;
+					case 4:
+						_estatus = "En Mensajería";
+						break;
+					case 5:
+						_estatus = "Finalizada";
+						break;
+				}	
+				_MainService.getCapturistas(_ODT._idTipoCliente);
+				_MainService.getCapturistas.addEventListener(ResultEvent.RESULT,onCapturistasReady);
+				updateNotifications();						
+			}
+			
+			
+			private function updateNotifications(){
+				_MainService.getNotificationsCount(_ODT._idODT);
+				_MainService.getNotificationsCount.addEventListener(ResultEvent.RESULT,onUpdateNotificationsReady);
+			}
+			
+			private function onUpdateNotificationsReady(e:ResultEvent):void{
+				_MainService.getNotificationsCount.removeEventListener(ResultEvent.RESULT,onUpdateNotificationsReady);
+				if(e.result){
+					_notification = Number(e.result);
+				}else{
+					_notification = 0;
+				}
+			}
+			
+			private function onFault(e:FaultEvent):void{
+				Alert.show(e.fault.faultString,"Error");
+			}
+			
+			private function onCapturistasReady(e:ResultEvent):void{
+				_MainService.getCapturistas.removeEventListener(ResultEvent.RESULT,onCapturistasReady);
+				if(e.result){
+					_capturistas = Converter.arrayConverter(e.result);
+				}else{
+					Alert.show("Error al cargar la lista de capturistas","Error");
+				}	
+			}
+						
+			private function sendODT():void{
+				var msg:String = "Se enviará la ODT a:\n"+_comboCapturista1.selectedItem._nombre+"\n"+_comboCapturista2.selectedItem._nombre+"\nDesea Continuar?";
+				Alert.show(msg,"Atención",Alert.YES|Alert.NO,this,sendODTHandler);
+			}	
+			
+			private function asignarODT(capturista:Number):void{
+				
+			}
+			
+			private function sendODTHandler(e:CloseEvent){
+				if(e.detail==Alert.YES){
+					
+				}
+			}
+			
+			private function openExtraWindow(e:Event):void{
+				_workManager.loadExtraCanvas((e.currentTarget.y+(e.currentTarget.height/2)),"ODT_Notificaciones");
+			}					
+			
+		]]>
+	</mx:Script>
+	<mx:Label x="10" y="142" text="Fecha :" fontFamily="ArialEmbedded" textAlign="right" fontSize="12" width="92"/>
+	<mx:TextInput x="110" y="142" text="{Converter.systemToViewDate(_ODT._fechaCreacion)}" width="80" editable="false" enabled="false"/>
+	<mx:TextInput x="198" y="142" editable="false" enabled="false" text="{Converter.systemToViewDate(_ODT._fechaRecoleccion)}" width="80"/>
+	<mx:TextInput x="286" y="142" editable="false" enabled="false" text="{_estatus}" width="113"/>
+	<mx:Label x="10" y="104" text="Asignada a :"   fontFamily="ArialEmbedded" textAlign="right" fontSize="12" width="92"/>
+	<mx:TextInput x="110" y="104" width="289" editable="false" enabled="false" text="{_user}"/>
+	<mx:HRule y="96" left="10" right="10"/>
+	<mx:HRule y="41" left="10" right="10"/>
+	<mx:HRule y="174" left="10" right="10"/>
+	<mx:DataGrid y="201" height="192" id="_servicios" dataProvider="{_servicesList}" editable="true"  right="10" left="10">
+		<mx:columns>						
+			<mx:DataGridColumn headerText="Cantidad" dataField="_cantidad" width="40" editorDataField="value" />
+			<mx:DataGridColumn headerText="Nombre" dataField="_nombre" width="180" editable="false"/>										
+		</mx:columns>
+	</mx:DataGrid>
+	<mx:TextArea y="415" right="10" left="10" height="82" text="{_ODT._observaciones}"/>
+	<mx:Text y="48" text="Ejecutivo de Cuenta : &#xa;{_ODT._nombreCreador}" height="40" right="10" left="10" fontFamily="ArialEmbedded" fontSize="14" />
+	<mx:Text text="FOLIO : {_ODT._numeroODT}" 
+		width="261" height="30" 
+		fontFamily="ArialEmbedded" 
+		fontSize="18" 
+		textAlign="left" 		
+		selectable="false"
+		fontAntiAliasType="advanced" top="10" left="10"/>
+	<mx:Text text="{_tipoCliente}" 
+		width="261" height="30" 
+		fontFamily="ArialEmbedded" 
+		fontSize="18" 
+		textAlign="right" 		
+		selectable="false"
+		fontAntiAliasType="advanced" right="10" top="10"/>
+	<mx:ComboBox y="572" left="10" right="120" id="_comboCapturista1" dataProvider="{_capturistas}" labelField="_nombre"></mx:ComboBox>
+	<mx:ComboBox y="616" left="10" right="120" id="_comboCapturista2" dataProvider="{_capturistas}" labelField="_nombre"></mx:ComboBox>
+	<mx:Button y="615" label="Asignar" width="102" right="10" click="asignarODT(2);"/>
+	<mx:Button y="571" label="Asignar" width="102" right="10" click="asignarODT(1);"/>
+	<mx:CheckBox y="574" enabled="false" id="_capturista1" right="93"/>
+	<mx:CheckBox y="618" enabled="false" id="_capturista2" right="93"/>
+	<mx:Button y="646" label="Enviar a Captura" height="44" id="_sendBt" click="sendODT()" right="10" left="10">
+		<mx:icon>@Embed(source='../../assets/Icons/Buttons/Start.png')</mx:icon>
+	</mx:Button>
+	<mx:Button y="505" label="Comentarios ({_notification})" height="44" id="_sendBt0" click="openExtraWindow(event)" right="10" left="10">
+	</mx:Button>
+	<mx:Label x="110" y="126" text="creación" fontStyle="italic" fontSize="9" color="#C1C1C1"/>
+	<mx:Label x="198" y="126" text="recolección" fontStyle="italic" fontSize="9" color="#C1C1C1"/>
+	<mx:Label x="286" y="126" text="estatus" fontStyle="italic" fontSize="9" color="#C1C1C1"/>
+</mx:Canvas>

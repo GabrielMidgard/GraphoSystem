@@ -1,0 +1,736 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:ns1="views.components.*" layout="absolute" width="1238" height="794" title="Administración de Ordenes de Trabajo" showCloseButton="true">
+	<mx:Script>
+		<![CDATA[
+			import views.fiscales.Fiscales_Clientes_Busqueda;
+			import views.clientes.Clientes_Busqueda;
+			import mx.random.constants.SystemGlobals;
+			import mx.managers.SystemManager;
+			import mx.controls.dataGridClasses.DataGridColumn;
+			import mx.random.constants.ConstantData;
+			import mx.random.constants.Catalogs;			
+			import mx.random.windowManagers.PopManager;
+			import mx.random.constants.Languages;
+			import mx.random.forms.Validator;
+			import mx.random.dataManagers.EventManager;
+			import mx.random.converters.Converter;
+			import mx.random.dataManagers.DataManager;
+			import mx.random.web.WebApplication;
+			import mx.managers.PopUpManager;
+			import mx.collections.ArrayCollection;
+			import mx.events.CloseEvent;
+			import mx.controls.Alert;
+			import mx.rpc.remoting.RemoteObject;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+
+			private var _webApplication:WebApplication;
+			private var Valid:Validator 			= new Validator();
+			private var _workManager:Object 		= new Object();
+			private var _MainService:RemoteObject 		= new RemoteObject();
+			private var _AuxService:RemoteObject 		= new RemoteObject();
+[Bindable]	private var _Data:DataManager 				= new DataManager(this);
+[Bindable]	private var _DataResult:ArrayCollection 		= new ArrayCollection();			
+			private var _eventManager:EventManager 		= new EventManager(this);
+			private var _dataIndex:Number 			= 0;
+			
+			//-----------Event Manager -----------
+
+[Bindable]	public var _dataReady:Boolean 			= false;
+[Bindable]	public var _newData:Boolean 			= false;
+[Bindable]	public var _updateData:Boolean 			= false;
+
+			//-----------Event Manager -----------
+			
+			
+			//-----------Local Vars -----------
+			
+			private var _selectedId:Number = 0;
+			private var _selectedName:String = "";
+			private var _serviceName  		= "ODTS";
+			private var _mainId  			= "_idODT";
+			private var _mainFocusField:String      = "_nombreCliente";
+			
+			private var _services  		= "Fiscales_Clientes_Servicios";
+
+			private var _capturaData:String = new String();
+			
+			private var _idCaptura1:Number = new Number();
+			private var _idCaptura2:Number = new Number();
+			private var _idCierre:Number = new Number();
+			private var _idDIOT:Number = new Number();
+			private var _idCliente:Number = new Number();
+			private var _idCreador:Number = new Number();
+
+[Bindable]	private var _servicesList:ArrayCollection = new ArrayCollection();			
+			
+			//-----------Local Vars -----------
+			
+//---------------------------- Context ---------------------------------------------            
+
+   			public function set context(contextObj:Object):void{
+				for( var p:String in contextObj){
+					if(this.hasOwnProperty(p)){
+						this[p] = contextObj[p];
+					}
+				}
+				initView();
+			}
+
+			public function set workManager(value:Object):void{
+				_workManager = value;
+			}
+
+			public function set webApplication(value:WebApplication):void{
+				_webApplication = value;
+				
+			}
+			public function get webApplication():WebApplication{ return _webApplication; } 
+						
+//---------------------------- Context ---------------------------------------------  
+
+//-------------------------------- MainInit --------------------------------------
+			// ------------------- View Extra Data -------------------------------
+			
+			private function get viewContext():Object{ 
+				return {webApplication: _webApplication,
+						workManager: this
+						}					
+			}
+
+			private function addValidations():void{
+				Valid.changeLanguage(Languages.SPANISH);
+				Valid.setErrorKnot(Validator.CIRCLE_KNOT,0xFF0000);
+				Valid.validateOnChange = true;
+				//----------- Validaciones ---------------------------
+				Valid.addStringVal(_nombreResponsable,2,250,"Nombre del Responsable");
+				Valid.addStringVal(_nombreCliente,2,250,"Razón Social");
+				Valid.addStringVal(_numeroCliente,2,15,"Número de Cliente");
+				Valid.addComboVal(_mes,"Mes de Captura");
+				//----------- Validaciones ---------------------------
+			}
+			
+			private function extraCreateData(params:Object):Object{								
+				params["_capturas"] 		= _capturas.componentData;	
+				params["_idCliente"] 		= _idCliente;
+				params["_idCreador"] 		= _idCreador;
+				params["_idCaptura1"] 		= _idCaptura1;
+				params["_idCaptura2"] 		= _idCaptura2;
+				params["_idDIOT"] 			= _idDIOT;
+				params["_idCierre"] 		= _idCierre;				
+				params["_servicios"]		= Converter.arrayToBase64(_servicesList);				
+				return params;
+			}
+			
+			private function createRecordExtras():void{	
+				_nombreResponsable.text = _webApplication.user.fullName.toUpperCase();
+				_idCreador 		= Number(_webApplication.user.idEmpleado);
+				
+				_numeroODT.text = "ODT_XXXX";
+				_folio.text 	= "XXXX";
+				_idCaptura1		= 0;
+				_idCaptura2		= 0;
+				_idCierre 		= 0;
+				_idDIOT 		= 0;
+				_idCliente 		= 0;
+				
+				_numeroCliente.text = "";
+				_nombreCliente.text = "";
+				_nombreCaptura1.text = "";
+				_nombreCaptura2.text = "";
+				_nombreCierre.text  = "";
+				_nombreDIOT.text    = "";
+				_fechaCreacion.text = "No Creado";
+				_servicesList = new ArrayCollection();		
+				_capturas.reset();				
+			}
+			
+			private function extraUpdateData(params:Object):Object{					
+				params["_capturas"] = _capturas.componentData;					
+				params["_idCliente"] 		= _idCliente;
+				params["_idCreador"] 		= _idCreador;
+				params["_idCaptura1"] 		= _idCaptura1;
+				params["_idCaptura2"] 		= _idCaptura2;
+				params["_idDIOT"] 			= _idDIOT;
+				params["_idCierre"] 		= _idCierre;				
+				params["_servicios"]		= Converter.arrayToBase64(_servicesList);
+					
+				return params;
+			}
+			
+			private function loadExtraFields(params:Object):void{								
+				_capturas.componentData = params["_capturas"];					
+				_idCliente 		= Number(params["_idCliente"]);
+				_idCreador 		= params["_idCreador"];
+				_idCaptura1 	= params["_idCaptura1"];
+				_idCaptura2 	= params["_idCaptura2"];
+				_idDIOT 		= params["_idDIOT"];
+				_idCierre 		= params["_idCierre"];	
+				_fechaCreacion.text  = Converter.systemToViewDate(params["_fechaCreacion"]);
+				_numeroODT.text =  "ODT_"+Converter.fillString(params["_idODT"],"0",4);
+				
+				if(params["_servicios"]==""||params["_servicios"]==null){			
+					getExtraData();
+				}else{
+					_servicesList = Converter.base64ToArray(params["_servicios"]);
+				}	
+				
+				_horaRecoleccion.removeEventListener(Event.CHANGE,updateTime);
+				_horaRecoleccion.addEventListener(Event.CHANGE,updateTime);			
+			}
+			
+			private function updateTime(e:Event):void{
+				dataChange();
+			}
+			
+			private function forceImports():void{
+				Fiscales_Clientes_Busqueda;
+			}
+			
+			public function initView():void{
+				forceImports();
+				_AuxService  = _webApplication.getService(_services);
+				_MainService = _webApplication.getService(_serviceName);
+				_Data.exceptions = ["_idODT","_capturas","_idCliente","_idCreador","_idCierre","_idDIOT",
+									"_idCaptura1","_idCaptura2","_servicios","_idEstatus","_creada","_capturada","_facturada",
+									"_finalizada","_horaCreacion","_horaInicio","_horaCaptura",
+									"_horaCierre","_horaFacturacion","_horaEntrega","_horaDIOT","_fechaEntrega","_fechaFacturacion","_fechaInicio","_fechaCreacion"];
+				_MainService.addEventListener(FaultEvent.FAULT,onFault);
+				_AuxService.addEventListener(FaultEvent.FAULT,onFault);
+				initData();
+				addValidations();
+				loadScroll();				
+				//_searchType.selectedIndex = 1;				
+			}
+			
+			public function imageUploadReady(data:Object):void{
+				
+			}
+			
+			
+			private function restoreServices():void{
+				Alert.show("Se remplazarán los servicios actuales por los asignados al cliente\nDesea continuar?","Atención",Alert.YES|Alert.CANCEL,this,restoreHandler);				
+			}
+			
+			private function restoreHandler(e:CloseEvent):void{
+				if(e.detail==Alert.YES){
+					dataChange();
+					getExtraData();
+				}
+			}
+			
+			private function addService():void{
+				
+				openPopUp("fiscales.Fiscales_Servicios_Busqueda",true);
+			}
+				
+			
+			private function removeService():void{
+				if(_servicios.selectedIndex!=-1){
+					_servicesList.removeItemAt(_servicios.selectedIndex);
+					dataChange();
+					updateTotals()					
+				}else{
+					Alert.show("No hay ningún servicio seleccionado","Error");				
+				}
+			}
+
+			
+
+			// ------------------- View Extra Data -------------------------------
+
+			private function loadScroll():void{
+				_dataList.visible = false;
+				_servicios.visible = false;
+				for(var n:Number = 0;n<100;n++){
+					_DataResult.addItem({i:0});
+					_servicesList.addItem({i:0});
+				}
+			}
+
+			private function initData():void{
+				_MainService.getFields();
+				_MainService.getFields.addEventListener(ResultEvent.RESULT,onGetFieldsResult);
+				_dataReady = false;
+			}
+			
+			public function closeWindow():void{
+            		dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
+            		PopUpManager.removePopUp(this);
+            }
+            
+//-------------------------------- MainInit --------------------------------------
+			
+			private function newData():void{
+				_Data.clear();
+				_newData = true;
+				_updateData = false;
+				Valid.validateAll();
+				this[_mainFocusField].setFocus();
+				createRecordExtras();
+			}
+			
+			private function createData():void{
+				if(Valid.validateAll()){
+					_dataReady = false;
+					var params:Object = extraCreateData(_Data.makeData());
+					_MainService.createRecord(params);
+					_MainService.createRecord.addEventListener(ResultEvent.RESULT,onCreateComplete);
+				}else{
+					Alert.show(Valid.errors,"Error");
+				}
+			}
+
+			private function updateData():void{
+				if(Valid.validateAll()){
+					_dataReady = false;
+					var params:Object = extraUpdateData(_Data.makeData());
+					params[_mainId] = _dataList.selectedItem[_mainId];
+					_MainService.updateRecord(params);
+					_MainService.updateRecord.addEventListener(ResultEvent.RESULT,onUpdateComplete);
+					_dataIndex =_dataList.selectedIndex;
+				}else{
+					Alert.show(Valid.errors,"Error");
+				}
+			}
+			
+			private function deleteDataAlert():void{
+				if(_dataList.selectedIndex!=-1){
+					Alert.show("Desea borrar el registro seleccionado?","Atención",Alert.YES|Alert.CANCEL,this,deleteData);
+				}else{
+					Alert.show("No hay registro selecionado","Error");
+				}
+			}
+			
+			private function deleteData(e:CloseEvent):void{
+				if(e.detail==Alert.YES){
+					var params:Object = new Object();
+					params[_mainId] = _dataList.selectedItem[_mainId];
+					_MainService.deleteRecord(params);
+					_MainService.deleteRecord.addEventListener(ResultEvent.RESULT,onDeleteComplete);
+					_dataReady = false;
+				}
+			}
+			
+			private function cancel():void{
+				onDataSelect();
+				resetBooleans();
+				Valid.validateAll();
+			}
+			
+			private function resetBooleans():void{
+				_newData = false;
+				_updateData = false;
+			}
+
+			private function dataChange():void{
+				_updateData = true;
+			}
+
+
+			private function getExtraData():void{				
+				_AuxService.getServiciosById(_idCliente);				
+				_AuxService.getServiciosById.addEventListener(ResultEvent.RESULT,onGetExtraDataResult);
+			}
+			
+			
+			private function onGetExtraDataResult(e:ResultEvent):void{
+				_AuxService.getServiciosById.removeEventListener(ResultEvent.RESULT,onGetExtraDataResult);
+				if(e.result){
+					_servicesList = Converter.arrayConverter(e.result);
+					updateTotals();
+				}else{
+					Alert.show("El Cliente no tiene servicios asignados","Alerta");
+				}
+			}
+			
+			
+			private function sendODT():void{
+				if(_dataList.selectedItem._idEstatus==0){					
+					if(!_newData&&_dataList.selectedIndex!=-1){
+						var today:String = Converter.dateToSQL(new Date());	
+						var data:Object = _dataList.selectedItem;		
+						var params:Object = {_idODT:data._idODT };										
+						_MainService.sendODT(params);				
+						_MainService.sendODT.addEventListener(ResultEvent.RESULT,onSendODTResult);
+						_dataList.enabled = false;
+						_sendBt.enabled = false;
+					}else{
+						Alert.show("No hay Orden de Trabajo Seleccionada","Error");
+					}
+				}else{
+					Alert.show("La Orden de Trabajo ya ha sido enviada","Atención");
+				}
+			}
+			
+			private function onSendODTResult(e:ResultEvent):void{
+				
+					_MainService.sendODT.removeEventListener(ResultEvent.RESULT,onSendODTResult);
+					_dataList.enabled = true;
+					_sendBt.enabled = true;
+					if(e.result){
+						Alert.show("Orden de Trabajo Enviada","Atención");
+						getData();
+					}
+				
+			}
+
+			private function clientSelect():void{
+				openPopUp("fiscales.Fiscales_Clientes_Busqueda",true);
+			}
+			
+			
+			private var _tempSelectedClient:Object = new Object();
+			
+			public function clientSelected(item:Object):void{
+				_tempSelectedClient = item;
+				if(!_newData){
+					Alert.show("Al realizar este cambio se modificará completamente la ODT\n\nDesea contiunar?","Atención",Alert.YES|Alert.CANCEL,this,updateClienteSelected)
+				}else{
+					_nombreCliente.text 	= _tempSelectedClient._razonSocial;
+					_idCliente 				= _tempSelectedClient._idCliente;	
+					_numeroCliente.text 	= _tempSelectedClient._numeroCliente;
+					_servicesList = new ArrayCollection();
+					_capturas.reset();
+					getExtraData();
+				}
+				
+			}
+			
+			private function updateClienteSelected(e:CloseEvent):void{
+				if(e.detail==Alert.YES){
+					_nombreCliente.text 	= _tempSelectedClient._razonSocial;
+					_idCliente 				= _tempSelectedClient._idCliente;	
+					_numeroCliente.text 	= _tempSelectedClient._numeroCliente;	
+					_servicesList = new ArrayCollection();
+					_capturas.reset();
+					getExtraData();
+					dataChange();
+				}
+				
+			}
+			public function serviceSelected(item:Object):void{
+				var itemData:Object = item; 	
+				var newItem:Object = {	_cantidad:1,
+										_costo:itemData._costo,
+										_descuento:0,
+										_idCLiente:_idCliente,
+										_idProducto:item._idProducto,
+										_idServicioCliente:0,
+										_nombre:item._nombre,
+										_observaciones:"",
+										_total:itemData._costo};
+				_servicesList.addItem(newItem);
+							
+			}
+			
+//-------------------------------- ResultsEvents --------------------------------------		
+			
+			private function onGetFieldsResult(e:ResultEvent):void{
+				_MainService.getFields.removeEventListener(ResultEvent.RESULT,onGetFieldsResult);
+				if(e){
+					if(e.result) {
+						_Data.createFields(Converter.arrayConverter(e.result));
+						getData();
+					}
+				}else{
+					Alert.show("Error al cargar los datos","Error");
+					_dataReady = false;
+				}
+				_DataResult= new ArrayCollection();
+				_dataList.visible = true;
+				_servicios.visible = true;
+				
+			}
+			
+			private function getData():void{
+				_MainService.getRecords();
+				_MainService.getRecords.addEventListener(ResultEvent.RESULT,onGetDataResult);
+			}
+			
+			private function onGetDataResult(e:ResultEvent):void{
+				_MainService.getRecords.removeEventListener(ResultEvent.RESULT,onGetDataResult);
+				_DataResult = Converter.arrayConverter(e.result);
+				if(_DataResult.length==0) {
+					Alert.show("No hay registros en la base de datos","Atención")
+				}else{
+					if(_dataIndex<0) _dataIndex = 0;
+					_Data.loadData(_DataResult[_dataIndex]);
+					_dataList.selectedIndex = _dataIndex;
+					_dataList.scrollToIndex(_dataList.selectedIndex);
+					loadExtraFields(_DataResult[_dataIndex]);
+				}
+				_dataReady = true;
+				resetBooleans();
+			}
+			
+			private function onFault(e:FaultEvent):void{
+				Alert.show(e.fault.faultString,"Error");
+			}
+
+			private function onDataSelect():void{
+				if(_dataList.selectedIndex!=-1) {
+					_Data.loadData(_dataList.selectedItem);
+					_dataIndex =_dataList.selectedIndex;
+					loadExtraFields(_dataList.selectedItem);
+					_selectedId = _dataList.selectedItem[_mainId];
+				}
+			}
+			
+			private function onCreateComplete(e:ResultEvent):void{				
+				_MainService.createRecord.removeEventListener(ResultEvent.RESULT,onCreateComplete);
+				_dataIndex = _DataResult.length;
+				Catalogs.reload();
+				getData();
+			}
+			
+			private function onUpdateComplete(e:ResultEvent):void{
+				_MainService.updateRecord.removeEventListener(ResultEvent.RESULT,onUpdateComplete);
+				Catalogs.reload();
+				getData();
+			}
+			
+			private function onDeleteComplete(e:ResultEvent):void{
+				_MainService.deleteRecord.removeEventListener(ResultEvent.RESULT,onDeleteComplete);
+				_dataIndex = _DataResult.length-2;
+				Catalogs.reload();
+				getData();
+			}
+			
+//-------------------------------- ResultsEvents --------------------------------------	
+
+//-------------------------------- POP UP WINDOW --------------------------------------	
+			public function openPopUp(popUpName:String,modal:Boolean = true):void{
+				var pop:TitleWindow = PopUpManager.createPopUp(this, getDefinitionByName("views."+popUpName) as Class, modal) as TitleWindow;
+				pop.name = popUpName;
+				pop.addEventListener(CloseEvent.CLOSE, closePopup);
+				if(pop.hasOwnProperty("context")){
+					Object(pop).context = viewContext;
+				}
+				PopUpManager.centerPopUp(pop);
+			}
+			
+			private function closePopup(e:CloseEvent):void{
+	            PopUpManager.removePopUp(e.target as TitleWindow);
+			}
+//-------------------------------- POP UP WINDOW --------------------------------------
+
+//-------------------------------- Search Engine --------------------------------------
+			
+			private function searchFilter():void{
+               			_DataResult.filterFunction = vlidateSearch;
+               			_DataResult.refresh();
+           		}
+          
+       		private function vlidateSearch(item:Object):Boolean{
+           		var isMatch:Boolean = false;           
+           		if(item[_searchType.selectedItem.value].toLowerCase().search(_searchFilter.toLowerCase()) != -1){
+               			isMatch = true
+           		}              
+           		return isMatch;              
+       		}
+	       	
+	       		private function search():void{
+				_searchFilter = _searchField.text;
+				searchFilter();
+			}
+			private var _searchFilter:String 			= new String();
+[Bindable]	private var _searchTypes:ArrayCollection 	= new ArrayCollection([{label:"Id",     	value:"_idArea"},{label:"Nombre",     	value:"_nombre"}]);
+			
+//-------------------------------- Search Engine --------------------------------------					
+			
+			
+			private function decuentoConverter(item:Object,dg:DataGridColumn):String{
+				var result:String = "0%";
+				if(item[dg.dataField]) {
+					var value:String = Converter.strReplace("","%",item[dg.dataField]);
+					result = Number(value)+"%";
+				}
+				return result;
+			}
+			
+			
+[Bindable]	private var _total:String = new String();
+[Bindable]	private var _iva:String = new String();
+[Bindable]	private var _subTotal:String = new String();
+			
+			
+			public function updatePrices(value:Number):void{
+				if(_servicios.selectedIndex!=-1){
+					_servicesList[_servicios.selectedIndex]._cantidad = value;
+					_servicesList[_servicios.selectedIndex]._total = (_servicesList[_servicios.selectedIndex]._cantidad*_servicesList[_servicios.selectedIndex]._costo);
+				}
+				_servicesList.refresh();
+				dataChange();
+				updateTotals();
+			}
+			
+			
+			private function updateTotals():void{
+				var total:Number = 0;
+				var iva:Number = 0;
+				var subTotal:Number = 0;
+				
+				for(var n:Number= 0; n<_servicesList.length;n++){
+					subTotal += Converter.unconvertNumber(_servicesList[n]._total);
+				}
+				
+				iva = subTotal*SystemGlobals.federalTax;
+				total = subTotal+iva;
+				
+				_total = Converter.numberFormat(total);
+				_iva = Converter.numberFormat(iva);
+				_subTotal = Converter.numberFormat(subTotal);
+				
+			}
+			
+		]]>
+	</mx:Script>
+	<mx:DataGrid height="590" dataProvider="{_DataResult}" id="_dataList" change="onDataSelect();" enabled="{_dataReady&amp;&amp;!_newData&amp;&amp;!_updateData}" y="69" width="582" x="642">
+		<mx:columns>
+			<mx:DataGridColumn headerText="A/I" width="40" >			
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:HBox width="100%"  verticalAlign="middle" horizontalAlign="center">
+							<mx:Image source="assets/Custom/ISCO_{data._idEstatus}.png"  width="13" height="13" scaleContent="false"/>
+						</mx:HBox>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>		
+			<mx:DataGridColumn headerText="Id" dataField="_idODT" width="40"/>		
+			<mx:DataGridColumn headerText="Número" dataField="_numeroCliente" width="58"/>
+			<mx:DataGridColumn headerText="Nombre" dataField="_nombreCliente" />	
+			
+			<mx:DataGridColumn headerText="CRE" width="40" >			
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:HBox width="100%"  verticalAlign="middle" horizontalAlign="center">
+							<mx:Image source="assets/Icons/Status/auth_{data._creada}.png"  width="13" height="13" scaleContent="false" toolTip="{data._horaCreacion}" buttonMode="true"/>
+						</mx:HBox>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>	
+			<mx:DataGridColumn headerText="CAP" width="40" >			
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:HBox width="100%"  verticalAlign="middle" horizontalAlign="center">
+							<mx:Image source="assets/Icons/Status/auth_{data._capturada}.png"  width="13" height="13" scaleContent="false" toolTip="{data._horaCaptura}" buttonMode="true"/>
+						</mx:HBox>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>	
+			<mx:DataGridColumn headerText="FAC" width="40" >			
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:HBox width="100%"  verticalAlign="middle" horizontalAlign="center">
+							<mx:Image source="assets/Icons/Status/auth_{data._facturada}.png"  width="13" height="13" scaleContent="false" toolTip="{data._horaFacturacion}" buttonMode="true"/>
+						</mx:HBox>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>	
+			<mx:DataGridColumn headerText="FIN" width="40" >			
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:HBox width="100%"  verticalAlign="middle" horizontalAlign="center">
+							<mx:Image source="assets/Icons/Status/auth_{data._finalizada}.png"  width="13" height="13" scaleContent="false" toolTip="{data._horaEntrega}" buttonMode="true"/>
+						</mx:HBox>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>	
+			
+			
+					
+		</mx:columns>
+	</mx:DataGrid>
+	<mx:ComboBox 	x="710" id="_searchType" 	dataProvider="{_searchTypes}" 	width="160" y="10"/>
+	<mx:TextInput 	x="878" id="_searchField" 	change="search();" 		width="218" enabled="{!_newData}" y="10"/>
+	<mx:Label x="641" text="Filtrar por :" textAlign="right" y="13"/>
+	<mx:Button label="Nuevo" width="80" enabled="{_dataReady}" visible="{!_newData&amp;&amp;!_updateData}" click="newData();" y="732" x="11"/>
+	<mx:Button label="Cancelar" width="80" enabled="{_dataReady}" visible="{_newData||_updateData}" click="cancel();" y="732" x="99"/>
+	<mx:Button label="Aceptar" width="80" enabled="{_dataReady}" visible="{_newData}" click="createData();" y="732" x="11"/>
+	<mx:Button label="Eliminar" width="80" enabled="{_dataReady&amp;&amp;!_newData}" visible="{!_newData&amp;&amp;!_updateData}" click="deleteDataAlert();" y="732" x="99"/>
+	<mx:Button label="Actualizar" width="80" enabled="{_dataReady&amp;&amp;!_newData&amp;&amp;_updateData}" visible="{_updateData&amp;&amp;!_newData}" click="updateData();" y="732" x="11"/>
+	<mx:Button label="Regresar" click="closeWindow();" width="145"  enabled="{!_newData&amp;&amp;!_updateData}" y="732" x="1079"/>
+	<mx:HRule x="11" y="719" width="1213" height="1"/>
+	<mx:HRule x="35" y="395" width="590" height="3"/>
+	<mx:HRule x="10" y="160" width="615" height="1"/>
+	<mx:Label x="461" y="102" text="ID :"/>
+	<mx:TextInput x="493" y="100" id="_numeroCliente" width="90" editable="false"/>
+	<mx:Label x="56" y="43" text="ID ODT:"/>
+	<mx:TextInput x="113" y="41" id="_numeroODT" width="150" editable="false"/>
+	<mx:Label x="56" y="102" text="Cliente :"/>
+	<mx:Label x="28" y="72" text="Recolección  :"/>
+	<mx:DateField x="113" y="70" width="110" showToday="true" id="_fechaRecoleccion" change="dataChange()"/>
+	<mx:Label x="492" y="25" text="mes de captura :" fontStyle="italic" color="#C1C1C1"/>
+	<mx:Label x="35" y="164" text="Servicios :"/>
+	<mx:TextInput x="113" y="100" id="_nombreCliente" width="342" change="dataChange()" editable="false"/>
+	<mx:Label x="53" y="131" text="Atiende :"/>
+	<mx:Label x="468" y="315" text="Sub Total :"/>
+	<mx:TextInput x="113" y="129" id="_nombreResponsable" width="470" change="dataChange()" editable="false"/>
+	<mx:Label x="271.5" y="25" text="folio :" fontStyle="italic" color="#C1C1C1"/>
+	<mx:Label x="361.5" y="25" text="fecha de creación :" fontStyle="italic" color="#C1C1C1"/>
+	<mx:Label x="524" y="421" text="fecha :" fontStyle="italic" color="#C1C1C1"/>
+	<mx:TextInput x="271" y="41" id="_folio" width="82" editable="false"/>
+	<mx:TextInput x="361" y="41" id="_fechaCreacion" width="102.5" editable="false"/>
+	<mx:TextInput x="543" y="313" width="82" text="{_subTotal}" textAlign="right"/>
+	<mx:Label x="451" y="341" text="I.V.A. (16%) :"/>
+	<mx:TextInput x="543" y="339" width="82" text="{_iva}" textAlign="right"/>
+	<mx:Label x="493" y="366" text="Total :" fontWeight="bold"/>
+	<mx:TextInput x="543" y="364" width="82" text="{_total}" textAlign="right" fontWeight="bold"/>
+	<mx:Button x="591" y="99" icon="@Embed(source='../../assets/Icons/Buttons/Edit.png')" width="34" click="clientSelect()"/>
+	<mx:Button x="591" y="128" icon="@Embed(source='../../assets/Icons/Buttons/Edit.png')" width="34"/>
+	<mx:Label x="37" y="439" text="Capturista 2:"/>
+	<mx:TextInput x="121" y="437" id="_nombreCaptura2" width="290" change="dataChange()" editable="true"/>
+	<mx:Label x="37" y="409" text="Capturista 1:"/>
+	<mx:TextInput x="121" y="407" id="_nombreCaptura1" width="290" change="dataChange()" editable="true"/>
+	<mx:Label x="72" y="466" text="DIOT :"/>
+	<mx:TextInput x="121" y="466" id="_nombreDIOT" width="290" change="dataChange()" editable="true"/>
+	<mx:DateField x="524" y="437" width="99" id="_fechaCaptura" change="dataChange()"/>
+	<mx:DateField x="524" y="466" width="99" id="_fechaDIOT" change="dataChange()"/>
+	<mx:DateField x="524" y="495" width="99" id="_fechaCierre" change="dataChange()"/>
+	<mx:ComboBox x="492" y="40" dataProvider="{ConstantData.Months}" labelField="label" width="132" id="_mes" change="dataChange()"></mx:ComboBox>
+	<mx:DataGrid x="35" y="181" width="590" height="124" id="_servicios" dataProvider="{_servicesList}" editable="true" >
+		<mx:columns>
+			<mx:DataGridColumn headerText="Id" dataField="_idProducto" width="40" editable="false"/>
+			<mx:DataGridColumn headerText="Nombre" dataField="_nombre" width="180" editable="false"/>
+			<mx:DataGridColumn headerText="Cantidad" dataField="_cantidad" width="40" editorDataField="value">
+				<mx:itemEditor>
+                    <mx:Component>
+                        <mx:NumericStepper stepSize="1" maximum="50" change="outerDocument.updatePrices(this.value)"/>
+                    </mx:Component>
+                </mx:itemEditor>
+			</mx:DataGridColumn>					
+			<mx:DataGridColumn headerText="Costo" dataField="_costo" width="40" labelFunction="Converter.columNumberConverter" editable="false" textAlign="right"/>
+			<mx:DataGridColumn headerText="Desc" dataField="_descuento" width="40" labelFunction="decuentoConverter" editable="false" textAlign="right" />
+			<mx:DataGridColumn headerText="Total" dataField="_total" width="40" labelFunction="Converter.columNumberConverter" editable="false" textAlign="right"/>
+		</mx:columns>
+	</mx:DataGrid>
+	<mx:Label x="68" y="495" text="Cierre :"/>
+	<mx:Label x="37" y="525" text="Capturados :"/>
+	<mx:Label x="20" y="667" text="Observaciones :" textAlign="right"/>
+	<mx:TextInput x="121" y="495" id="_nombreCierre" width="290" change="dataChange()" editable="true"/>
+	<mx:Label x="47" y="588" text="Reevisíon :"/>
+	<mx:TextInput x="123" y="586" id="_revision" width="502" change="dataChange()"/>
+	<mx:Label x="45" y="616" text="Propuesta :"/>
+	<mx:TextInput x="123" y="614" id="_propuesta" width="502" change="dataChange()"/>
+	<mx:TextArea x="123" y="667" width="502" id="_observaciones" change="dataChange()"/>
+	<mx:Label x="42" y="644" text="Autorizado :"/>
+	<mx:CheckBox x="125" y="644" id="_autorizado" click="dataChange()"/>
+	<ns1:ServiceCheck x="123" y="525" width="502" height="53" id="_capturas" mouseDown="dataChange()">
+	</ns1:ServiceCheck>
+	<mx:Button x="35" y="312" label="Remover" click="removeService();">
+		<mx:icon>@Embed(source='../../assets/Icons/Buttons/Menos.png')</mx:icon>
+	</mx:Button>
+	<mx:Button x="140" y="312" label="Agregar" click="addService();">
+		<mx:icon>@Embed(source='../../assets/Icons/Buttons/Mas.png')</mx:icon>
+	</mx:Button>
+	<mx:Button x="238" y="312" label="Restaurar" click="restoreServices();">
+		<mx:icon>@Embed(source='../../assets/Icons/Buttons/refresh.png')</mx:icon>
+	</mx:Button>
+	<mx:Button x="642" y="667" label="Enviar Orden de Trabajo" width="582" height="44" id="_sendBt" click="sendODT()">
+		<mx:icon>@Embed(source='../../assets/Icons/Buttons/Start.png')</mx:icon>
+	</mx:Button>
+	<ns1:HourField x="243" y="72" id="_horaRecoleccion">
+	</ns1:HourField>
+	
+</mx:TitleWindow>

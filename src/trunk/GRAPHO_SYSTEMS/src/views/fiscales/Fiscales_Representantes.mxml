@@ -1,0 +1,435 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   width="706" height="404" backgroundAlpha="1.0" contentBackgroundColor="#D5E7FB"
+			   title="Responsable de la Empresa">
+
+
+	<fx:Script>
+		<![CDATA[
+			import mx.random.constants.ConstantData;
+			
+			import mx.random.constants.Catalogs;
+			import mx.random.windowManagers.PopManager;
+			import mx.random.constants.Languages;
+			import mx.random.forms.Validator;
+			import mx.random.dataManagers.EventManager;
+			import mx.random.converters.Converter;
+			import mx.random.dataManagers.DataManager;
+			import mx.random.web.WebApplication;
+			import mx.managers.PopUpManager;
+			import mx.collections.ArrayCollection;
+			import mx.events.CloseEvent;
+			import mx.controls.Alert;
+			import mx.rpc.remoting.RemoteObject;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+
+			private var _webApplication:WebApplication;
+			private var Valid:Validator 			= new Validator();
+			private var _workManager:Object 		= new Object();
+			private var _MainService:RemoteObject 	= new RemoteObject();
+[Bindable]	private var _Data:DataManager 			= new DataManager(this);
+[Bindable]	private var _DataResult:ArrayCollection = new ArrayCollection();			
+			private var _eventManager:EventManager 	= new EventManager(this);
+			private var _dataIndex:Number 			= 0;
+			
+			//-----------Event Manager -----------
+
+[Bindable]	public var _dataReady:Boolean 			= false;
+[Bindable]	public var _newData:Boolean 			= false;
+[Bindable]	public var _updateData:Boolean 			= false;
+
+			//-----------Event Manager -----------
+			
+			
+			//-----------Local Vars -----------
+			
+			private var _selectedId:Number 		= 0;
+			private var _selectedName:String 	= "";
+			private var _serviceName  			= "Fiscales_Clientes_Representantes";
+			private var _mainId  				= "_idRepresentante";
+			private var _relationId  			= "_idCliente";
+			private var _mainFocusField:String  = "_nombre";
+			private var _dataObject:Object  	= new Object();
+//<------->			
+
+[Bindable]	private var _idCliente:Number 		= 0;
+[Bindable]	private var _idRepresentante:Number = 0;
+[Bindable]	private var _nombreEmpresa:String 	= "";
+	
+			public function set relationIdValue(value:Number):void { _idCliente = value }
+			
+			public function set dataObject(value:Object):void	{
+				_nombreEmpresa = value._nombreEmpresa;	
+				_dataObject = value;	
+				_idCliente = 	value._idCliente;	
+			}
+			
+			//-----------Local Vars -----------
+
+			
+//---------------------------- Context ---------------------------------------------            
+
+   			public function set context(contextObj:Object):void{
+				for( var p:String in contextObj){
+					if(this.hasOwnProperty(p)){
+						this[p] = contextObj[p];
+					}
+				}
+			}
+
+			public function set workManager(value:Object):void{
+				_workManager = value;
+			}
+
+			public function set webApplication(value:WebApplication):void{
+				_webApplication = value;
+				initView();
+			}
+			public function get webApplication():WebApplication{ return _webApplication; } 
+						
+//---------------------------- Context ---------------------------------------------  
+
+//-------------------------------- MainInit --------------------------------------
+			// ------------------- View Extra Data -------------------------------
+			
+			private function get viewContext():Object{
+				return {webApplication: _webApplication,
+						workManager: this
+						}					
+			}
+
+			private function addValidations():void{
+				Valid.changeLanguage(Languages.SPANISH);
+				Valid.setErrorKnot(Validator.CIRCLE_KNOT,0xFF0000);	
+				Valid.validateOnChange = true;		
+				
+				Valid.addStringVal(_nombre,3,50,"Nombre");
+				Valid.addStringVal(_paterno,3,50,"Apellido Paterno");
+				Valid.addStringVal(_materno,3,50,"Apellido Materno");
+				
+				//Valid.addStringVal(_curp,18,18,"CURP");
+								
+				Valid.addPhoneVal(_telefonoCasa,true,false,"Teléfono de casa");
+				Valid.addPhoneVal(_telefonoMovil,true,false,"Teléfono móvil");
+				Valid.addPhoneVal(_telefonoOficina,true,false,"Teléfono de oficina");
+				
+				Valid.addSomeRequired([_telefonoCasa,_telefonoMovil,_telefonoOficina],"Teléfonos");
+				Valid.addSomeEquals(_telefonoCasa,_telefonoMovil,"Los Telefonos no pueden ser iguales",true);
+				Valid.addSomeEquals(_telefonoMovil,_telefonoOficina,"Los Telefonos no pueden ser iguales",true);
+				Valid.addSomeEquals(_telefonoCasa,_telefonoOficina,"Los Telefonos no pueden ser iguales",true);
+								
+				Valid.addMailVal(_mailPrincipal,false,"Mail Principal");
+				Valid.addMailVal(_mailSecundario,false,"Mail Secundario");
+				Valid.addSomeRequired([_mailPrincipal,_mailSecundario],"E-Mails");
+				Valid.addSomeEquals(_mailPrincipal,_mailSecundario,"Los E-Mails no pueden ser iguales",true);
+												
+				Valid.addStringVal(_rfc,13,14,"RFC");
+
+				Valid.addStringVal(_calle,5,255,"Calle");
+				Valid.addStringVal(_numeroExterior,1,8,"Número Exterior");
+				Valid.addStringVal(_ciudad,2,50,"Ciudad");
+				Valid.addStringVal(_colonia,2,50,"Colonia");
+				Valid.addComboVal(_estado,"Estado");
+				Valid.addStringVal(_cp,5,5,"Código Postal");
+								
+					
+			}
+			
+			private function extraCreateData(params:Object):Object{
+				params[_relationId] = this[_relationId];
+				//params["_newsImage"] = _image;
+				//params['_fechaNacimiento'] 	= _year.selectedItem.label+'-'+_month.selectedItem.value+'-'+_day.selectedItem.value;
+				return params;
+			}
+			
+			private function createRecordExtras():void{
+				//_image = "defaultNew.jpg";
+				/*_day.selectedIndex 	= 0;
+				_month.selectedIndex 	= 0;
+				_year.selectedIndex 	= 0;*/
+			}
+			
+			private function extraUpdateData(params:Object):Object{	
+				//params['_fechaNacimiento'] = _year.selectedItem.label+'-'+_month.selectedItem.value+'-'+_day.selectedItem.value;			
+				return params;
+			}
+			
+			private function loadExtraFields(params:Object):void{
+				//_image = params["_newsImage"];
+				/*
+				if(tempDate){
+					var temp:Array 		 = tempDate.split('-');
+					_day.selectedIndex 	 = parseInt(temp[2]);
+					_month.selectedIndex = parseInt(temp[1]);
+					_year.selectedIndex  = ConstantData.FindYearindex(temp[0]);
+				}else{
+					_day.selectedIndex 		= 0;
+					_month.selectedIndex 	= 0;
+					_year.selectedIndex 	= 0;
+				}*/
+			}
+			
+			private function forceImports():void{
+				Catalogs;
+			}
+			
+			public function initView():void{
+				forceImports();
+				_MainService = _webApplication.getService(_serviceName);
+				_Data.exceptions = ["_idCliente","_idRepresentante"];
+				_MainService.addEventListener(FaultEvent.FAULT,onFault);
+				initData();
+				addValidations();						
+			}
+			
+			public function imageUploadReady(data:Object):void{
+				
+			}
+
+			// ------------------- View Extra Data -------------------------------			
+
+			private function initData():void{
+				_MainService.getFields();
+				_MainService.getFields.addEventListener(ResultEvent.RESULT,onGetFieldsResult);
+				_dataReady = false;
+			}
+			
+			public function closeWindow():void{
+            		dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
+            		PopUpManager.removePopUp(this);
+            }
+            
+//-------------------------------- MainInit --------------------------------------
+			
+			private function newData():void{
+				_Data.clear();
+				_newData = true;
+				_updateData = false;				
+				this[_mainFocusField].setFocus();
+				createRecordExtras();
+				Valid.validateAll();
+			}
+			
+			
+			private function importData(item:String):void{
+				switch(item){
+					case "rfc":
+						_rfc.text 				= _dataObject._rfc;
+						_curp.text 				= _dataObject._rfc;
+						break;
+						
+					case "direccion":
+						_calle.text 			= _dataObject._rfc;
+						_numeroExterior.text 	= _dataObject._numeroExterior;
+						_numeroInterior.text 	= _dataObject._numeroInterior;
+						_cp.text 				= _dataObject._cp;
+						_colonia.text 			= _dataObject._colonia;
+						_estado.selectedIndex 	= _dataObject._estado;
+						_ciudad.text 			= _dataObject._ciudad;
+						break;
+					case "telefonos":
+						_telefonoCasa.text 		= _dataObject._telefonoCasa;
+						_telefonoOficina.text 	= _dataObject._telefonoOficina;
+						_telefonoMovil.text 	= _dataObject._telefonoMovil;
+						_ext.text 				= _dataObject._ext;					
+						break;
+					case "mails":
+						_mailPrincipal.text 	= _dataObject._mailPrincipal;
+						_mailSecundario.text 	= _dataObject._mailSecundario;								
+						break;
+				}
+				dataChange();
+			}
+			
+			private function createData():void{
+				if(Valid.validateAll()){
+					_dataReady = false;					
+					var params:Object = extraCreateData(_Data.makeData());
+					_MainService.createRecord(params);
+					_MainService.createRecord.addEventListener(ResultEvent.RESULT,onCreateComplete);
+				}else{
+					Alert.show(Valid.errors,"Error");
+				}
+			}
+
+			private function updateData():void{
+				if(Valid.validateAll()){
+					_dataReady = false;
+					var params:Object = extraUpdateData(_Data.makeData());
+					params[_mainId] = this[_mainId];
+					_MainService.updateRecord(params);
+					_MainService.updateRecord.addEventListener(ResultEvent.RESULT,onUpdateComplete);					
+				}else{
+					Alert.show(Valid.errors,"Error");
+				}
+			}
+			
+			private function cancel():void{				
+				resetBooleans();
+				Valid.validateAll();
+			}
+			
+			private function resetBooleans():void{
+				_newData = false;
+				_updateData = false;
+			}
+
+			private function dataChange():void{
+				_updateData = true;
+			}
+			
+			
+			
+			
+			
+			
+//-------------------------------- ResultsEvents --------------------------------------		
+			
+			private function onGetFieldsResult(e:ResultEvent):void{
+				_MainService.getFields.removeEventListener(ResultEvent.RESULT,onGetFieldsResult);
+				if(e){
+					if(e.result) {
+						_Data.createFields(Converter.arrayConverter(e.result));
+						getData();
+					}
+				}else{
+					Alert.show("Error al cargar los datos","Error");
+					_dataReady = false;
+				}
+				_DataResult= new ArrayCollection();								
+			}
+			
+			private function getData():void{
+//-------->			
+				var params:Object = new Object();
+				params[_relationId] = this[_relationId];  
+				_MainService.getRecordsById(params);
+				_MainService.getRecordsById.addEventListener(ResultEvent.RESULT,onGetDataResult);
+			}
+			
+			private function onGetDataResult(e:ResultEvent):void{
+				_MainService.getRecordsById.removeEventListener(ResultEvent.RESULT,onGetDataResult);
+				_DataResult = Converter.arrayConverter(e.result);
+				if(_DataResult.length==0) {
+					Alert.show("No hay datos para este registro...\nCrear un registro nuevo?","Atención",Alert.OK|Alert.NO,this,alertNewHandler);
+				}else{			
+					_Data.loadData(_DataResult[_dataIndex]);					
+					loadExtraFields(_DataResult[_dataIndex]);
+					this[_mainId] = _DataResult[_dataIndex][_mainId];
+				}
+				_dataReady = true;
+				resetBooleans();			
+			}
+			
+			private function alertNewHandler(e:CloseEvent):void{
+				if(e.detail == Alert.OK){
+					newData()
+				}
+			}
+			
+			private function onFault(e:FaultEvent):void{
+				Alert.show(e.fault.faultString,"Error");
+			}			
+			
+			private function onCreateComplete(e:ResultEvent):void{				
+				_MainService.createRecord.removeEventListener(ResultEvent.RESULT,onCreateComplete);
+				_dataIndex = 0;
+				_workManager.getData();
+				getData();
+			}
+			
+			private function onUpdateComplete(e:ResultEvent):void{
+				_MainService.updateRecord.removeEventListener(ResultEvent.RESULT,onUpdateComplete);
+				_workManager.getData();
+				getData();
+			}					
+			
+//-------------------------------- ResultsEvents --------------------------------------	
+
+//-------------------------------- POP UP WINDOW --------------------------------------	
+			public function openPopUp(popUpName:String,modal:Boolean=false):void{
+				var pop:TitleWindow = PopUpManager.createPopUp(this, getDefinitionByName("views."+popUpName) as Class, modal) as TitleWindow;
+				pop.name = popUpName;
+				pop.addEventListener(CloseEvent.CLOSE, closePopup);
+				if(pop.hasOwnProperty("context")){
+					Object(pop).context = viewContext;
+				}
+				PopUpManager.centerPopUp(pop);
+			}
+			
+			private function closePopup(e:CloseEvent):void{
+	            PopUpManager.removePopUp(e.target as TitleWindow);
+			}
+//-------------------------------- POP UP WINDOW --------------------------------------
+				
+			
+		]]>
+	</fx:Script>
+<s:Label x="87" y="15" text="Empresa :" textAlign="right"/>
+<s:TextInput x="148" y="10" change="dataChange();" width="496" text="{_nombreEmpresa}" editable="false"/>
+
+	<s:Button label="Cancelar" width="77" enabled="{_dataReady}" visible="{_newData||_updateData}" click="cancel();" x="235" y="324"/>
+	<s:Button label="Actualizar" width="78" enabled="{_dataReady&amp;&amp;!_newData&amp;&amp;_updateData}" visible="{_updateData&amp;&amp;!_newData}" click="updateData();" x="152" y="324"/>
+	<s:Button label="Regresar" click="closeWindow();" width="217"  enabled="{!_newData}" x="474" y="322"/>
+	<s:Button label="Aceptar" width="78" enabled="{_dataReady}" visible="{_newData}" click="createData();" x="152" y="324"/>
+	<s:Label x="23" y="74" text="Representante Legal :" />
+	<s:TextInput x="148" y="67" id="_nombre" change="dataChange();" width="156" tabIndex="4"/>
+	<s:Label x="150" y="57" text="nombre(s)"  color="#5A5A5A" fontSize="10" fontStyle="italic"/>
+	<s:Label x="313" y="57" text="paterno"  color="#5A5A5A" fontSize="10" fontStyle="italic"/>
+	<s:Label x="472" y="57" text="materno"  color="#5A5A5A" fontSize="10" fontStyle="italic"/>
+	<s:TextInput x="312" y="67" id="_paterno" change="dataChange();" width="150" tabIndex="5"/>
+	<s:TextInput x="470" y="67" id="_materno" change="dataChange();" width="174" tabIndex="6"/>
+	<s:Label x="148.5" y="231" text="casa"  fontSize="9" color="#5A5A5A" fontStyle="italic"/>
+	<s:Label x="146.5" y="269" text=" principal"  fontSize="9" color="#5A5A5A" fontStyle="italic"/>
+	<s:Label x="309.5" y="270" text="secundario"  fontSize="9" color="#5A5A5A" fontStyle="italic"/>
+	<s:Label x="309.5" y="232" text="movil"  fontSize="9" color="#5A5A5A" fontStyle="italic"/>
+	<s:Label x="475" y="230" text="oficina"  fontSize="9" color="#5A5A5A" fontStyle="italic"/>
+	<s:Label x="609" y="230" text="ext."  fontSize="9" color="#5A5A5A" fontStyle="italic"/>
+	<s:TextInput x="608" y="240" id="_ext" change="dataChange();" width="36" maxChars="5" tabIndex="18" restrict="0-9 A-Z "/>
+	<s:Label x="83" y="250" text="Teléfonos :" />
+	<s:Label x="97" y="285" text="E- Mail :" />
+	<s:TextInput x="148" y="241" id="_telefonoCasa" change="dataChange();" width="152" tabIndex="15" restrict="0-9 "/>
+	<s:TextInput x="308" y="242" id="_telefonoMovil" change="dataChange();" width="152" tabIndex="16" restrict="0-9 "/>
+	<s:TextInput x="474" y="240" id="_telefonoOficina" change="dataChange();" width="128" tabIndex="17" restrict="0-9 "/>
+	<s:TextInput x="148" y="279" id="_mailPrincipal" change="dataChange();" width="152" tabIndex="19"/>
+	<s:TextInput x="308" y="280" id="_mailSecundario" change="dataChange();" width="152" tabIndex="20"/>
+	<s:Label x="149" y="151" text="calle"  fontSize="9" color="#5A5A5A" fontStyle="italic"/>
+	<s:Label x="149" y="192" text="ciudad"  fontSize="9" color="#5A5A5A" fontStyle="italic"/>
+	<s:Label x="473" y="194" text="estado"  fontSize="9" color="#5A5A5A" fontStyle="italic"/>
+	<s:Label x="475" y="151" text="número"  fontSize="9" color="#5A5A5A" fontStyle="italic"/>
+	<s:Label x="532" y="151" text="interior"  fontSize="9" color="#5A5A5A" fontStyle="italic"/>
+	<s:Label x="578.5" y="151" text="c.p."  fontSize="9" color="#5A5A5A" fontStyle="italic"/>
+	<s:Label x="85" y="168" text="Dirección :" />
+	<s:TextInput x="148" y="161" id="_calle" change="dataChange();" width="314" maxChars="255" tabIndex="7"/>
+	<s:TextInput x="474" y="161" id="_numeroExterior" change="dataChange();" width="48" maxChars="10" tabIndex="8" restrict="0-9"/>
+	<s:TextInput x="530" y="161" id="_numeroInterior" change="dataChange();" width="40" maxChars="5" tabIndex="9" restrict="0-9 A-Z "/>
+	<s:TextInput x="578" y="161" id="_cp" change="dataChange();" width="65" restrict="0-9" maxChars="5" tabIndex="10"/>
+	<s:TextInput x="148" y="202" id="_ciudad" change="dataChange();" width="152" tabIndex="11"/>
+	<s:ComboBox  x="474" y="204" id="_estado" change="dataChange();" width="125.5" dataProvider="{ConstantData.NationalStates}" labelField="label" tabIndex="13"/>
+	<s:Label x="310" y="192" text="colonia"  fontSize="9" color="#5A5A5A" fontStyle="italic"/>
+	<s:TextInput x="308" y="202" id="_colonia" change="dataChange();" width="152" tabIndex="11" restrict="A-Z "/>
+	<s:TextInput x="148" y="95" id="_rfc" change="dataChange();" width="156" maxChars="14" tabIndex="3"/>
+	<s:Label x="110" y="104" text="RFC :" />
+	<s:TextInput x="148" y="123" id="_curp" change="dataChange();" width="156" maxChars="20" tabIndex="3"/>
+	<s:Label x="101" y="132" text="CURP :" />
+	<s:Button x="312" y="94" width="40" click="importData(&quot;rfc&quot;);"
+			  skinClass="skins.ButtonSkin">
+		<s:icon>@Embed(source='../../assets/Icons/Buttons/LiberarSalida.png')</s:icon>
+	</s:Button>
+	<s:Button x="474" y="279" width="40" click="importData(&quot;mails&quot;);"
+			  skinClass="skins.ButtonSkin">
+		<s:icon>@Embed(source='../../assets/Icons/Buttons/LiberarSalida.png')</s:icon>
+	</s:Button>
+	<s:Button x="652" y="239" width="40" click="importData(&quot;telefonos&quot;);"
+			  skinClass="skins.ButtonSkin">
+		<s:icon>@Embed(source='../../assets/Icons/Buttons/LiberarSalida.png')</s:icon>
+	</s:Button>
+	<s:Button x="651" y="160" width="40" click="importData(&quot;direccion&quot;);"
+			  skinClass="skins.ButtonSkin">
+		<s:icon>@Embed(source='../../assets/Icons/Buttons/LiberarSalida.png')</s:icon>
+	</s:Button>
+	
+</s:TitleWindow>

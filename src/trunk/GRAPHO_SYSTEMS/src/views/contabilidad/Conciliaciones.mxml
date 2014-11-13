@@ -1,0 +1,563 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow 
+	xmlns:mx="http://www.adobe.com/2006/mxml" 
+	width="1200" height="642" 
+	layout="absolute" 
+	horizontalCenter="0" 
+	title="Conciliaciones" 
+	verticalCenter="0"
+	verticalScrollPolicy="off"
+	horizontalScrollPolicy="off"
+	showCloseButton="true">
+
+	<mx:Script>
+		<![CDATA[
+			import mx.random.ventas.Vendedores;
+			import mx.random.events.PaymentEvent;
+			import mx.controls.dataGridClasses.DataGridColumn;
+			import mx.random.constants.ConstantData;
+			import mx.random.clientes.ClientData;
+			import mx.random.constants.SystemGlobals;
+			import mx.random.events.SelectionEvent;
+			import mx.random.events.StaticEvent;
+			
+			import mx.random.constants.Catalogs;
+			import mx.random.windowManagers.PopManager;
+			import mx.random.constants.Languages;
+			import mx.random.forms.Validator;
+			import mx.random.dataManagers.EventManager;
+			import mx.random.converters.Converter;
+			import mx.random.dataManagers.DataManager;
+			import mx.random.web.WebApplication;
+			import mx.managers.PopUpManager;
+			import mx.collections.ArrayCollection;
+			import mx.events.CloseEvent;
+			import mx.controls.Alert;
+			import mx.rpc.remoting.RemoteObject;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+
+			private var _webApplication:WebApplication;
+			private var Valid:Validator 			= new Validator();
+			private var _workManager:Object 		= new Object();
+			private var _MainService:RemoteObject 		= new RemoteObject();
+[Bindable]	private var _Data:DataManager 				= new DataManager(this);
+[Bindable]	private var _DataResult:ArrayCollection 		= new ArrayCollection();			
+			private var _eventManager:EventManager 		= new EventManager(this);
+			private var _dataIndex:Number 			= 0;
+			
+			//-----------Event Manager -----------
+
+[Bindable]	public var _dataReady:Boolean 			= false;
+[Bindable]	public var _newData:Boolean 			= false;
+[Bindable]	public var _updateData:Boolean 			= false;
+[Bindable]	private var _selectionMode:Boolean		= false;
+[Bindable]	private var _multipleSelection:Boolean	= false;
+[Bindable]	private var _cliente:ClientData = new ClientData();
+[Bindable]	private var _blockData:Boolean = true;
+			//-----------Event Manager -----------
+			
+			
+			//-----------Local Vars -----------
+[Bindable]	private var _sucursalesList:ArrayCollection = new ArrayCollection();
+[Bindable]	private var _range:Boolean = false;			
+			private var _selectedId:Number = 0;
+			private var _selectedName:String = "";
+			private var _serviceName  		= "Conciliaciones";
+			private var _mainId  			= "_idPago";
+			private var _mainFocusField:String      = "_idTipoPago";
+
+			
+			//-----------Local Vars -----------
+			
+//---------------------------- Context ---------------------------------------------            
+
+   			public function set context(contextObj:Object):void{
+				for( var p:String in contextObj){
+					if(this.hasOwnProperty(p)){
+						this[p] = contextObj[p];
+					}
+				}
+				initView();
+			}
+
+			public function set workManager(value:Object):void{
+				_workManager = value;
+			}
+
+			public function set selectionMode(value:Boolean):void{
+				_selectionMode = value;
+			}
+			
+			public function set multipleSelection(value:Boolean):void{
+				_multipleSelection = value;
+			}
+			
+			public function set cliente(value:ClientData):void{
+				_cliente = value;
+			}
+
+			public function set webApplication(value:WebApplication):void{
+				_webApplication = value;
+				
+			}
+			public function get webApplication():WebApplication{ return _webApplication; } 
+						
+//---------------------------- Context ---------------------------------------------  
+
+//-------------------------------- MainInit --------------------------------------
+			// ------------------- View Extra Data -------------------------------
+			
+			private function get viewContext():Object{
+				return {dataObject:_dataList.selectedItem,
+						webApplication: _webApplication,
+						cliente:_cliente,
+						workManager: this
+						}					
+			}
+
+			private function addValidations():void{
+				Valid.changeLanguage(Languages.SPANISH);
+				
+
+				var validFields:ArrayCollection = Valid.validFields;
+				for(var n:Number = 0;n<validFields.length;n++){					
+					this[validFields[n].obj.name].addEventListener(Event.CHANGE,onFocusOut);
+				}
+				Valid.setErrorKnot(Validator.CIRCLE_KNOT,0xFF0000);
+			}
+
+			private function onFocusOut(e:Event):void{
+				if(_newData||_updateData) Valid.validateAll();//Valid.validateOne(e.currentTarget.name);
+			}
+			
+			private function extraCreateData(params:Object):Object{
+				//params["_newsImage"] = _image;
+				//params['_fechaNacimiento'] 	= _year.selectedItem.label+'-'+_month.selectedItem.value+'-'+_day.selectedItem.value;
+				return params;
+			}
+			
+			private function createRecordExtras():void{
+				//_image = "defaultNew.jpg";
+				/*_day.selectedIndex 	= 0;
+				_month.selectedIndex 	= 0;
+				_year.selectedIndex 	= 0;*/
+			}
+			
+			private function extraUpdateData(params:Object):Object{	
+				//params['_fechaNacimiento'] = _year.selectedItem.label+'-'+_month.selectedItem.value+'-'+_day.selectedItem.value;			
+				return params;
+			}
+			
+			private function loadExtraFields(params:Object):void{
+				if(params['_numeroTarjeta']!=""){
+					_numeroTarjeta.text = "•••• - •••• - •••• - "+params['_numeroTarjeta'];
+				}else{
+					_numeroTarjeta.text = "NO APLICA";
+				}
+				var itemVenta:Object = _cliente.ventaData;
+				//_idPrograma.selectedIndex = Converter.findIndex(SystemGlobals.PROGRAMAS,"_idPrograma",itemVenta._idPrograma);
+				//_idProducto.selectedIndex = Converter.findIndex(SystemGlobals.PRODUCTOS,"_idProducto",itemVenta._idProducto);
+				//_membresia.text = itemVenta._codigoPrograma+itemVenta._idSucursal+itemVenta._codigoMembresia+itemVenta._folio;
+				Vendedores.getVendor(_dataList.selectedItem._idEmpleado);
+			}
+			
+			private function forceImports():void{
+				Catalogs;
+			}
+			
+			public function initView():void{
+				loadSucursales();
+				forceImports();
+				_MainService = _webApplication.getService(_serviceName);
+				_Data.exceptions = ["_idPago","_idSucursal","_idCuentaDestino","_idVenta","_idContrato","_numeroTarjeta","_idTarjetaCredito","_idCuentaOrigen","_numeroCliente","_numeroContrato","_idCliente","_idEmpleado","_numeroEmpleado"];
+				_MainService.addEventListener(FaultEvent.FAULT,onFault);
+				initData();
+				addValidations();
+				loadScroll();				
+			}
+			
+			public function loadSucursales():void{
+				_sucursalesList = new ArrayCollection();
+				_sucursalesList.addItem({_nombre:"Todas",_idSucursal:0});
+				for(var n:Number = 0;n<SystemGlobals.SUCURSALES.length;n++){
+					_sucursalesList.addItem(SystemGlobals.SUCURSALES[n]);
+				}
+				_sucursales.selectedIndex = 0;
+			}
+			
+			public function updateCriterio():void{				
+				_range = _criterio.selectedValue == 2;
+				_dataIndex = 0;
+			}
+
+			// ------------------- View Extra Data -------------------------------
+
+			private function loadScroll():void{
+				_dataList.visible = false;
+				for(var n:Number = 0;n<100;n++){
+					_DataResult.addItem({i:0});
+				}
+			}
+
+			private function initData():void{
+				_MainService.getFields();
+				_MainService.getFields.addEventListener(ResultEvent.RESULT,onGetFieldsResult);
+				_dataReady = false;
+			}
+			
+			public function closeWindow():void{
+					if(_selectionMode&&_dataList.selectedIndex!=-1) StaticEvent.dispatchEvent(new SelectionEvent(SelectionEvent.SELECTION_COMPLETE,_dataList.selectedItems));
+            		dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
+            		PopUpManager.removePopUp(this);
+            }
+            
+//-------------------------------- MainInit --------------------------------------
+			
+			private function newData():void{
+				_Data.clear();
+				_newData = true;
+				_updateData = false;				
+				this[_mainFocusField].setFocus();
+				createRecordExtras();
+				Valid.validateAll();
+			}
+			
+			private function createData():void{
+				if(Valid.validateAll()){
+					_dataReady = false;
+					var params:Object = extraCreateData(_Data.makeData());
+					_MainService.createRecord(params);
+					_MainService.createRecord.addEventListener(ResultEvent.RESULT,onCreateComplete);
+				}else{
+					Alert.show(Valid.errors,"Error");
+				}
+			}
+
+			private function updateData():void{
+				if(Valid.validateAll()){
+					_dataReady = false;
+					var params:Object = extraUpdateData(_Data.makeData());
+					params[_mainId] = _dataList.selectedItem[_mainId];
+					_MainService.updateRecord(params);
+					_MainService.updateRecord.addEventListener(ResultEvent.RESULT,onUpdateComplete);
+					_dataIndex =_dataList.selectedIndex;
+				}else{
+					Alert.show(Valid.errors,"Error");
+				}
+			}
+			
+			private function deleteDataAlert():void{
+				if(_dataList.selectedIndex!=-1){
+					Alert.show("Desea borrar el registro seleccionado?","Atención",Alert.YES|Alert.CANCEL,this,deleteData);
+				}else{
+					Alert.show("No hay registro selecionado","Error");
+				}
+			}
+			
+			private function deleteData(e:CloseEvent):void{
+				if(e.detail==Alert.YES){
+					var params:Object = new Object();
+					params[_mainId] = _dataList.selectedItem[_mainId];
+					_MainService.deleteRecord(params);
+					_MainService.deleteRecord.addEventListener(ResultEvent.RESULT,onDeleteComplete);
+					_dataReady = false;
+				}
+			}
+			
+			private function cancel():void{
+				onDataSelect();
+				resetBooleans();
+				Valid.validateAll();
+			}
+			
+			private function resetBooleans():void{
+				_newData = false;
+				_updateData = false;
+			}
+
+			private function dataChange():void{
+				_updateData = true;
+			}
+
+			private function openImageEditor():void{
+				if(_dataList.selectedIndex!=-1){
+					//_newsIdNumber 	= new Number(_dataList.selectedItem._blogId);
+					openPopUp("managers.ImageManager")
+				}else{
+					Alert.show("No hay registro selecionado","Error");
+				}
+			}
+			
+			
+			private function openPaymentStatus():void{
+				openPopUp("contabilidad.Conciliaciones_Referencia",true);				
+				StaticEvent.addEventListener(PaymentEvent.PAYMETN_REFERRED,onPaymentComplete);
+			}
+			
+			private function onPaymentComplete(e:PaymentEvent):void{
+				StaticEvent.removeEventListener(PaymentEvent.PAYMETN_REFERRED,onPaymentComplete);
+            	getData();
+            }
+			
+//-------------------------------- ResultsEvents --------------------------------------		
+			
+			private function onGetFieldsResult(e:ResultEvent):void{
+				_MainService.getFields.removeEventListener(ResultEvent.RESULT,onGetFieldsResult);
+				if(e){
+					if(e.result) {
+						_Data.createFields(Converter.arrayConverter(e.result));
+						getData();
+					}
+				}else{
+					Alert.show("Error al cargar los datos","Error");
+					_dataReady = false;
+				}
+				_DataResult= new ArrayCollection();
+				_dataList.visible = true;
+				
+			}
+			
+			private function getData():void{
+				var params:Object = new Object();
+				params["_idSucursal"] 	= _sucursales.selectedItem._idSucursal;
+				params["_range"]		= _criterio.selectedValue;
+				params["_startDate"]	= Converter.dateToSQL(_startDate.selectedDate);
+				params["_stopDate"]		= Converter.dateToSQL(_stopDate.selectedDate);
+										
+				_MainService.getRecords(params);
+				_MainService.getRecords.addEventListener(ResultEvent.RESULT,onGetDataResult);
+			}
+			
+			private function onGetDataResult(e:ResultEvent):void{
+				_MainService.getRecords.removeEventListener(ResultEvent.RESULT,onGetDataResult);
+				_DataResult = Converter.arrayConverter(e.result);
+				if(_DataResult.length==0) {
+					Alert.show("No hay registros en la base de datos","Atención")
+				}else{
+					if(_dataIndex<0) _dataIndex = 0;
+					_Data.loadData(_DataResult[_dataIndex]);
+					_dataList.selectedIndex = _dataIndex;
+					_dataList.scrollToIndex(_dataList.selectedIndex);
+					loadExtraFields(_DataResult[_dataIndex]);
+				}
+				_dataReady = true;
+				resetBooleans();
+				_blockData = false;
+			}
+			
+			private function onFault(e:FaultEvent):void{
+				Alert.show(e.fault.faultString,"Error");
+			}
+
+			private function onDataSelect():void{
+				if(_dataList.selectedIndex!=-1) {
+					_Data.loadData(_dataList.selectedItem);
+					_dataIndex =_dataList.selectedIndex;
+					loadExtraFields(_dataList.selectedItem);
+					_selectedId = _dataList.selectedItem[_mainId];
+				}
+			}
+			
+			private function onCreateComplete(e:ResultEvent):void{				
+				_MainService.createRecord.removeEventListener(ResultEvent.RESULT,onCreateComplete);
+				_dataIndex = _DataResult.length;
+				getData();
+			}
+			
+			private function onUpdateComplete(e:ResultEvent):void{
+				_MainService.updateRecord.removeEventListener(ResultEvent.RESULT,onUpdateComplete);
+				getData();
+			}
+			
+			private function onDeleteComplete(e:ResultEvent):void{
+				_MainService.deleteRecord.removeEventListener(ResultEvent.RESULT,onDeleteComplete);
+				_dataIndex = _DataResult.length-2;
+				getData();
+			}
+			
+//-------------------------------- ResultsEvents --------------------------------------	
+
+//-------------------------------- POP UP WINDOW --------------------------------------	
+			public function openPopUp(popUpName:String,modal:Boolean=false):void{
+				var pop:TitleWindow = PopUpManager.createPopUp(this, getDefinitionByName("views."+popUpName) as Class, modal) as TitleWindow;
+				pop.name = popUpName;
+				pop.addEventListener(CloseEvent.CLOSE, closePopup);
+				if(pop.hasOwnProperty("context")){
+					Object(pop).context = viewContext;
+				}
+				PopUpManager.centerPopUp(pop);
+			}
+			
+			private function closePopup(e:CloseEvent):void{			
+	            		PopUpManager.removePopUp(e.target as TitleWindow);
+			}
+//-------------------------------- POP UP WINDOW --------------------------------------
+
+//-------------------------------- Search Engine --------------------------------------
+
+			private function searchFilter():void{
+               			_DataResult.filterFunction = vlidateSearch;
+               			_DataResult.refresh();
+           		}
+          
+       		private function vlidateSearch(item:Object):Boolean{
+           		var isMatch:Boolean = true; 
+           		
+           		
+
+           			if(_idStatus.selectedIndex!=0){          
+		           		if(item["_idEstatusPago"].toLowerCase().search(_idStatus.selectedItem.value) == -1){
+		               			isMatch = false
+		           		}
+	           		}
+	           		if(_idPymentType.selectedIndex!=0){          
+		           		if(item["_idTipoPago"].toLowerCase().search(_idPymentType.selectedItem.value) == -1){
+		               			isMatch = false
+		           		}
+	           		}
+           		return isMatch;              
+       		}
+	       	
+	       	private function search():void{
+			//	_searchFilter = _searchField.text;
+			//	searchFilter();
+			}
+			
+			private function doFilter():void{
+				_dataIndex = 0;
+				searchFilter();
+			}
+			
+			/*
+			private var _searchFilter:String 			= new String();
+[Bindable]	private var _searchTypes:ArrayCollection 	= new ArrayCollection([{label:"Pago :",     	value:"_idPago"}]);
+*/
+//-------------------------------- Search Engine --------------------------------------					
+			
+			
+			private function conceptos(item:Object,dc:DataGridColumn):String{
+				var res:String = "";
+				if(item[dc.dataField]){
+					res = SystemGlobals.DESCRIPCION_PAGOS[item[dc.dataField]]._nombre;
+				}
+				return res;
+			}
+			
+			private function estatus(item:Object,dc:DataGridColumn):String{
+				var res:String = "";
+				if(item[dc.dataField]){
+					res = ConstantData.PaymentStatus[item[dc.dataField]].label;
+				}
+				return res;
+			}
+			
+			
+			
+		]]>
+	</mx:Script>
+	<mx:Label x="695" y="40" text="Estatus Pago :" textAlign="right"/>
+<mx:ComboBox  x="789" y="38" id="_idEstatusPago" width="160" dataProvider="{ConstantData.PaymentStatus}" enabled="{_blockData}"/>
+<mx:Label x="684" y="253" text="Tarjeta Credito :" textAlign="right"/>
+<mx:ComboBox  x="789" y="251" width="160" dataProvider="{ConstantData.CardTypes}" id="_idTipoTarjeta" enabled="{_blockData}"/>
+<mx:Label x="711" y="68" text="Tipo Pago :" textAlign="right"/>
+<mx:ComboBox  x="789" y="66" id="_idTipoPago" width="160" dataProvider="{ConstantData.PaymentTypes}" enabled="{_blockData}"/>
+<mx:Label x="695" y="96" text="Tipo Moneda :" textAlign="right"/>
+<mx:ComboBox  x="789" y="94" id="_idTipoMoneda" width="74" dataProvider="{SystemGlobals.MONEDAS}" labelField="_codigo" enabled="{_blockData}"/>
+<mx:Label x="715" y="135" text="Concepto :" textAlign="right"/>
+<mx:ComboBox  x="789" y="133" id="_idConcepto" width="324" dataProvider="{SystemGlobals.DESCRIPCION_PAGOS}" labelField="_nombre" enabled="{_blockData}"/>
+<mx:Label x="703" y="12" text="Fecha Pago :" textAlign="right"/>
+	<mx:Label x="26" y="10" text="Sucursal :" textAlign="right"/>
+	<mx:Label x="40" y="40" text="Fecha :" textAlign="right"/>
+	<mx:Label x="30" y="154" text="Filtros :" textAlign="right"/>
+	<mx:Label x="94" y="139" text="estatus" textAlign="right" fontSize="9" fontStyle="italic" color="#C1C1C1"/>
+	<mx:Label x="280" y="139" text="tipo de pago" textAlign="right" fontSize="9" fontStyle="italic" color="#C1C1C1"/>
+	<mx:Label x="862" y="436" text="fecha de conciliación" textAlign="right" fontSize="9" fontStyle="italic" color="#C1C1C1"/>
+	<mx:Label x="993" y="436" text="fecha del pago" textAlign="right" fontSize="9" fontStyle="italic" color="#C1C1C1"/>
+	<mx:Label x="10" y="194" text="Resultados :" textAlign="right"/>
+	<mx:Label x="57" y="110" text="De :" textAlign="right" enabled="{_range}"/>
+	<mx:Label x="202" y="110" text="a" textAlign="right" enabled="{_range}"/>
+<mx:TextInput x="789" y="10" id="_fechaPago" width="90" enabled="{_blockData}"/>
+<mx:Label x="941" y="12" text="Fecha Vencimiento :" textAlign="right"/>
+<mx:DateField  x="1067" y="10" id="_fechaVencimiento" formatString="DD/MM/YYYY" change="dataChange();" width="122" enabled="{_blockData}"/>
+<mx:Label x="699" y="177" text="No. Cuentas :" textAlign="right"/>
+<mx:TextInput x="953" y="175" id="_numeroCuentaDestino" width="160" enabled="{_blockData}"/>
+<mx:TextInput x="789" y="175" id="_numeroCuentaOrigen" width="160" enabled="{_blockData}"/>
+<mx:Label x="708" y="207" text="Referencia :" textAlign="right"/>
+<mx:TextInput x="789" y="205" id="_numeroReferencia" width="324" enabled="{_blockData}"/>
+<mx:Label x="724" y="281" text="Cheque :" textAlign="right"/>
+<mx:TextInput x="789" y="279" id="_numeroCheque" width="160" enabled="{_blockData}"/>
+	<mx:TextInput x="957" y="251" id="_numeroTarjeta" width="156" textAlign="left" enabled="{_blockData}"/>
+<mx:Label x="1055" y="64" text="Tc Fix :" textAlign="right" fontStyle="italic"/>
+<mx:TextInput x="1111" y="64" id="_tcFix" width="78" textAlign="right" fontStyle="italic" enabled="{_blockData}"/>
+<mx:Label x="1056" y="94" text="Monto :" textAlign="right" fontWeight="bold"/>
+<mx:TextInput x="1111" y="94" id="_monto" width="78" fontWeight="bold" textAlign="right" enabled="{_blockData}"/>
+<mx:Label x="686" y="309" text="Observaciones :" textAlign="right"/>
+	<mx:Label x="702" y="455" text="Conciliación :" textAlign="right"/>
+<mx:TextArea x="789" y="309" id="_descripcion" change="dataChange();" width="400" height="109"/>
+
+	<mx:DataGrid height="361" dataProvider="{_DataResult}" id="_dataList" change="onDataSelect();" allowMultipleSelection="{_multipleSelection}"  enabled="{_dataReady&amp;&amp;!_newData}" y="191" width="562" x="94">
+		<mx:columns>			
+			<mx:DataGridColumn headerText="Id" dataField="_idPago" width="40"/>
+			<mx:DataGridColumn headerText="C" dataField="_idEstatusConciliacion" width="20">
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:HBox width="100%"  verticalAlign="middle" horizontalAlign="center">
+							<mx:Image source="assets/Icons/Status/auth_{data._idEstatusConciliacion}.png"  width="13" height="13" scaleContent="false"/>
+						</mx:HBox>
+					</mx:Component>
+				</mx:itemRenderer>				
+			</mx:DataGridColumn>
+			<mx:DataGridColumn headerText="E" dataField="_idEstatusPago" width="20">
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:HBox width="100%"  verticalAlign="middle" horizontalAlign="center">
+							<mx:Image source="assets/Icons/Status/pago_{data._idEstatusPago}.png"  width="13" height="13" scaleContent="false"/>
+						</mx:HBox>
+					</mx:Component>
+				</mx:itemRenderer>				
+			</mx:DataGridColumn>
+			<mx:DataGridColumn headerText="T" dataField="_idTipoPago" width="20">
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:HBox width="100%"  verticalAlign="middle" horizontalAlign="center">
+							<mx:Image source="assets/CRM/payment_{data._idTipoPago}.png"  width="13" height="13" scaleContent="false"/>
+						</mx:HBox>
+					</mx:Component>
+				</mx:itemRenderer>				
+			</mx:DataGridColumn>
+			<mx:DataGridColumn headerText="Estatus" dataField="_idEstatusPago" labelFunction="estatus" width="85"/>			
+			<mx:DataGridColumn headerText="Concepto" dataField="_idConcepto" labelFunction="conceptos"  width="150"/>
+			<mx:DataGridColumn headerText="Alta del Pago" dataField="_fechaPago" labelFunction="Converter.columDateConverter" width="100"/>
+			<mx:DataGridColumn headerText="Conciliación" dataField="_fechaPagoRealizado" labelFunction="Converter.columDateConverter" width="100"/>
+			<mx:DataGridColumn headerText="Monto" dataField="_monto" textAlign="right" labelFunction="Converter.columNumberConverter" width="80"/>
+		</mx:columns>
+	</mx:DataGrid>
+	<mx:Button label="Regresar" click="closeWindow();" width="145"  enabled="{!_newData}" y="578" x="1045"/>
+	<mx:HRule x="10" y="184" width="646" height="1"/>
+	<mx:HRule x="675" y="125" width="515" height="1"/>
+	<mx:HRule x="672" y="426" width="515" height="1"/>
+	<mx:HRule x="672" y="486" width="515" height="1"/>
+	<mx:Label y="158" text="origen"  fontSize="9" color="#CECECE" fontStyle="italic" x="789"/>
+	<mx:Label y="160" text="destino"  fontSize="9" color="#CECECE" fontStyle="italic" x="954"/>
+	<mx:Label y="235" text="número"  fontSize="9" color="#CECECE" fontStyle="italic" x="954"/>
+	<mx:Label y="235" text="tipo"  fontSize="9" color="#CECECE" fontStyle="italic" x="789"/>
+	<mx:VRule x="664" y="10" width="1" height="585"/>
+	<mx:Button x="93" y="560" width="563" height="35" click="openPaymentStatus();" textAlign="center" label="Conciliar Cargo" enabled="{_dataList.selectedIndex!=-1}"/>
+	<mx:ComboBox x="280" y="154" change="doFilter();" dataProvider="{ConstantData.PaymentTypesFilter}" width="160" id="_idPymentType"></mx:ComboBox>
+	<mx:ComboBox x="94" y="10" width="246" id="_sucursales" dataProvider="{_sucursalesList}" labelField="_nombre" change="_dataIndex = 0;getData();"></mx:ComboBox>
+	<mx:ComboBox x="94" y="154" change="doFilter();" dataProvider="{ConstantData.PaymentStatusFilterB}" width="160" id="_idStatus"></mx:ComboBox>
+	<mx:DateField x="94" y="108" showToday="true" id="_startDate" enabled="{_range}" width="105"/>
+	<mx:DateField x="235" y="108" showToday="true" id="_stopDate" enabled="{_range}" width="105"/>
+	<mx:RadioButtonGroup id="_criterio"/>
+	<mx:RadioButton x="94" y="40" label="Mes Actual" groupName="_criterio" value="0" selected="true" click="updateCriterio();getData();"/>
+	<mx:RadioButton x="94" y="60" label="Mes Anterior" groupName="_criterio" value="1" click="updateCriterio();getData();"/>
+	<mx:RadioButton x="94" y="80" label="Rango" groupName="_criterio" value="2" click="updateCriterio()"/>
+	<mx:Button x="357" y="107" label="Buscar" enabled="{_range}" click="getData();">
+		<mx:icon>@Embed(source='../../assets/Icons/Buttons/refresh.png')</mx:icon>
+	</mx:Button>
+	<mx:CheckBox x="789" y="453" label="estatus" enabled="false" id="_idEstatusConciliacion"/>
+	<mx:DateField x="862" y="453" id="_fechaConciliacion" enabled="false" width="120"/>
+	<mx:DateField x="993" y="453" id="_fechaPagoRealizado" enabled="false" width="120"/>
+	
+</mx:TitleWindow>

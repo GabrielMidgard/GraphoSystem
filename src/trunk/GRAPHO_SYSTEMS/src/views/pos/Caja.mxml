@@ -1,0 +1,395 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   width="1138" height="614" title="Caja">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	
+	
+	<s:DataGrid id="_orderListView" x="126" y="151" width="672" height="346" dataProvider="{_orderList}"
+				requestedRowCount="4">
+		<s:columns>
+			<s:ArrayList>
+				<s:GridColumn dataField="_idNICE" headerText="Código" width="70"></s:GridColumn>			
+				<s:GridColumn dataField="_cantidad" headerText="Cant." width="48"></s:GridColumn>
+				<s:GridColumn dataField="_nombre" headerText="Artículo"></s:GridColumn>
+				<s:GridColumn dataField="_precioCatalogo" headerText="$ Catálogo" width="80"></s:GridColumn>
+				<s:GridColumn dataField="_precioSistema" headerText="$ Unitario" width="80"></s:GridColumn> <!-- _precio o _precioSistema? -->
+				<s:GridColumn dataField="_importe" headerText="Importe" width="80"></s:GridColumn>
+				<s:GridColumn dataField="_puntos" headerText="Puntos" width="80"></s:GridColumn>
+				
+			</s:ArrayList>
+		</s:columns>
+	</s:DataGrid>
+	
+	<s:Button right="8" bottom="8" width="167" height="54" label="Cobrar" fontSize="15"
+			  fontStyle="normal" fontWeight="normal" icon="@Embed('../assets/CRM/Money.png')" click="openPopUp('pagos.Pagos_Seleccion_Tipo',true)"/>
+	<s:Button x="806" y="464" width="322" height="33" label="Eliminar Artículo"
+			  click="deleteProduct()" fontSize="15" fontStyle="normal" fontWeight="normal"/>
+	<s:Button x="1" y="1" width="100" height="100" label="DIN"
+			  icon="@Embed('../assets/CRM/Service.png')" iconPlacement="top" click="openPopUp('din.Din_Busqueda',true)" />
+	<s:Button x="1" y="100" width="100" height="100" label="Inventario"
+			  icon="@Embed('../assets/CRM/Docs.png')" iconPlacement="top"/>
+	<s:Button x="1" y="199" width="100" height="100" label="Ordenes"
+			  icon="@Embed('../assets/CRM/Mail.png')" iconPlacement="top"/>
+	<s:Button x="1" y="298" width="100" height="100" label="Corte"
+			  icon="@Embed('../assets/CRM/Payments.png')" iconPlacement="top"/>
+	<s:Button x="1" y="397" width="100" height="100" label="Configuración"
+			  icon="@Embed('../assets/CRM/Details.png')" iconPlacement="top"/>
+	<s:Label x="140" y="126" fontWeight="bold" text="Artículo :"/>
+	<s:Label x="829" y="51" fontWeight="bold" text="DIN :"/>
+	<s:TextInput id="_codigo" x="196" y="121" width="265" enabled="{_dinSelected}"
+				 enter="searchProduct()"/>
+	
+	<s:Line left="10" right="10" bottom="73">
+		<s:stroke>
+			<s:SolidColorStroke color="#c6c6c6" weight="1" caps="square"/>
+		</s:stroke>
+	</s:Line>
+	<s:Label x="936" y="31" color="#9A9A9A" fontFamily="Arial" fontSize="10" fontStyle="italic"
+			 fontWeight="normal" text="nombre"/>
+	<s:Label x="198" y="109" color="#9A9A9A" fontFamily="Arial" fontSize="10" fontStyle="italic"
+			 fontWeight="normal" text="código LIOR / NICE / Nombre"/>
+	<s:TextInput x="935" y="43" width="192" editable="false" enabled="true"
+				 text="{_din._nombre+' '+_din._paterno+' '+_din._materno }"/>
+	<s:Label x="862" y="31" color="#9A9A9A" fontFamily="Arial" fontSize="10" fontStyle="italic"
+			 fontWeight="normal" text="id"/>
+	<s:TextInput x="862" y="43" width="65" text="{_din._idDin}"/>
+	<s:Label x="801" y="86" fontWeight="bold" text="PUNTOS :"/>
+	<s:Label x="863" y="69" color="#9A9A9A" fontFamily="Arial" fontSize="10" fontStyle="italic"
+			 fontWeight="normal" text="acumulado"/>
+	<s:TextInput x="863" y="81" editable="false" enabled="true"
+				 text="{Number(_din._puntosAcumulados)}"/>
+	<s:Label x="999" y="70" color="#9A9A9A" fontFamily="Arial" fontSize="10" fontStyle="italic"
+			 fontWeight="normal" text="grupales"/>
+	<s:TextInput x="999" y="82" editable="false" enabled="true" text="{Number(_din._puntosGrupales)}"/>
+	<s:Label x="999" y="108" color="#9A9A9A" fontFamily="Arial" fontSize="10" fontStyle="italic"
+			 fontWeight="normal" text="por compra actual"/>
+	<s:TextInput x="999" y="120" editable="false" enabled="true" text="{Number(_puntosCompra)}"/>
+	<s:Label right="338" bottom="22" fontSize="25" text="Total:"/>
+	<s:Label id="_mainTotal" right="200" bottom="22" width="130" color="#F23A3A" fontSize="25"
+			 textAlign="right" text="$ {Converter.numberFormat(_total)}"/>
+	<s:Image x="144" y="36" width="96" height="38" backgroundColor="#FFFFFF" scaleMode="letterbox"
+			 source="@Embed('../assets/Custom/logo.png')"/>
+	<s:BorderContainer x="806" y="151" width="322" height="305">
+		<s:Image x="0" y="0" width="320" height="303" backgroundColor="#FFFFFF" scaleMode="stretch"
+				 source="{_imagen}" toolTip="{_imagen}"/>
+		<s:Label x="210" y="288" backgroundAlpha="0.49" backgroundColor="#FFFFFF" color="#000000"
+				 fontFamily="Arial" fontSize="10" fontStyle="italic" fontWeight="normal"
+				 text="Producto seleccionado"/>
+
+	</s:BorderContainer>
+	<fx:Script>
+		<![CDATA[
+			import flash.utils.getDefinitionByName;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.managers.PopUpManager;
+			import mx.random.constants.Catalogs;
+			import mx.random.constants.ConstantData;
+			import mx.random.constants.Constantes;
+			import mx.random.constants.Languages;
+			import mx.random.constants.SystemGlobals;
+			import mx.random.converters.Converter;
+			import mx.random.dataManagers.DataManager;
+			import mx.random.dataManagers.EventManager;
+			import mx.random.files.PathData;
+			import mx.random.forms.Validator;
+			import mx.random.userAuth.User;
+			import mx.random.web.WebApplication;
+			import mx.random.windowManagers.PopManager;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.remoting.RemoteObject;
+			
+			import spark.components.TitleWindow;
+			
+			import views.clientes.Clientes_Busqueda;
+			import views.din.Din_Busqueda;
+			import views.pagos.Pagos_Seleccion_Tipo;
+			
+			private var _webApplication:WebApplication;
+			private var Valid:Validator 			= new Validator();
+			private var _workManager:Object 		= new Object();
+			private var _MainService:RemoteObject 		= new RemoteObject();
+			private var _ProductService:RemoteObject 		= new RemoteObject();
+			[Bindable]	private var _Data:DataManager 				= new DataManager(this);
+			[Bindable]	private var _DataResult:ArrayCollection 		= new ArrayCollection();			
+			private var _eventManager:EventManager 		= new EventManager(this);
+			private var _dataIndex:Number 			= 0;
+			
+			//-----------Event Manager -----------
+			
+			[Bindable]	public var _dataReady:Boolean 			= true;
+			[Bindable]	public var _newData:Boolean 			= false;
+			[Bindable]	public var _updateData:Boolean 			= false;
+			
+			//-----------Event Manager -----------
+			
+			
+			//-----------Local Vars -----------
+			
+			private var _selectedId:Number = 0;
+			private var _selectedName:String = "";
+			private var _serviceName  		= "POS";
+			private var _mainId  			= "_idOrdenes";
+			private var _mainFocusField:String      = "";
+			
+[Bindable]	private var _filterData:ArrayCollection = new ArrayCollection();	
+[Bindable]  private var _din:Object = {_idDin:'NA',_nombre:'No hay din seleccionado',_paterno:'',_materno:''};
+[Bindable]	private var _orderList:ArrayCollection = new ArrayCollection();
+			
+[Bindable]	private var _total:Number 				= 0;
+[Bindable]	private var _puntosAcumulados:Number 	= 0;
+[Bindable]	private var _puntosCompra:Number 		= 0;
+[Bindable]	private var _imagen:String 				= "";
+[Bindable]	private var _dinSelected:Boolean		= false;			
+			
+			
+			//-----------Local Vars -----------
+			
+			//---------------------------- Context ---------------------------------------------            
+			
+			public function set context(contextObj:Object):void{
+				for( var p:String in contextObj){
+					if(this.hasOwnProperty(p)){
+						this[p] = contextObj[p];
+					}
+				}
+				initView();
+			}
+			
+			public function set workManager(value:Object):void{
+				_workManager = value;
+			}
+			
+			public function set webApplication(value:WebApplication):void{
+				_webApplication = value;
+				
+			}
+			public function get webApplication():WebApplication{ return _webApplication; } 
+			
+			//---------------------------- Context ---------------------------------------------  
+			
+			//-------------------------------- MainInit --------------------------------------
+			// ------------------- View Extra Data -------------------------------
+			
+			private function get viewContext():Object{
+				return {					
+						webApplication: 	_webApplication,
+						workManager: this
+					
+				}	
+			}
+			
+			private function addValidations():void{
+				Valid.changeLanguage(Languages.SPANISH);
+				Valid.setErrorKnot(Validator.CIRCLE_KNOT,0xFF0000);
+				
+			
+			}
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			private function forceImports():void{
+				Clientes_Busqueda;
+				Pagos_Seleccion_Tipo;
+			}
+			
+			public function initView():void{
+				forceImports();
+				_dataReady = false;
+				_MainService = _webApplication.getService(_serviceName);				
+				_MainService.addEventListener(FaultEvent.FAULT,onFault);
+				_ProductService = _webApplication.getService("Productos");
+				_ProductService.addEventListener(FaultEvent.FAULT,onFault);
+			}
+			
+			
+			
+			
+			// ------------------- View Extra Data -------------------------------
+				
+			
+			public function closeWindow():void{
+				this.dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
+				PopUpManager.removePopUp(this);
+			}
+			
+			//-------------------------------- MainInit --------------------------------------
+			
+			
+			
+			
+			
+			
+			//-------------------------------- ResultsEvents --------------------------------------		
+			
+			
+			public function getData():void{
+				var parmas:Object = new Object();
+				_MainService.getRecords(parmas);
+				_MainService.getRecords.addEventListener(ResultEvent.RESULT,onGetDataResult);
+			}
+			
+			private function onGetDataResult(e:ResultEvent):void{
+				_MainService.getRecords.removeEventListener(ResultEvent.RESULT,onGetDataResult);
+				_DataResult = Converter.arrayConverter(e.result);
+				if(_DataResult.length==0) {
+					Alert.show("No hay registros en la base de datos","Atención")
+				}else{
+					if(_dataIndex<0) _dataIndex = 0;					
+					//_dataList.selectedIndex = _dataIndex;
+					//_dataList.scrollToIndex(_dataList.selectedIndex);										
+				}
+				_dataReady = true;
+				//_dataList.visible = true;
+			}
+			
+			private function onFault(e:FaultEvent):void{
+				Alert.show(e.fault.faultString,"Error");
+			}
+			
+			
+			//-------------------------------- ResultsEvents --------------------------------------	
+			
+			//-------------------------------- POP UP WINDOW --------------------------------------	
+			public function openPopUp(popUpName:String,modal:Boolean = false):void{
+				var pop:TitleWindow = PopUpManager.createPopUp(SystemGlobals.mainStage as DisplayObject, getDefinitionByName("views."+popUpName) as Class, modal) as TitleWindow;
+				pop.name = popUpName;
+				pop.addEventListener(CloseEvent.CLOSE, closePopup);
+				if(pop.hasOwnProperty("context")){
+					Object(pop).context = viewContext;
+				}
+				PopUpManager.centerPopUp(pop);
+			}
+			
+			private function closePopup(e:CloseEvent):void{
+				PopUpManager.removePopUp(e.target as TitleWindow);
+			}
+		
+			
+			
+			//-------------------------------- POP UP WINDOW --------------------------------------
+			
+			//-------------------------------- Search Engine --------------------------------------
+			
+			/*
+			private function searchFilter():void{
+				_DataResult.filterFunction = vlidateSearch;
+				_DataResult.refresh();
+			}
+			
+			private function vlidateSearch(item:Object):Boolean{
+				var isMatch:Boolean = false;           
+				if(item[_searchType.selectedItem.value].toLowerCase().search(_searchFilter.toLowerCase()) != -1){
+					isMatch = true
+				}              
+				return isMatch;              
+			}
+			
+			private function search():void{
+				_searchFilter = _searchField.text;
+				searchFilter();
+			}
+			
+			private function onFilterChange():void{
+				_dataIndex = -1;
+				getData();
+			}
+			
+			private function clearFilter():void{
+				_searchField.text = "";
+				search();
+			}
+			
+			
+			
+			private var _searchFilter:String 			= new String();
+			[Bindable]	private var _searchTypes:ArrayCollection 	= new ArrayCollection([	{label:"Número de Cliente", value:"_idCliente"},
+				{label:"Nombre",     		value:"_nombre"},
+				{label:"Paterno",     		value:"_paterno"},
+				{label:"Materno",     		value:"_materno"}
+			]);
+			*/
+			//-------------------------------- Search Engine --------------------------------------		
+			
+			
+			
+			public function selectDin(din:Object){
+				_din = din;
+				_dinSelected = true;
+				focusManager.setFocus(_codigo);
+			}
+			
+			
+			private function searchProduct():void{		
+				getProductByCode(_codigo.text)
+				_codigo.text = "";				
+			}
+			
+			private function getProductByCode(codigo:String):void{				
+				_MainService.getProductByCode(codigo);
+				_MainService.getProductByCode.addEventListener(ResultEvent.RESULT,getProductByCodeResult);
+				
+			}
+			
+			private function getProductByCodeResult(e:ResultEvent):void{
+				_MainService.getProductByCode.removeEventListener(ResultEvent.RESULT,getProductByCodeResult);
+				var product:ArrayCollection = Converter.arrayConverter(e.result);
+				addProduct(product[0]);
+			}
+			
+			private function addProduct(product:Object):void{
+				product._cantidad 	= 1;
+				product._precio 	= product._costo;
+				product._importe 	= product._precio*product._cantidad;
+				_orderList.addItem(product);
+				_imagen = PathData.HOST+PathData.PUBLIC+"___PRODUCTS/"+product._idLIOR+".jpg?rnd="+Math.random();
+				updateOrder();
+			}
+			
+			private function deleteProduct():void{
+				if(_orderListView.selectedIndex!=-1){
+					var product:Object = _orderListView.selectedItem;
+					Alert.show("Eliminar articulo "+product._idLIOR+" ?","Atención",Alert.YES|Alert.CANCEL,this,deleteProductHandler);
+				}else{
+					Alert.show("No hay producto seleccionado","Atención");
+				}
+			}
+			
+			private function deleteProductHandler(e:CloseEvent):void{
+				if(e.detail==Alert.YES){
+					_orderList.removeItemAt(_orderListView.selectedIndex);
+					updateOrder();
+				}
+			}
+			
+			private function updateOrder():void{
+				_total = 0;
+				_puntosCompra = 0;
+				for(var n:Number = 0;n<_orderList.length;n++){
+					_total += Number(_orderList[n]._importe);
+					_puntosCompra += Number(_orderList[n]._puntos);
+				}
+				if(_orderList.length>0)
+					_orderListView.setSelectedIndex(_orderList.length-1);
+				
+			}
+			
+			
+			
+		]]>
+	</fx:Script>
+</s:TitleWindow>

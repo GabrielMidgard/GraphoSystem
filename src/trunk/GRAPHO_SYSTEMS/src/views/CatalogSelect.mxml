@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="510" height="360" showCloseButton="true" title="Catalog Selection">
+	<mx:List x="10" y="29" height="214" id="_dataList" dataProvider="{_tables}" width="162" change="onDataChange()" labelField="TABLE_NAME"></mx:List>
+	<mx:List x="180" y="29" height="214" id="_fieldsList" dataProvider="{_fields}" width="160" labelField="COLUMN_NAME" change="onFieldsChange()"></mx:List>
+	<mx:Label x="180" y="10" text="Fields :"/>
+	<mx:Label x="10" y="10" text="Tables :"/>
+	<mx:Button x="272" y="296" label="Select" width="160" click="closeWindow();" enabled="{_catalog!=''&amp;&amp;_selectedField!=''}"/>
+	<mx:Script>
+		<![CDATA[
+			import mx.managers.PopUpManager;
+			import mx.random.windowManagers.PopManager;
+			import mx.random.cms.converters.Converter;
+			import mx.controls.Alert;
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.remoting.RemoteObject;
+			import mx.random.cms.web.WebApplication;
+			import mx.collections.ArrayCollection;
+			
+			
+[Bindable]	private var _tables:ArrayCollection;
+[Bindable]	private var _fields:ArrayCollection = new ArrayCollection();
+			private var _webApplication:WebApplication;
+			private var _workManager:Object;
+			private var _MainService:RemoteObject;
+			private var _serviceName  		= "SQLServices";
+			private var _params:Object;
+			private var _external:Boolean;
+			
+[Bindable]	private var _selectedTable:String = "";
+[Bindable]	private var _selectedField:String = "";
+//---------------------------- Context ---------------------------------------------            
+
+   			public function set context(contextObj:Object):void{
+				for( var p:String in contextObj){
+					if(this.hasOwnProperty(p)){
+						this[p] = contextObj[p];
+					}
+				}
+			}
+
+			public function set workManager(value:Object):void{
+				_workManager = value;
+			}
+
+			public function set webApplication(value:WebApplication):void{
+				_webApplication = value;
+				initView();				
+			}					
+			
+			public function set tables(value:ArrayCollection):void{
+				_tables = value;
+			}
+			
+			public function set params(value:Object):void{
+				_params = value;
+			}
+			public function set external(value:Boolean):void{
+				_external = value;
+			}
+			
+			public function set catalog(value:String):void{
+				_catalog = value;
+			}
+			public function set selectedField(value:String):void{
+				_selectedField = value;
+			}			
+						
+//---------------------------- Context ---------------------------------------------  		
+			public function initView():void{
+				_MainService = _webApplication.getService(_serviceName);				
+				_MainService.addEventListener(FaultEvent.FAULT,onFault);
+			}					
+			
+			private function loadScroll():void{
+				_fieldsList.visible = false;
+				for(var n:Number = 0;n<100;n++){
+					_fields.addItem({i:0});
+				}
+			}
+			
+			private function getFields():void{
+				if(_dataList.selectedIndex !=-1){
+					loadScroll();					
+					_MainService.getFields(_dataList.selectedItem.TABLE_NAME);
+					_MainService.getFields.addEventListener(ResultEvent.RESULT,onGetFieldsResult);
+				}
+			}
+			
+			private function getExternalFields():void{
+				if(_dataList.selectedIndex !=-1){
+					loadScroll();
+					_MainService.getExternalFields(_dataList.selectedItem.TABLE_NAME,_params);
+					_MainService.getExternalFields.addEventListener(ResultEvent.RESULT,onGetFieldsResult);
+				}
+			}
+			
+			private function onGetFieldsResult(e:ResultEvent):void{
+				_MainService.getFields.removeEventListener(ResultEvent.RESULT,onGetFieldsResult);				
+				_fields = Converter.arrayConverter(e.result);
+				_fieldsList.visible = true;
+			}
+			
+			private function onFault(e:FaultEvent):void{
+				Alert.show(e.fault.faultString,"Error");
+			}
+			
+			private function onDataChange():void{
+				if(_external){
+					getExternalFields();
+				}else{
+					getFields();
+				}
+				_selectedTable = _dataList.selectedItem.TABLE_NAME;
+				updateString();
+			}
+			
+			private function onFieldsChange():void{
+				_selectedField = _fieldsList.selectedItem.COLUMN_NAME;
+				updateString();
+			}
+			
+			
+[Bindable] private var _catalog:String = "";
+[Bindable] private var _label:String = "";	
+		
+			private function updateString():void{
+				_catalog = "Catalogs.DataObject."+_selectedTable;
+				_label   = _selectedField;
+			}
+			
+			private function closeWindow():void{
+				_workManager.updateCatalog(_selectedTable,_selectedField);
+				PopUpManager.removePopUp(this);
+			}
+
+		]]>
+	</mx:Script>
+	<mx:Label x="10" y="251" text="dataProvider = &quot;{"/>
+	<mx:Label x="111" y="251" text="{_catalog}}&quot;"/>
+	<mx:Label x="26" y="271" text="lableField = &quot;"/>
+	<mx:Label x="103" y="271" text="{_label}&quot;"/>
+</mx:TitleWindow>

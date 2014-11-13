@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="60" height="20" backgroundColor="{_color}" borderStyle="solid" borderColor="#000000" horizontalScrollPolicy="off" verticalScrollPolicy="off" backgroundAlpha="0.3">
+	<mx:Label x="0" y="0" text="{_nombre}" width="60" height="100%" color="#FFFFFF" fontWeight="bold" textAlign="center" buttonMode="true"/>
+	
+	<mx:Script>
+		<![CDATA[
+			
+[Bindable]  public var _nombre:String = new String();
+[Bindable]  public var _idCaptura:Number = new Number();
+[Bindable]  public var _estatus:Boolean = false;
+[Bindable]  private var _color:uint = 0xFF0000;
+			
+
+			public function set context(contextObj:Object):void{
+				for( var p:String in contextObj){
+					if(this.hasOwnProperty(p)){
+						this[p] = contextObj[p];
+					}
+				}
+				this.addEventListener(MouseEvent.CLICK,mouseControl);
+				updateEstatus();				
+			}
+			
+			private function mouseControl(e:MouseEvent):void{
+				_estatus = !_estatus;
+				updateEstatus();
+			}
+			
+			private function updateEstatus():void{				
+				if(_estatus){
+					_color = 0x00FF1E;
+				}else{
+					_color = 0xFF0000;
+				}
+			}
+			
+			public function get estatus():Boolean{
+				return _estatus;
+			}
+			
+			public function set estatus(value:Boolean):void{
+				_estatus = value;				
+				updateEstatus();
+			}
+			
+			
+		]]>
+	</mx:Script>
+	
+	
+</mx:Canvas>

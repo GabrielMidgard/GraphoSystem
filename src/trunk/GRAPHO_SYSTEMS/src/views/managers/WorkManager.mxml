@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 xmlns:s="library://ns.adobe.com/flex/spark"
+		 xmlns:mx="library://ns.adobe.com/flex/mx"		
+		 width="100%" height="100%"
+		 creationComplete="initMainApp();">
+	
+	<fx:Script>
+        <![CDATA[
+        	import flash.utils.getDefinitionByName;
+        	
+        	import mx.collections.ArrayCollection;
+        	import mx.collections.XMLListCollection;
+        	import mx.controls.Alert;
+        	import mx.controls.Menu;
+        	import mx.core.IFlexDisplayObject;
+        	import mx.core.UIComponent;
+        	import mx.events.CloseEvent;
+        	import mx.events.MenuEvent;
+        	import mx.managers.PopUpManager;
+        	import mx.random.config.ConfigLoader;
+        	import mx.random.constants.ConstantData;
+        	import mx.random.constants.SystemGlobals;
+        	import mx.random.converters.Converter;
+        	import mx.random.events.CatalogEvent;
+        	import mx.random.events.ConfigEvent;
+        	import mx.random.events.StaticEvent;
+        	import mx.random.red5.Red5Client;
+        	import mx.random.sockets.SocketManager;
+        	import mx.random.userAuth.MenuRoleFilter;
+        	import mx.random.userAuth.User;
+        	import mx.random.web.WebApplication;
+        	import mx.rpc.events.FaultEvent;
+        	import mx.rpc.events.ResultEvent;
+        	import mx.rpc.remoting.RemoteObject;
+        	
+        	import spark.components.TitleWindow;
+        	
+        	import views.*;
+        	import views.system.MessageBox;
+            
+            protected var _webApplication:WebApplication;
+            protected var _configXML:XML;
+			public 	  var openWindows:Object = new Object();
+			protected var _openApps:Object = new Object();
+			
+			
+			
+			private 	var _service:RemoteObject;
+			private 	var targetTransition:Object = new Object();
+			private 	var RF:Red5Client;
+			private 	var SyncRed5:Boolean = false;
+[Bindable]	private 	var _socketManager:SocketManager;					
+				
+			
+[Bindable]	private var _menuCollection:XMLListCollection;
+			private var _messageBox:MessageBox = new MessageBox();;
+           	
+			public function set context(contextObj:Object):void{
+				for( var p:String in contextObj){
+					if(this.hasOwnProperty(p)){
+						this[p] = contextObj[p];
+					}
+				}
+			}
+            
+                       
+			public function set webApplication(webApplication:WebApplication):void{
+				_webApplication = webApplication;				
+			}
+            
+            public function set configXML(value:XML):void{
+            	_configXML = value;
+            }
+            
+//-------- Red 5 API ----------------------------------------------------------------------
+			
+			private function iniRed5API():void{
+				
+				//iniPopUp("")
+				if(SyncRed5){
+					//RF = new Red5Client("","")
+					//RF.appName = "";
+					//RF.connect();
+					//RF.addEventListener("DataSync",onDataSync);
+				}
+			}
+			
+			private function onDataSync(e:Event):void{
+				//trace(RF.so.data[RF.appName]);
+			}
+			
+			public function sendStreamData():void{
+				//RF.sendData("1");
+			}
+			
+//-------- Red 5 API ----------------------------------------------------------------------
+			
+			private function initMainApp():void{
+				iniRed5API();				
+				ExternalInterface.addCallback("doSilentLogOut", onPageUnload);
+				iniPopUp("empresa.Empresa_Menu",false,10,40);
+			}	
+			 
+			private function onPageUnload ():void{
+			    _webApplication.logout();
+			}
+
+            public function logout(event:MenuEvent=null):void{
+				closeAllWindows();
+            	_webApplication.logout();
+            } 
+			
+			protected function closeAllWindows():void{
+				for each (var pop:TitleWindow in openWindows)  {					
+					PopUpManager.removePopUp(openWindows[pop.name]);
+					delete openWindows[pop.name];
+				}
+			}
+
+            protected function closePopup(event:CloseEvent):void{
+            	var pop:TitleWindow = event.target as TitleWindow;
+            	if(openWindows.hasOwnProperty(pop.name)){
+	            	PopUpManager.removePopUp(openWindows[pop.name]);
+	            	delete openWindows[pop.name]
+            	}
+            }
+            
+            public function iniPopUp(popUpName:String,modal:Boolean = false, xPos:Number = 0 , yPos:Number = 0):void{
+				if(!openWindows.hasOwnProperty(popUpName)){
+    				var pop:TitleWindow = PopUpManager.createPopUp(this, getDefinitionByName("views."+popUpName) as Class, modal) as TitleWindow;
+    				pop.name = popUpName;
+    				pop.addEventListener(CloseEvent.CLOSE, closePopup);
+    				openWindows[popUpName] = pop;
+    				
+					if(pop.hasOwnProperty("context")){
+    					var popupContext:Object = {
+							webApplication: _webApplication,
+							workManager: this
+						}
+    					Object(pop).context = popupContext;
+    					
+    				}
+					if(xPos!=0 || yPos!=0){
+						pop.x = xPos;
+						pop.y = yPos;
+						
+					}else{
+						PopUpManager.centerPopUp(pop);
+					}
+        		}	
+			}	
+					
+			 
+			public function iniApp(appName:String):void{
+				if(!_openApps.hasOwnProperty(appName)){
+    			   var AppClass:Class = getDefinitionByName("views."+appName) as Class;  
+    				var app:* = (new AppClass());
+    				app.name = appName;
+    				app.addEventListener(CloseEvent.CLOSE, closeApp);
+    				_openApps[appName] = app;
+    				
+					if(app.hasOwnProperty("context")){
+    					var appContext:Object = {
+							webApplication: _webApplication,
+							workManager: this
+						}
+    					Object(app).context = appContext;    					
+    				} 
+    				this.addChild(app);   				
+        		}	
+			}	
+			
+			public function closeApp(e:CloseEvent):void{
+				if(_openApps.hasOwnProperty(e.target.name)){
+	            	this.removeChild(e.target as DisplayObject);
+	            	delete _openApps[e.target.name]
+            	}
+			}
+			
+			
+			
+			 public function enterState():void{			 	
+            	var filteredList:XMLList = MenuRoleFilter.filterMenuItemXMLList(_configXML.navMenu.menuitem, _webApplication.user);
+            	_menuCollection = new XMLListCollection(filteredList);
+            	
+            	
+            	if(_webApplication.user.role != "System"){
+					//MainMenuBar.visible = false;
+					//currentState = "GuestState";
+					//iniPopUp("FileViewer");
+				}else{
+					
+				}
+				
+				
+            }
+			
+			public function exitState():void{
+				//_menuCollection = new XMLListCollection();
+			}
+			
+			protected function menuHandler(event:MenuEvent):void {	
+            	if(event.item.@method != ""){
+            		this[event.item.@method](event);
+            	}
+            }
+            
+            private function  openPopup(event:MenuEvent):void{
+            	if(event.item.@data !=0){
+            		if(!openWindows.hasOwnProperty(event.item.@className)){
+        				var pop:TitleWindow = PopUpManager.createPopUp(this, getDefinitionByName("views." + event.item.@className) as Class, false) as TitleWindow;
+        				pop.name = event.item.@className;
+        				PopUpManager.centerPopUp(pop);
+        				pop.addEventListener(CloseEvent.CLOSE, closePopup);
+        				openWindows[event.item.@className] = pop;
+        				
+        				if(pop.hasOwnProperty("context")){
+    					var popupContext:Object = {
+							webApplication: _webApplication,
+							workManager: this
+							}
+    						Object(pop).context = popupContext;
+    					}
+        				
+            		}
+            	}
+            }
+			
+			protected function  changeLanguage(event:MenuEvent):void{
+				if(event.item.@data !=0){
+					SystemGlobals.LANGUAGE = event.item.@value;
+				}
+			}
+			
+			protected function  openPopupOrig(event:MenuEvent):void{
+				if(event.item.@data !=0){
+					if(!openWindows.hasOwnProperty(event.item.@className)){
+						var pop:TitleWindow = PopUpManager.createPopUp(this, getDefinitionByName("views." + event.item.@className) as Class, false) as TitleWindow;
+						pop.name = event.item.@className;
+						PopUpManager.centerPopUp(pop);
+						pop.addEventListener(CloseEvent.CLOSE, closePopup);
+						openWindows[event.item.@className] = pop;
+						
+						if(pop.hasOwnProperty("context")){
+							var popupContext:Object = {
+								webApplication: _webApplication,
+								workManager: this
+							}
+							Object(pop).context = popupContext;
+						}
+						
+					}
+				}
+			}
+			
+			
+			
+			private function setStep(valor:Number):void{
+				
+				//trace(valor.toString());
+			}
+            
+			private function exitAlert():void{
+				//Alert.show("Are you sure you want to leave the reservation process ?","Exit Regitration",3,this,exitApp);
+			}
+			
+			private function exitApp(e:CloseEvent):void{
+				if (e.detail==Alert.YES){
+            		//this.dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
+            		//navigateToURL(new URLRequest("http://www.latranquila.com.mx"),"_self");               
+       			}	
+			}
+			
+         ]]>
+    </fx:Script>
+	
+	<mx:MenuBar id="MainMenuBar" left="0" right="0" top="0" height="30" cornerRadius="0"
+				dataProvider="{_menuCollection}" itemClick="menuHandler(event);" labelField="@label"/>
+	<s:Label text="Usuario : {SystemGlobals.userName}" bottom="44" left="26"/>
+	<s:Label text=" {SystemGlobals.systemStatus}" right="260" y="11" width="265" textAlign="right"/>
+	<s:Label text=" {SystemGlobals.serverStatus}" right="10" y="11" width="132" textAlign="left"/>
+	<s:Label text="  Server Status :" right="165" y="12" width="106" textAlign="right"/>
+	<s:Label text="Grupo : {SystemGlobals.userGroup}" bottom="27" left="34"/>
+	<s:Label text="Nivel / Suc : {SystemGlobals.sucursal}" bottom="10" left="10"/>
+	<s:Image left="10" bottom="61" width="96" height="38" scaleMode="letterbox"
+			 source="assets/Custom/logo.png"/>
+	<s:CheckBox enabled="false" right="144" top="7" selected="{SystemGlobals.SOCKET_MANAGER.connected}"/>
+	<s:Group right="10" bottom="10" id="iconCanvas" left="485" height="91">
+	</s:Group>
+	
+</s:Group>

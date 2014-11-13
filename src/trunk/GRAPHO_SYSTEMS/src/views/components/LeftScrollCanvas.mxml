@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="400" height="300">
+	<mx:Script>
+		<![CDATA[
+	 
+			public override function validateDisplayList( ):void{
+				super.validateDisplayList( );
+	 
+				if( verticalScrollBar && verticalScrollBar.visible ){
+					verticalScrollBar.x = 0;
+				}	
+	 
+			}
+	 
+		]]>
+	</mx:Script>
+</mx:Canvas>

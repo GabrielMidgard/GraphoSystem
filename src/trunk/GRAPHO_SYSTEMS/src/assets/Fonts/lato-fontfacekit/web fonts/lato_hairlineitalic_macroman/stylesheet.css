@@ -1,0 +1,12 @@
+@font-face {
+    font-family: 'latohairline_italic';
+    src: url('Lato-HaiIta-webfont.eot');
+    src: url('Lato-HaiIta-webfont.eot?#iefix') format('embedded-opentype'),
+         url('Lato-HaiIta-webfont.woff') format('woff'),
+         url('Lato-HaiIta-webfont.ttf') format('truetype'),
+         url('Lato-HaiIta-webfont.svg#latohairline_italic') format('svg');
+    font-weight: normal;
+    font-style: normal;
+
+}
+

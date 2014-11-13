@@ -1,0 +1,414 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" width="1106" height="660" 
+	layout="absolute" title="Pagos por Tarjeta de Crédito" showCloseButton="true" creationComplete="_blockData=false">
+	<mx:ComboBox x="695" y="214" width="174" dataProvider="{SystemGlobals.BANCOS}" labelField="_nombre" change="filterBanks()" id="_banco"></mx:ComboBox>
+	<mx:ComboBox x="875" y="214" width="211" dataProvider="{_cuentasBancarias}" labelField="_numeroCuenta" id="_cuenta"></mx:ComboBox>
+	<mx:Label x="638" y="216" text="Banco :"/>
+	<mx:Label x="65" y="211" text="Fechas :"/>
+	<mx:DateField x="125" y="209" width="109" showToday="true"  id="_fechaPago"/>
+	<mx:DateField x="268" y="209" width="109" showToday="true"  id="_fechaVencimiento"/>
+	<mx:Label x="125" y="553" text="TC-Fix : $" fontStyle="italic" color="#C1C1C1"/>
+	<mx:TextInput x="190" y="551" width="70" textAlign="right" editable="false" enabled="false" text="{Converter.numberFormat(SystemGlobals.tcFix)}" id="_tcFix"/>
+	<mx:Label x="433" y="553" text="TOTAL : $" fontWeight="bold"/>
+	<mx:TextInput x="499" y="551" width="70" text="0.00" textAlign="right" fontWeight="bold" editable="false" enabled="true" id="_monto"/>
+	<mx:TextInput x="695" y="316" width="162" textAlign="left" editable="false" enabled="false" id="_numeroCuentaDestino" text="{_cuenta.selectedItem._numeroCuenta}"/>
+	<mx:Label x="611" y="346" text="Descripción :"/>
+	<mx:TextInput x="865" y="316" width="160" textAlign="left" editable="false" enabled="false" id="_clabe" text="{_cuenta.selectedItem._CLABE}"/>
+	<mx:Label x="629" y="246" text="Moneda :"/>
+	<mx:Label x="22" y="499" text="Observaciones :"/>
+	<mx:Button x="403" y="596" label="Realizar Cargo / Abono" width="166"  click="confirmPayment()"/>
+	<mx:Button x="125" y="596" label="Cancelar" width="89" click="closeWindow()"/>
+	<mx:TextArea x="125" y="477" width="444" height="66" id="_descripcion"/>
+	<mx:TextArea x="695" y="346" width="391" height="44" editable="false" enabled="false" textAlign="left" text="{_cuenta.selectedItem._descripcion}"/>
+	<mx:HRule x="10" y="190" width="559" height="1"/>
+	<mx:Label x="638" y="274" text="Titular :"/>
+	<mx:TextInput x="695" y="274" width="319" textAlign="left" editable="false" enabled="false" id="_nombreTitular" text="{_cuenta.selectedItem._nombreTitular}"/>
+	
+	
+	<mx:Script>
+		<![CDATA[
+			import views.clientes.Clientes_Cuentas_Bancarias_Ventas;
+			import mx.random.constants.ConstantData;
+			import mx.random.constants.Languages;
+			import mx.random.forms.Validator;
+			import mx.random.events.PaymentEvent;
+			import mx.controls.Alert;
+			import mx.rpc.events.FaultEvent;
+			import mx.random.payments.Payment;
+			import mx.core.Application;
+			import mx.random.events.SelectionEvent;
+			import mx.random.events.StaticEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.remoting.RemoteObject;
+			import mx.random.converters.Converter;
+			import mx.collections.ArrayCollection;
+			import mx.random.constants.SystemGlobals;
+			import mx.random.clientes.ClientData;
+			import mx.random.web.WebApplication;
+			import mx.managers.PopUpManager;
+			import mx.events.CloseEvent;
+			
+[Bindable]  private var _webApplication:WebApplication;
+			private var _workManager:Object 		= new Object();
+			private var _accountsService:RemoteObject = new RemoteObject();
+			private var _paymentService:RemoteObject = new RemoteObject();
+
+			//-----------Event Manager -----------
+[Bindable]	private var _cliente:ClientData = new ClientData();
+
+[Bindable]	private var _blockData:Boolean = true;
+[Bindable]	private var _dataReady:Boolean = false;
+[Bindable]	private var _cuentasBancarias:ArrayCollection = SystemGlobals.CUENTAS_BANCARIAS;
+[Bindable]	private var _accounts:ArrayCollection;
+			private var Valid:Validator 			= new Validator();
+			//-----------Event Manager -----------
+			
+			
+			//-----------Local Vars -----------
+			
+
+			
+			//-----------Local Vars -----------
+			
+//---------------------------- Context ---------------------------------------------            
+
+   			public function set context(contextObj:Object):void{
+				for( var p:String in contextObj){
+					if(this.hasOwnProperty(p)){
+						this[p] = contextObj[p];
+					}
+				}
+				_dataReady = true;
+				initView();
+			}
+
+			public function set workManager(value:Object):void{
+				_workManager = value;
+			}
+			
+			public function set cliente(value:ClientData):void{
+				_cliente = value;
+			}
+
+			public function set webApplication(value:WebApplication):void{
+				_webApplication = value;				
+			}
+			
+			public function get webApplication():WebApplication{ return _webApplication; } 
+						
+//---------------------------- Context ---------------------------------------------  
+
+//-------------------------------- MainInit --------------------------------------
+			// ------------------- View Extra Data -------------------------------
+			
+			private function get viewContext():Object{
+				return {webApplication: _webApplication,
+						workManager: this,
+						relationIdValue: _cliente.idCliente,
+						idCliente: _cliente.idCliente,
+						nombreCliente:	_cliente.nombre,
+						numeroCliente:	_cliente.numeroCliente,
+						selectmode:true
+						}					
+			}
+			
+			
+			
+			
+			private function initView():void{
+				_accountsService = _webApplication.getService("Clientes_Cuentas_Bancarias");
+				_paymentService  = _webApplication.getService("Pagos_Ingresos");
+				_paymentService.addEventListener(FaultEvent.FAULT,onFault);
+				getData();
+				PopUpManager.centerPopUp(this);	
+				addValidations();
+				
+				if(_cliente.tipoVenta==1){
+					openPopUp("clientes.Clientes_Cuentas_Bancarias_Ventas",true);
+				}	
+				
+				
+				var itemVenta:Object = _cliente.ventaData;
+				_idPrograma.selectedIndex = Converter.findIndex(SystemGlobals.PROGRAMAS,"_idPrograma",itemVenta._idPrograma);
+				_idProducto.selectedIndex = Converter.findIndex(SystemGlobals.PRODUCTOS,"_idProducto",itemVenta._idProducto);
+				_membresia.text = itemVenta._codigoPrograma+itemVenta._idSucursal+itemVenta._codigoMembresia+itemVenta._folio;
+				//Vendedores.getVendor(itemVenta._idEmpleado);
+						
+			}
+			
+			private function addValidations():void{
+				Valid.changeLanguage(Languages.SPANISH);
+				Valid.addStringVal(_fechaPago,3,15,"Fecha de Transacción");
+				Valid.addStringVal(_numeroCuentaDestino,3,50,"Cuenta Destino");
+				Valid.addStringVal(_numeroTarjeta,3,50,"Cuenta Origen");
+				Valid.addStringVal(_fechaPago,3,15,"Fecha de Transacción");
+				Valid.addNumberVal(_monto,true,true,2,true,"Monto de la Operación Inválido");
+				Valid.validateOnChange = true;
+				Valid.setErrorKnot(Validator.CIRCLE_KNOT,0xFF0000);
+			}
+			
+			private function onFault(e:FaultEvent):void{
+				_paymentService.removeEventListener(FaultEvent.FAULT,onFault);
+				Alert.show(e.fault.faultString,"Error");
+				_paymentService.addEventListener(FaultEvent.FAULT,onFault);
+			}
+			
+			
+			private function getAccountComplete(e:SelectionEvent):void{
+				StaticEvent.removeEventListener(SelectionEvent.SELECTION_COMPLETE,getAccountComplete);
+				getData();
+			}
+			
+			public function getData():void{
+				var params:Object = new Object();
+				params['_idCliente'] = _cliente.idCliente;
+				params['_isCC'] = true;
+				_accountsService.getRecords(_cliente.idCliente,"true");
+				_accountsService.getRecords.addEventListener(ResultEvent.RESULT,onGetDataResult);
+			}
+			
+			private function onGetDataResult(e:ResultEvent):void{
+				_accountsService.getRecords.removeEventListener(ResultEvent.RESULT,onGetDataResult);
+				_accounts = Converter.arrayConverter(e.result);
+				if(_accounts.length==0){
+				  var nullAccount:Object = new Object();
+				  nullAccount['_nombreBanco'] = "No existen cuentas de crédito";
+				  nullAccount['_numeroTarjeta'] = "";
+				  nullAccount['_nombreTitularTarjeta'] = "";
+				  nullAccount['_vencimiento'] = "";
+				  nullAccount['_idTipoTarjeta'] = 0;
+				  nullAccount['_idTipoMoneda'] = 0;
+				  _accounts = new ArrayCollection();
+				}
+				_monto.text = _idProducto.selectedItem._costo;
+			}
+			
+			private function filterBanks():void{
+				
+			}
+			
+			
+			public function openPopUp(popUpName:String,modal:Boolean=false):void{
+				var pop:TitleWindow = PopUpManager.createPopUp(SystemGlobals.mainStage as DisplayObject, getDefinitionByName("views."+popUpName) as Class, modal) as TitleWindow;
+				pop.name = popUpName;
+				pop.addEventListener(CloseEvent.CLOSE, closePopup);
+				if(pop.hasOwnProperty("context")){
+					Object(pop).context = viewContext;
+				}
+				PopUpManager.centerPopUp(pop);
+			}
+			
+			private function closePopup(e:CloseEvent):void{			
+	            		PopUpManager.removePopUp(e.target as TitleWindow);
+			}
+			
+			public function closeWindow():void{					
+            		dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
+            		PopUpManager.removePopUp(this);
+            }
+            
+            private function openCuentas():void{
+            	StaticEvent.addEventListener(SelectionEvent.SELECTION_COMPLETE,getAccountComplete);
+				openPopUp("clientes.Clientes_Cuentas_Bancarias",true);
+			}
+			
+			private function confirmPayment():void{
+				if(Valid.validateAll()){
+					var pymentData:String = new String();
+					pymentData += "Realizar Cargo de venta "+_cliente.ventaData._idVenta+" a : \n";
+					pymentData += _cliente.nombre+"\n\n";
+					pymentData += "Membresía :\t\t" +_cliente.numeroCliente+"\n";
+					pymentData += "Concepto :\t\t\t" +_idConcepto.selectedItem._nombre+"\n";
+					pymentData += "Cuenta Tarjeta :\t" +_numeroTarjeta.text+"\n";
+					pymentData += "Cuenta Destino :\t" +_numeroCuentaDestino.text+"\n";
+					pymentData += "Monto :\t\t\t\t" +_monto.text+"\n";					
+					Alert.show(pymentData,"Confirmación",Alert.OK|Alert.CANCEL,this,makePayment);	
+					Alert.buttonWidth = 80;				
+				}else{
+					if(_monto.text=="0.00"){
+						Alert.show("El monto debe ser distino a 0.00","Error");
+					}
+				}
+			}
+			
+			private function makePayment(e:CloseEvent):void{
+				if(e.detail==Alert.OK){
+					if(Valid.validateAll()){
+						var payment:Payment = new Payment();
+						payment._idVenta			= _cliente.ventaData._idVenta;				
+						payment._descripcion 		= _descripcion.text;
+						payment._fechaPago 			= Converter.viewToSystemDate(_fechaPago.text);
+						payment._fechaVencimiento 	= Converter.viewToSystemDate(_fechaVencimiento.text);
+						payment._idCliente 			= _cliente.idCliente;
+						payment._idConcepto 		= _idConcepto.selectedIndex;
+						payment._idContrato 		= _cliente.idCliente;
+						payment._idCuentaDestino 	= _cuenta.selectedItem._idCuenta;
+						payment._idCuentaOrigen 	= _account.selectedItem._idCuenta;
+						payment._idEmpleado 		= _webApplication.user.idEmpleado;
+						payment._idEstatusPago 		= 1;
+						payment._idPago 			= 0;
+						payment._idTarjetaCredito 	= 0;
+						payment._idTipoMoneda 		= _idTipoMoneda.selectedIndex;
+						payment._idTipoPago 		= 1;
+						payment._idTipoTarjeta 		= _idTipoTarjeta.selectedIndex;
+						payment._monto 				= _monto.text.replace(/[^0-9 ^. ^-]/g,"");
+						payment._numeroCheque 		= "";
+						payment._numeroCliente 		= _membresia.text;
+						payment._numeroContrato 	= _membresia.text;
+						payment._numeroCuentaDestino= _numeroCuentaDestino.text;
+						payment._numeroCuentaOrigen = "";
+						payment._numeroEmpleado 	= _numeroEmpleado.text;
+						payment._numeroReferencia 	= "";
+						payment._numeroTarjeta 		= _numeroTarjeta.text.slice((_numeroTarjeta.text.length-4),_numeroTarjeta.text.length);
+						payment._tcFix 				= _tcFix.text;	
+		
+						var params:Object = payment.makeData();
+						var paymentData:Array = new Array();
+						
+						for(var n:Number = 0;n<_payments.length;n++){
+							paymentData.push(createPayment(_payments[n]._payDate,_payments[n]._amount));
+						}
+						
+						if(paymentData.length==1){
+							_paymentService.createRecord(params);
+							_paymentService.createRecord.addEventListener(ResultEvent.RESULT,onPaymentComplete);
+						}else{
+							_paymentService.createMultipleRecord(paymentData);
+							_paymentService.createMultipleRecord.addEventListener(ResultEvent.RESULT,onPaymentComplete);
+						}
+					}
+				}
+			}
+			
+			private function onPaymentComplete(e:ResultEvent):void{
+				_paymentService.removeEventListener(ResultEvent.RESULT,onPaymentComplete);
+				Alert.show("El registro de pago se ingresó correctamente","Pagos");
+				StaticEvent.dispatchEvent(new PaymentEvent(PaymentEvent.PAYMETN_COMPLETE));
+				closeWindow();
+			}
+			
+			
+[Bindable]	private var _payments:ArrayCollection = new ArrayCollection();
+			
+			private function calculateAmount():void{
+				_payments = new ArrayCollection();
+				
+				var paymentType:Object 	= _idCondiciones.selectedItem;
+				var pl:Number 			= Number(paymentType._plazo);
+				var mi:Number 			= Number(paymentType._montoInicial);
+				var totalAmount:Number 	= Converter.unconvertNumber(_idProducto.selectedItem._costo);
+				var payAv:Array 		= new Array();
+				payAv.push(mi);
+				
+				var rp:Number = (100-mi)/(pl-1);
+				var ad:Date = new Date();
+				
+				
+				
+				for(var n:Number = 0;n<pl-1;n++){
+					payAv.push(rp);
+				}
+				
+				
+				for(n = 0;n<pl;n++){
+					var amm:Number = (totalAmount*payAv[n])/100;
+					var dateToPay:String = Converter.dateToSQL(ad);					
+					_payments.addItem({_num:n+1,_payDate:dateToPay,_amount:amm});
+					ad = Converter.addDays(ad,30);
+				}
+			}
+			
+			private function createPayment(fechaPago:String,monto:Number):Object{
+				var payment:Object = new Object();
+				payment._idVenta			= _cliente.ventaData._idVenta;
+				payment._descripcion 		= _descripcion.text;
+				payment._fechaPago 			= fechaPago;
+				payment._fechaVencimiento 	= fechaPago;
+				payment._idCliente 			= _cliente.idCliente;
+				payment._idConcepto 		= _idConcepto.selectedIndex;
+				payment._idContrato 		= _cliente.idCliente;
+				payment._idCuentaDestino 	= _cuenta.selectedItem._idCuenta;
+				payment._idCuentaOrigen 	= _account.selectedItem._idCuenta;
+				payment._idEmpleado 		= _webApplication.user.idEmpleado;
+				payment._idEstatusPago 		= 1;
+				payment._idPago 			= 0;
+				payment._idTarjetaCredito 	= 0;
+				payment._idTipoMoneda 		= _idTipoMoneda.selectedIndex;
+				payment._idTipoPago 		= 1;
+				payment._idTipoTarjeta 		= _idTipoTarjeta.selectedIndex;
+				payment._monto 				= monto;
+				payment._numeroCheque 		= "";
+				payment._numeroCliente 		= _membresia.text;
+				payment._numeroContrato 	= _membresia.text;
+				payment._numeroCuentaDestino= _numeroCuentaDestino.text;
+				payment._numeroCuentaOrigen = "";
+				payment._numeroEmpleado 	= _numeroEmpleado.text;
+				payment._numeroReferencia 	= "";
+				payment._numeroTarjeta 		= _numeroTarjeta.text.slice((_numeroTarjeta.text.length-4),_numeroTarjeta.text.length);
+				payment._tcFix 				= _tcFix.text;
+				payment._idSucursal			= _webApplication.user.idSucursal;
+				return payment;
+			}
+			
+			
+			
+		]]>
+	</mx:Script>
+	<mx:TextInput x="196" y="27" width="373" text="{_cliente.nombre}" enabled="{_blockData}"/>
+	<mx:TextInput x="196" y="157" id="_nombreCliente"  width="373" enabled="{_blockData}" text="{_webApplication.user.fullName}"/>
+	<mx:TextInput x="125" y="27" width="63" text="{_cliente.idCliente}" enabled="{_blockData}" />
+	<mx:TextInput x="125" y="108" width="160" enabled="{_blockData}" id="_membresia"/>
+	<mx:TextInput x="125" y="157" id="_numeroEmpleado"  width="65" enabled="{_blockData}" text="{_webApplication.user.idEmpleado}"/>
+	<mx:HRule x="10" y="136" width="559" height="1"/>
+	<mx:Label x="64" y="29" text="Cliente :"/>
+	<mx:Label x="61" y="159" text="Usuario :"/>
+	<mx:ComboBox y="66" id="_idProducto" width="156" labelField="_nombre" dataProvider="{SystemGlobals.PRODUCTOS}" x="413" enabled="{_blockData}"/>
+	<mx:Label y="49" text="producto"  fontSize="9" color="#CECECE" fontStyle="italic" x="413"/>
+	<mx:Label y="49" text="nombre"  fontSize="9" color="#CECECE" fontStyle="italic" x="125"/>
+	<mx:Label y="92" text="número"  fontSize="9" color="#CECECE" fontStyle="italic" x="125"/>
+	<mx:Label y="10" text="nombre"  fontSize="9" color="#CECECE" fontStyle="italic" x="196"/>
+	<mx:Label y="141" text="nombre"  fontSize="9" color="#CECECE" fontStyle="italic" x="196"/>
+	<mx:Label y="141" text="id"  fontSize="9" color="#CECECE" fontStyle="italic" x="125"/>
+	<mx:Label y="10" text="id"  fontSize="9" color="#CECECE" fontStyle="italic" x="125"/>
+	<mx:ComboBox  x="125" y="66" id="_idPrograma" width="280" dataProvider="{SystemGlobals.PROGRAMAS}" labelField="_nombre" enabled="{_blockData}"/>
+	<mx:Label x="49" y="68" text="Programa :" />
+	<mx:Label x="695" y="8" text="TARJETA DE CREDITO" />
+	<mx:Label x="695" y="190" text="CUENTA DESTINO" />
+	<mx:Label x="42" y="110" text="Membresía :" />
+	<mx:ComboBox  x="695" y="244" id="_idTipoMoneda" width="74" dataProvider="{SystemGlobals.MONEDAS}" labelField="_codigo" enabled="{_blockData}" selectedIndex="{_cuenta.selectedItem._tipoMoneda}"/>
+	<mx:Label x="627" y="316" text=" Cuenta :" textAlign="right"/>
+	<mx:Label x="1033" y="300" text="swift" textAlign="left" fontSize="9" color="#C1C1C1" fontStyle="italic"/>
+	<mx:Label x="865" y="300" text="clabe" textAlign="left" fontSize="9" color="#C1C1C1" fontStyle="italic"/>
+	<mx:Label x="695" y="300" text="número" textAlign="left" fontSize="9" color="#C1C1C1" fontStyle="italic"/>
+	<mx:Label x="125" y="193" text="transacción" textAlign="left" fontSize="9" color="#C1C1C1" fontStyle="italic"/>
+	<mx:Label x="268" y="193" text="vencimiento" textAlign="left" fontSize="9" color="#C1C1C1" fontStyle="italic"/>
+	<mx:TextInput x="1033" y="316"  width="53"/>
+	<mx:ComboBox x="695" y="26" width="319"  change="filterBanks()" dataProvider="{_accounts}" labelField="_nombreBanco" id="_account"></mx:ComboBox>
+	<mx:Label x="638" y="28" text="Banco :"/>
+	<mx:TextInput x="695" y="128" width="162" textAlign="left" editable="false" enabled="false" text="{'•••• - •••• - •••• - '+_account.selectedItem._numeroTarjeta}" id="_numeroTarjeta"/>
+	<mx:Label x="629" y="58" text="Moneda :"/>
+	<mx:Label x="634" y="88" text="Titular  :"/>
+	<mx:TextInput x="695" y="86" width="319" textAlign="left" editable="false" enabled="false" text="{_account.selectedItem._nombreTitularTarjeta}"/>
+	<mx:ComboBox  x="695" y="56" width="74" dataProvider="{SystemGlobals.MONEDAS}" labelField="_codigo" enabled="{_blockData}" selectedIndex="{_account.selectedItem._tipoMoneda}"/>
+	<mx:Label x="630" y="130" text=" Tarjeta :" textAlign="right"/>
+	<mx:Label x="695" y="112" text="número" textAlign="left" fontSize="9" color="#C1C1C1" fontStyle="italic"/>
+	<mx:TextInput x="865" y="128" width="85" text="{_account.selectedItem._vencimiento}" id="_vencimiento" enabled="false" editable="false"/>
+	<mx:Button x="1022" y="55" icon="@Embed(source='../../assets/Icons/Buttons/Edit.png')" width="28.5" click="openCuentas();" height="22"/>
+	<mx:Button x="385" y="239" icon="@Embed(source='../../assets/Icons/Buttons/Edit.png')" width="28.5"  height="22"/>
+	<mx:Label x="52" y="241" text="Concepto :" textAlign="right"/>
+	<mx:Label x="37" y="271" text="Condiciones :" textAlign="right"/>
+	<mx:Label x="69" y="306" text="Pagos :" textAlign="right"/>
+	<mx:ComboBox  x="126" y="239" id="_idConcepto" width="251" dataProvider="{SystemGlobals.DESCRIPCION_PAGOS}" labelField="_nombre"/>
+	<mx:ComboBox  x="126" y="269" width="251" dataProvider="{SystemGlobals.CONDICIONES_DE_PAGO}" labelField="_nombre" id="_idCondiciones" change="calculateAmount();"/>
+	<mx:VRule x="587" y="10" width="1" height="435"/>
+	<mx:Label x="606" y="158" text="Tipo Tarjeta :" textAlign="right"/>
+	<mx:ComboBox  x="695" y="156" id="_idTipoTarjeta"  width="162" dataProvider="{ConstantData.CardTypes}" enabled="{_blockData}" selectedIndex="{_account.selectedItem._idTipoTarjeta}"/>
+	<mx:DataGrid x="125" y="303" width="444" dataProvider="{_payments}" height="166">
+		<mx:columns>
+			<mx:DataGridColumn headerText="No."   dataField="_num" 		width="40"/>
+			<mx:DataGridColumn headerText="Fecha" dataField="_payDate" labelFunction="Converter.columDateConverter" width="100"/>
+			<mx:DataGridColumn headerText="Monto" dataField="_amount" labelFunction="Converter.columNumberConverter" width="100"/>
+		</mx:columns>
+	</mx:DataGrid>
+	
+</mx:TitleWindow>

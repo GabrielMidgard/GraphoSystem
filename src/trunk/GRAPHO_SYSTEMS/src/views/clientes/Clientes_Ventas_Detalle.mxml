@@ -1,0 +1,520 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow 
+	xmlns:mx="http://www.adobe.com/2006/mxml" 
+	width="404" height="538" 
+	layout="absolute" 
+	horizontalCenter="0" 
+	title="Detalle del Cliente" 
+	verticalCenter="0"
+	verticalScrollPolicy="off"
+	horizontalScrollPolicy="off"
+	showCloseButton="true">
+
+	<mx:Script>
+		<![CDATA[
+			import mx.random.events.PaymentEvent;
+			import mx.random.events.ClientEvent;
+			import mx.random.events.StaticEvent;
+			import mx.random.ventas.Vendedores;
+			import mx.controls.dataGridClasses.DataGridColumn;
+			import mx.random.clientes.ClientData;
+			import mx.random.constants.SystemGlobals;
+			
+			import mx.random.constants.Catalogs;
+			import mx.random.constants.ConstantData;
+			import mx.random.constants.Constantes;
+			
+			import mx.random.windowManagers.PopManager;
+			import mx.random.constants.Languages;
+			import mx.random.forms.Validator;
+			import mx.random.dataManagers.EventManager;
+			import mx.random.converters.Converter;
+			import mx.random.dataManagers.DataManager;
+			import mx.random.web.WebApplication;
+			import mx.managers.PopUpManager;
+			import mx.collections.ArrayCollection;
+			import mx.events.CloseEvent;
+			import mx.controls.Alert;
+			import mx.rpc.remoting.RemoteObject;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			
+
+			private var _webApplication:WebApplication;
+			private var Valid:Validator 			= new Validator();
+			private var _workManager:Object 		= new Object();
+			private var _MainService:RemoteObject 		= new RemoteObject();
+[Bindable]	private var _Data:DataManager 				= new DataManager(this);
+[Bindable]	private var _DataResult:ArrayCollection 		= new ArrayCollection();			
+			private var _eventManager:EventManager 		= new EventManager(this);
+			private var _dataIndex:Number 			= 0;
+			
+			//-----------Event Manager -----------
+
+[Bindable]	public var _dataReady:Boolean 			= false;
+[Bindable]	public var _newData:Boolean 			= false;
+[Bindable]	public var _updateData:Boolean 			= false;
+[Bindable]	private var _productos:ArrayCollection;
+			//-----------Event Manager -----------
+			
+			
+			//-----------Local Vars -----------
+			
+			private var _selectedId:Number 			= 0;
+			private var _selectedName:String 		= "";
+			private var _serviceName  				= "Clientes";
+			private var _mainId  					= "_idCliente";
+			private var _mainFocusField:String      = "_nombre";
+			private var _idCliente:Number			= 0;
+			
+			
+[Bindable]	private var _selectedTool:String 		= "Details";
+[Bindable]	private var _cliente:ClientData;			
+			//-----------Local Vars -----------
+			
+//---------------------------- Context ---------------------------------------------            
+
+   			public function set context(contextObj:Object):void{
+				for( var p:String in contextObj){
+					if(this.hasOwnProperty(p)){
+						this[p] = contextObj[p];
+					}
+				}
+				initView();
+			}
+
+			public function set workManager(value:Object):void{
+				_workManager = value;
+			}
+			
+			public function set idCliente(value:Number):void{
+				_idCliente = value;
+			}
+
+			public function set webApplication(value:WebApplication):void{
+				_webApplication = value;
+				
+			}
+			public function get webApplication():WebApplication{ return _webApplication; } 
+			
+			public function set cliente(value:ClientData):void{
+				_cliente = value;
+			}
+						
+//---------------------------- Context ---------------------------------------------  
+
+//-------------------------------- MainInit --------------------------------------
+			// ------------------- View Extra Data -------------------------------
+			
+			private function get viewContext():Object{				
+				_cliente.ventaData	    = _productosCliente.selectedItem;
+				return {
+						relationIdValue: _idCliente,
+						idCliente: _idCliente,						
+						webApplication: _webApplication,
+						workManager: this,
+						cliente:_cliente,
+						selectedItem: _idCliente
+						}					
+			}
+
+			private function addValidations():void{
+				Valid.changeLanguage(Languages.SPANISH);
+				
+
+				
+				
+				var validFields:ArrayCollection = Valid.validFields;
+				for(var n:Number = 0;n<validFields.length;n++){					
+					this[validFields[n].obj.name].addEventListener(Event.CHANGE,onFocusOut);
+				}
+				
+				Valid.setErrorKnot(Validator.CIRCLE_KNOT,0xFF0000);
+			}
+			
+			private function onFocusOut(e:Event):void{
+				if(_newData||_updateData) Valid.validateAll();//Valid.validateOne(e.currentTarget.name);
+			}
+			
+			private function extraCreateData(params:Object):Object{
+				
+				return params;
+			}
+			
+			private function createRecordExtras():void{				
+				//_image = "defaultNew.jpg";							
+			}
+			
+			private function extraUpdateData(params:Object):Object{	
+					
+				return params;
+			}
+			
+			private function loadExtraFields(params:Object):void{
+				//_image = params["_newsImage"];				
+			}
+			
+			private function forceImports():void{
+				
+			}
+			
+			public function initView():void{
+				forceImports();
+				_MainService = _webApplication.getService(_serviceName);
+				//_Data.exceptions = ["_idCliente","_fechaNacimiento","_idSucursal","_idCompania","_idEmpleado","_codigoPrograma","_codigoMembresia","_folio","_idOcupacion","_ingresos"];
+				_MainService.addEventListener(FaultEvent.FAULT,onFault);				
+				addValidations();
+				loadScroll();
+				getClientProducs();
+				StaticEvent.removeAllListenersByCaller("PaymentSaleDetail");
+				StaticEvent.addEventListener(PaymentEvent.PAYMETN_COMPLETE,updatePayments,"PaymentSaleDetail");	
+			}
+			
+		
+			
+
+			// ------------------- View Extra Data -------------------------------
+
+			private function loadScroll():void{
+				/*_dataList.visible = false;
+				for(var n:Number = 0;n<100;n++){
+					_DataResult.addItem({i:0});
+				}*/
+			}
+
+			private function initData():void{
+				_MainService.getFields();
+				_MainService.getFields.addEventListener(ResultEvent.RESULT,onGetFieldsResult);
+				_dataReady = false;
+			}			
+            
+            
+            public function closeWindow():void{
+					Alert.show("Desea terminar con la ventana de pagos?","Atención",Alert.YES|Alert.NO,this,closeConfirm);
+            }
+            
+            public function closeConfirm(e:CloseEvent):void{
+            	if(e.detail==Alert.YES){  
+            		StaticEvent.dispatchEvent(new ClientEvent(ClientEvent.CLIENT_PAYMENTS_COMPLETE));          		
+            		dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
+            		PopUpManager.removePopUp(this);
+            	}
+            }
+//-------------------------------- MainInit --------------------------------------
+			
+			private function newData():void{
+				_Data.clear();
+				_newData = true;
+				_updateData = false;				
+				this[_mainFocusField].setFocus();
+				createRecordExtras();
+				Valid.validateAll();
+			}
+			
+			private function createData():void{
+				if(Valid.validateAll()){
+					_dataReady = false;
+					var params:Object = extraCreateData(_Data.makeData());
+					_MainService.createRecord(params);
+					_MainService.createRecord.addEventListener(ResultEvent.RESULT,onCreateComplete);
+				}else{
+					Alert.show(Valid.errors,"Error");
+				}
+			}
+
+			private function updateData():void{
+				if(Valid.validateAll()){
+					_dataReady = false;
+					var params:Object = extraUpdateData(_Data.makeData());
+					params[_mainId] = this[_mainId];
+					_MainService.updateRecord(params);
+					_MainService.updateRecord.addEventListener(ResultEvent.RESULT,onUpdateComplete);
+					//_dataIndex =_dataList.selectedIndex;
+				}else{
+					Alert.show(Valid.errors,"Error");
+				}
+			}
+			
+			private function deleteDataAlert():void{
+				/*if(_dataList.selectedIndex!=-1){
+					Alert.show("Desea borrar el registro seleccionado?","Atención",Alert.YES|Alert.CANCEL,this,deleteData);
+				}else{
+					Alert.show("No hay registro selecionado","Error");
+				}*/
+			}
+			
+			private function deleteData(e:CloseEvent):void{
+				/*if(e.detail==Alert.YES){
+					var params:Object = new Object();
+					params[_mainId] = _dataList.selectedItem[_mainId];
+					_MainService.deleteRecord(params);
+					_MainService.deleteRecord.addEventListener(ResultEvent.RESULT,onDeleteComplete);
+					_dataReady = false;
+				}*/
+			}
+			
+			private function cancel():void{
+				onDataSelect();
+				resetBooleans();				
+				Valid.validateAll();
+				Valid.removeAllKnots();				
+			}
+			
+			private function resetBooleans():void{
+				_newData = false;
+				_updateData = false;
+			}
+
+			private function dataChange():void{				
+				_updateData = true;				
+			}
+
+			
+			private function openContratos():void{
+				openPopUp("contratos.Contratos",true);
+			}
+			
+		
+			private function openFamiliares():void{
+				openPopUp("clientes.Clientes_Familiares",true);
+			}
+			
+			private function openPreferencias():void{
+				openPopUp("clientes.Clientes_Preferencias",true);
+			}
+			
+			private function openCuentas():void{
+				openPopUp("clientes.Clientes_Cuentas_Bancarias",true);
+			}
+			
+			private function openProductos():void{
+				openPopUp("clientes.Clientes_Cuentas_Bancarias",true);
+			}
+			
+			
+			private function openInternalBlog():void{
+				openPopUp("comunicaciones.Comunicaciones_Interna",true);
+			}
+			
+			private function openPaymentsTerminal():void{
+				openPopUp("pagos.Pagos_Seleccion_Tipo",true);
+			}
+			
+			
+//-------------------------------- ResultsEvents --------------------------------------		
+			
+			private function onGetFieldsResult(e:ResultEvent):void{
+				_MainService.getFields.removeEventListener(ResultEvent.RESULT,onGetFieldsResult);
+				if(e){
+					if(e.result) {
+						_Data.createFields(Converter.arrayConverter(e.result));
+						getData();
+					}
+				}else{
+					Alert.show("Error al cargar los datos","Error");
+					_dataReady = false;
+				}
+				_DataResult= new ArrayCollection();
+				//_dataList.visible = true;
+								
+			}
+			
+			public function updatePayments(e:PaymentEvent):void{
+				getClientProducs();
+			}
+			
+			public function getClientProducs():void{
+				_MainService.getClientProducts({_idCliente:_cliente.idCliente});
+				_MainService.addEventListener(ResultEvent.RESULT,onProductoready);
+			}
+			
+			public function onProductoready(e:ResultEvent):void{
+				_MainService.removeEventListener(ResultEvent.RESULT,onProductoready);
+				if(e){
+					if(e.result) {
+						_productos = Converter.arrayConverter(e.result);
+						_dataReady = true;					
+					}
+				}else{
+					Alert.show("No Hay Productos para este cliente","Error");					
+				}
+			}
+			
+			public function getData():void{
+				_MainService.getRecordsById(_idCliente);
+				_MainService.getRecordsById.addEventListener(ResultEvent.RESULT,onGetDataResult);
+			}
+			
+			private function onGetDataResult(e:ResultEvent):void{
+				_MainService.getRecordsById.removeEventListener(ResultEvent.RESULT,onGetDataResult);
+				_DataResult = Converter.arrayConverter(e.result);
+				if(_DataResult.length==0) {
+					Alert.show("No hay registros en la base de datos","Atención")
+				}else{
+					if(_dataIndex<0) _dataIndex = 0;
+					_Data.loadData(_DataResult[_dataIndex]);
+					//_dataList.selectedIndex = _dataIndex;
+					//_dataList.scrollToIndex(_dataList.selectedIndex);
+					loadExtraFields(_DataResult[_dataIndex]);
+					Valid.validateAll();
+					Valid.removeAllKnots();
+				}
+				_dataReady = true;
+				resetBooleans();
+			}
+			
+			private function onFault(e:FaultEvent):void{
+				Alert.show(e.fault.faultString,"Error");
+			}
+
+			private function onDataSelect():void{
+				/*if(_dataList.selectedIndex!=-1) {
+					_Data.loadData(_dataList.selectedItem);
+					_dataIndex =_dataList.selectedIndex;
+					loadExtraFields(_dataList.selectedItem);
+					_selectedId = _dataList.selectedItem[_mainId];
+				}*/
+			}
+			
+			private function onCreateComplete(e:ResultEvent):void{				
+				_MainService.createRecord.removeEventListener(ResultEvent.RESULT,onCreateComplete);
+				_dataIndex = _DataResult.length;
+				getData();
+			}
+			
+			private function onUpdateComplete(e:ResultEvent):void{
+				_MainService.updateRecord.removeEventListener(ResultEvent.RESULT,onUpdateComplete);
+				getData();
+			}
+			
+			private function onDeleteComplete(e:ResultEvent):void{
+				_MainService.deleteRecord.removeEventListener(ResultEvent.RESULT,onDeleteComplete);
+				_dataIndex = _DataResult.length-2;
+				getData();
+			}
+			
+//-------------------------------- ResultsEvents --------------------------------------	
+
+//-------------------------------- POP UP WINDOW --------------------------------------	
+			public function openPopUp(popUpName:String,modal:Boolean = false):void{
+				var pop:TitleWindow = PopUpManager.createPopUp(SystemGlobals.mainStage as DisplayObject, getDefinitionByName("views."+popUpName) as Class, modal) as TitleWindow;
+				pop.name = popUpName;
+				pop.addEventListener(CloseEvent.CLOSE, closePopup);
+				if(pop.hasOwnProperty("context")){
+					Object(pop).context = viewContext;
+				}
+				PopUpManager.centerPopUp(pop);
+			}
+			
+			private function closePopup(e:CloseEvent):void{
+	            PopUpManager.removePopUp(e.target as TitleWindow);
+			}
+//-------------------------------- POP UP WINDOW --------------------------------------
+
+//-------------------------------- Search Engine --------------------------------------
+
+			private function searchFilter():void{
+           			//_DataResult.filterFunction = vlidateSearch;
+           			//_DataResult.refresh();
+       		}
+      
+       		private function vlidateSearch(item:Object):Boolean{
+           		var isMatch:Boolean = false;           
+           		/*if(item[_searchType.selectedItem.value].toLowerCase().search(_searchFilter.toLowerCase()) != -1){
+               			isMatch = true
+           		}  */             
+           		return isMatch;             
+       		}
+       	
+       		private function search():void{
+				/*_searchFilter = _searchField.text;
+				searchFilter();*/
+			}
+				
+				
+			private var _searchFilter:String 			= new String();
+[Bindable]	private var _searchTypes:ArrayCollection 	= new ArrayCollection([	{label:"Número de Cliente", value:"_numeroCliente"},
+																				{label:"Nombre",     		value:"_nombre"},
+																				{label:"Paterno",     		value:"_ap"},
+																				{label:"Materno",     		value:"_am"}
+																				]);
+
+//-------------------------------- Search Engine --------------------------------------					
+		
+			private function ProductConverter(item:Object,dg:DataGridColumn):String{
+				var result:String = "";
+					if(item[dg.dataField]){
+						result = Converter.findLabel(SystemGlobals.PRODUCTOS,"_idProducto","_nombre",item[dg.dataField]);
+						
+					}
+				return result;
+			}
+			
+			private function productosChange():void{
+				if(_productosCliente.selectedIndex!=-1){
+					var item:Object = _productosCliente.selectedItem;
+					_fechaVenta.text = Converter.systemToViewDate(item._fechaVenta);
+					_fechaRenovacion.text = Converter.systemToViewDate(item._fechaRenovacion);
+					_fechaVencimiento.text = Converter.systemToViewDate(item._fechaVencimiento);
+					_sucursal.text = Converter.findLabel(SystemGlobals.SUCURSALES,"_idSucursal","_nombre",item._idSucursal);
+					Vendedores.getVendor(item._idEmpleado);
+				}
+			}
+		
+			
+		]]>
+	</mx:Script>
+	<mx:TextInput y="390" id="_sucursal" width="378" tabIndex="1" x="10" editable="false" enabled="false"/>
+	<mx:TextInput y="428" id="_vendedor" width="378" tabIndex="1" x="10" editable="false" enabled="false" text="{Vendedores.nombre}"/>
+	<mx:Button label="Terminar" click="closeWindow();" width="156"  enabled="{!_newData}" x="232" y="472"/>
+	<mx:Button x="10" y="270" width="380" height="50" icon="@Embed(source='../../assets/CRM/Payments.png')" click="openPaymentsTerminal();" selected="{_selectedTool=='Payments'}" enabled="{_dataReady&amp;&amp;_productosCliente.selectedIndex!=-1}" label="Realizar Cargos"/>
+	<mx:Label y="374" text="sucursal"  fontSize="9" color="#CECECE" fontStyle="italic" x="10"/>
+	<mx:Label y="412" text="vendedor"  fontSize="9" color="#CECECE" fontStyle="italic" x="10"/>
+	<mx:Label x="10" y="70" text="Productos :" />
+	<mx:DataGrid x="10" y="87" width="378" height="175" id="_productosCliente" dataProvider="{_productos}" change="productosChange()">
+		<mx:columns>
+			<mx:DataGridColumn headerText="EST" width="40" >			
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:HBox width="100%"  verticalAlign="middle" horizontalAlign="center" mouseOver="init()">
+							<mx:Script>
+								<![CDATA[
+									import mx.random.converters.Converter;
+									[Bindable]	private var _toolTip:String = "";
+									
+									private function init():void{
+										_toolTip = "Pagos   : "+		data._pagos+"\n"+
+												   "Abonos : "+		Converter.numberFormat(data._monto)+"\n"+	 
+												   "Saldo    : "+ 	Converter.numberFormat(data._costo-data._monto);											
+									}
+								]]>
+							</mx:Script>
+							<mx:Image source="assets/Icons/Status/{data._estatus}.png"  
+								width="13" height="13" 
+								scaleContent="false" 
+								toolTip="{_toolTip}"
+								/>
+						</mx:HBox>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn headerText="Venta" 		dataField="_idVenta" width="40"/>
+			<mx:DataGridColumn headerText="Producto" 	dataField="_idProducto" labelFunction="ProductConverter"/>								
+			<mx:DataGridColumn headerText="Prog" 	    dataField="_codigoPrograma" width="40"/>
+			<mx:DataGridColumn headerText="Folio" 		dataField="_folio" width="70"/>	
+			<mx:DataGridColumn headerText="Costo" 	    dataField="_costo" labelFunction="Converter.columNumberConverter" width="70" textAlign="right"/>
+		</mx:columns>
+	</mx:DataGrid>
+	<mx:TextInput y="344" id="_fechaVencimiento" width="100" tabIndex="1" x="140" editable="false" enabled="false"/>
+	<mx:TextInput y="344" id="_fechaVenta" width="100" tabIndex="1" x="10" editable="false" enabled="false"/>
+	<mx:TextInput y="344" id="_fechaRenovacion" width="100" tabIndex="1" x="288" editable="false" enabled="false"/>
+	<mx:Label y="328" text="fecha de venta"  fontSize="9" color="#CECECE" fontStyle="italic" x="10"/>
+	<mx:Label y="328" text="fecha de renovación"  fontSize="9" color="#CECECE" fontStyle="italic" x="288"/>
+	<mx:Label y="328" text="fecha devencimiento"  fontSize="9" color="#CECECE" fontStyle="italic" x="140"/>
+	<mx:TextInput x="140" y="23" width="248" text="{_cliente.nombre}" />
+	<mx:TextInput x="69" y="23" width="63" text="{_cliente.idCliente}"  />
+	<mx:Label x="10" y="25" text="Cliente :"/>
+	<mx:Label y="6" text="nombre"  fontSize="9" color="#CECECE" fontStyle="italic" x="140"/>
+	<mx:Label y="6" text="id"  fontSize="9" color="#CECECE" fontStyle="italic" x="69"/>
+	
+</mx:TitleWindow>

@@ -1,0 +1,507 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   width="708" height="658" backgroundAlpha="1.0" contentBackgroundColor="#D5FBDB"
+			   title="Apertura de Órdenes de Servicio">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:TextInput id="_operador" x="71" y="232" width="310" change="dataChange();"/>
+	<s:Label x="6" y="238" text="Operador :"/>
+	<s:TextInput id="_idOrden" x="72" y="21" width="70" contentBackgroundColor="#E7E7E7"
+				 enabled="false" fontWeight="bold" textAlign="center"/>
+	<s:TextInput id="_fechaCreacion" x="148" y="21" width="70" contentBackgroundColor="#E7E7E7"
+				 enabled="false" fontWeight="bold" textAlign="center"/>
+	<s:Label x="150" y="10" color="#767474" fontSize="10" fontStyle="italic" text="fecha"/>
+	<s:TextInput id="_horaCreacion" x="224" y="21" width="70" contentBackgroundColor="#E7E7E7"
+				 enabled="false" fontWeight="bold" textAlign="center"/>
+	<s:Label x="226" y="10" color="#767474" fontSize="10" fontStyle="italic" text="hora"/>
+	<s:Label x="302" y="9" color="#767474" fontSize="10" fontStyle="italic" text="estatus"/>
+	<s:Label x="73" y="10" color="#767474" fontSize="10" fontStyle="italic" text="número"/>
+	<s:TextInput id="_descripcionFalla" x="159" y="313" width="380" prompt="Descripción"/>
+	<s:TextInput id="_codigoFalla" x="72" y="313" width="79" prompt="Código"/>
+	<s:Label x="73" y="491" color="#767474" fontSize="10" fontStyle="italic" text="observaciones"/>
+	<s:Label x="74" y="262" color="#767474" fontSize="10" fontStyle="italic" text="descripción"/>
+	<s:Label x="39" y="26" fontWeight="bold" text="OS :"/>
+	<s:Label x="16" y="205" text="Atendio :"/>
+	<s:Label x="20" y="279" text="Equipo :"/>
+	<s:ComboBox id="_idEmpleado" x="71" y="200" width="310" change="dataChange();"
+				dataProvider="{SystemGlobals.EMPLEADOS}" labelField="_nombre"></s:ComboBox>
+	<s:ComboBox id="_idContacto" x="71" y="169" width="310" change="dataChange();"
+				dataProvider="{_contactos}" labelField="_nombre"></s:ComboBox>
+	<s:Label x="14" y="175" text="Reporto :"/>
+	<s:ComboBox id="_idEquipo" x="72" y="274" width="309" change="dataChange();"
+				dataProvider="{_equipos}" labelField="_nombreEquipo"></s:ComboBox>
+	<s:Label x="389" y="9" color="#767474" fontSize="10" fontStyle="italic" text="área de soporte"/>
+	<s:ComboBox id="_idAreaSoporteTecnico" x="389" y="21" width="150" change="dataChange();"
+				dataProvider="{SystemGlobals.AREAS_SOPORTE}" fontWeight="bold"
+				labelField="_areaSoporteTecnico"></s:ComboBox>
+	<s:Label x="550" y="9" color="#767474" fontSize="10" fontStyle="italic" text="servicio"/>
+	<s:ComboBox id="_idTipoServicio" x="550" y="21" width="80" change="dataChange();"
+				dataProvider="{SystemGlobals.TIPOS_SERVICIO}" fontWeight="bold" labelField="_nombre"></s:ComboBox>
+	<s:DataGrid id="_listaFallas" x="72" y="345" width="625" dataProvider="{_fallasReportadas}"
+				requestedRowCount="4">
+		<s:columns>
+			<s:ArrayList>
+				<s:GridColumn width="80" dataField="_codigo" headerText="Código"></s:GridColumn>
+				<s:GridColumn dataField="_falla" headerText="Falla"></s:GridColumn>
+			</s:ArrayList>
+		</s:columns>
+	</s:DataGrid>
+	<s:Label x="23" y="352" text="Fallas :"/>
+	<s:Label x="28" y="318" text="Falla :"/>
+	<s:TextArea id="_nota" x="72" y="503" width="625" height="67" change="dataChange();"/>
+	<s:Button label="Nuevo" width="80" enabled="{_dataReady}" visible="false" click="newData();" y="576" x="71"/>
+	<s:Button label="Cancelar" width="80" enabled="{_dataReady}" visible="{_newData||_updateData}" click="cancel();" y="576" x="159"/>
+	<s:Button label="Aceptar" width="80" enabled="{_dataReady}" visible="{_newData}" click="createData();" y="576" x="71"/>
+	<s:Button label="Eliminar" width="80" enabled="{_dataReady&amp;&amp;!_newData}" visible="false" click="deleteDataAlert();" y="576" x="159"/>
+	<s:Button visible="{!_newData&amp;&amp;!_updateData}" x="547" y="312" width="114" height="24"
+			  label="Agregar Falla" click="recordIssue();"
+			  enabled="{_dataReady&amp;&amp;!_newData}"/>
+	<s:Button label="Actualizar" width="80" enabled="{_dataReady&amp;&amp;!_newData&amp;&amp;_updateData}" visible="{_updateData&amp;&amp;!_newData}" click="updateData();" y="576" x="71"/>
+	<s:Button label="Regresar" click="closeWindow();" width="145"  enabled="{!_newData}" y="576" x="553"/>
+	<s:Button x="389" y="200" width="28" height="23"
+			  click="openPopUp(&quot;empleados.Empleados&quot;);"
+			  icon="@Embed(source='../../assets/Icons/Buttons/Edit.png')"
+			  skinClass="spark.skins.spark.ButtonSkin"/>
+	<s:Button x="667" y="312" width="28" height="23"
+			  click="openPopUp(&quot;empresa.Empresa_Companias&quot;);"
+			  icon="@Embed(source='../../assets/Icons/Buttons/Search.png')"
+			  skinClass="spark.skins.spark.ButtonSkin"/>
+	<s:TextInput id="_nombreEmpresa" x="71" y="63" width="310" contentBackgroundColor="#E7E7E7"
+				 enabled="false" text="{_cliente._nombreEmpresa}"/>
+	<s:TextInput id="_nombreRepresentante" x="71" y="139" width="310" contentBackgroundColor="#E7E7E7"
+				 enabled="false" text="{_cliente._nombreRepresentante}"/>
+	<s:TextInput id="_ciudad" x="72" y="101" width="150" contentBackgroundColor="#E7E7E7"
+				 enabled="false" text="{_cliente._ciudad}"/>
+	<s:TextInput id="_nombreEstado" x="231" y="101" width="150" contentBackgroundColor="#E7E7E7"
+				 enabled="false" text="{_cliente._nombreEstado}"/>
+	<s:Label x="232" y="90" color="#767474" fontSize="10" fontStyle="italic" text="estado"/>
+	<s:Label x="73" y="90" color="#767474" fontSize="10" fontStyle="italic" text="ciudad"/>
+	<s:TextInput id="_telefonoCasa" x="389" y="63" width="150" contentBackgroundColor="#E7E7E7"
+				 enabled="false" text="{_cliente._telefonoCasa}"/>
+	<s:TextInput id="_telefonoOficina" x="547" y="63" width="150" contentBackgroundColor="#E7E7E7"
+				 enabled="false" text="{_cliente._telefonoOficina}"/>
+	<s:TextInput id="_mailPrincipal" x="389" y="102" width="150" contentBackgroundColor="#E7E7E7"
+				 enabled="false" text="{_cliente._mailPrincipal}"/>
+	<s:TextInput id="_mailSecundario" x="547" y="102" width="150" contentBackgroundColor="#E7E7E7"
+				 enabled="false" text="{_cliente._mailSecundario}"/>
+	<s:Label x="389" y="93" color="#767474" fontSize="10" fontStyle="italic" text="mail principal"/>
+	<s:Label x="546" y="91" color="#767474" fontSize="10" fontStyle="italic" text="mail secundario"/>
+	<s:Label x="390" y="52" color="#767474" fontSize="10" fontStyle="italic" text="teléfono principal"/>
+	<s:Label x="547" y="52" color="#767474" fontSize="10" fontStyle="italic" text="teléfono oficina"/>
+	<s:Label x="19" y="69" text="Cliente :"/>
+	<s:Label x="71" y="52" color="#767474" fontSize="10" fontStyle="italic" text="nombre / empresa"/>
+	<s:Label x="72" y="128" color="#767474" fontSize="10" fontStyle="italic" text="encargado"/>
+	<s:Button visible="{!_newData&amp;&amp;!_updateData}" x="389" y="138" width="114" height="24"
+			  label="Buscar Cliente" click="deleteDataAlert();"
+			  enabled="{_dataReady&amp;&amp;!_newData}"/>
+	<s:Button visible="{!_newData&amp;&amp;!_updateData}" x="389" y="138" width="114" height="24"
+			  label="Buscar Cliente" click="openPopUp(&quot;clientes.Clientes_Busqueda&quot;,true);"/>
+	<s:Button x="509" y="138" width="28" height="23"
+			  click="openPopUp(&quot;clientes.Clientes&quot;);"
+			  icon="@Embed(source='../../assets/Icons/Buttons/Edit.png')"
+			  skinClass="spark.skins.spark.ButtonSkin"/>
+	<s:ComboBox id="_idEstatus" x="300" y="21" width="81" change="dataChange();"
+				dataProvider="{SystemGlobals.ORDEN_ESTATUS}" fontWeight="bold"
+				labelField="_nombreEstatus"></s:ComboBox>
+	
+		<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.managers.PopUpManager;
+			import mx.random.constants.Catalogs;
+			import mx.random.constants.Languages;
+			import mx.random.constants.SystemGlobals;
+			import mx.random.converters.Converter;
+			import mx.random.dataManagers.DataManager;
+			import mx.random.dataManagers.EventManager;
+			import mx.random.forms.Validator;
+			import mx.random.web.WebApplication;
+			import mx.random.windowManagers.PopManager;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.remoting.RemoteObject;
+			
+			private var _webApplication:WebApplication;
+			private var Valid:Validator 			= new Validator();
+			private var _workManager:Object 		= new Object();
+			private var _MainService:RemoteObject 		= new RemoteObject();
+			[Bindable]	private var _Data:DataManager 				= new DataManager(this);
+			[Bindable]	private var _DataResult:ArrayCollection 		= new ArrayCollection();			
+			private var _eventManager:EventManager 		= new EventManager(this);
+			private var _dataIndex:Number 			= 0;
+			
+			//-----------Event Manager -----------
+			
+			[Bindable]	public var _dataReady:Boolean 			= false;
+			[Bindable]	public var _newData:Boolean 			= false;
+			[Bindable]	public var _updateData:Boolean 			= false;//No podemos agregar nuevos en esta forma, sólo podemos actualizar Siempre mostrar boton actualizar
+			
+			//-----------Event Manager -----------
+			
+			
+			//-----------Local Vars -----------
+			
+			private var _selectedId:Number 			= 0;
+			private var _selectedName:String 		= "";
+			private var _serviceName  				= "Ordenes";
+			private var _mainId  					= "_idOrden";
+			private var _mainFocusField:String      = "_operador";
+			private var _idOrdenSelected:Number		= -1;
+			[Bindable] private var _cliente:Object = {};
+			[Bindable] private var _contactos:ArrayCollection = new ArrayCollection();
+			[Bindable] private var _equipos:ArrayCollection = new ArrayCollection();
+			[Bindable] private var _fallasReportadas:ArrayCollection = new ArrayCollection();
+			[Bindable] private var _clientSelected:Boolean = false;
+			
+			//-----------Local Vars -----------
+			
+			//---------------------------- Context ---------------------------------------------            
+			
+			public function set context(contextObj:Object):void{
+				for( var p:String in contextObj){
+					if(this.hasOwnProperty(p)){
+						this[p] = contextObj[p];
+					}
+				}
+			}
+			
+			public function set workManager(value:Object):void{
+				_workManager = value;
+			}
+			
+			public function set cliente(value:Object):void{
+				_cliente = value;
+			}
+			
+			public function set idOrden(value:Number):void{
+				_idOrdenSelected = value;
+			}
+			
+			public function set webApplication(value:WebApplication):void{
+				_webApplication = value;
+				initView();
+			}
+			public function get webApplication():WebApplication{ return _webApplication; } 
+			
+			//---------------------------- Context ---------------------------------------------  
+			
+			//-------------------------------- MainInit --------------------------------------
+			// ------------------- View Extra Data -------------------------------
+			
+			private function get viewContext():Object{
+				return {webApplication: _webApplication,
+					workManager: this
+				}					
+			}
+			
+			private function addValidations():void{
+				Valid.changeLanguage(Languages.SPANISH);
+				
+				//----------- Validaciones ---------------------------
+				//Valid.addStringVal(_nombre,2,100,"Nombre");
+				//Valid.addStringVal(_codigo,1,2,"Código");
+				
+				//----------- Validaciones ---------------------------
+				
+				
+				Valid.validateOnChange = true;
+				Valid.setErrorKnot(Validator.CIRCLE_KNOT,0xFF0000);
+			}
+			
+			private function extraCreateData(params:Object):Object{				
+				//params["_newsImage"] = _image;
+				return params;
+			}
+			
+			private function createRecordExtras():void{
+				//_image = "defaultNew.jpg";
+			}
+			
+			private function extraUpdateData(params:Object):Object{	
+				//params['_color'] = areaColor.selectedColor;			
+				return params;
+			}
+			
+			private function loadExtraFields(params:Object):void{				
+				//_image = params["_newsImage"];
+			}
+			
+			private function forceImports():void{
+				
+			}
+			
+			public function initView():void{
+				forceImports();
+				_MainService = _webApplication.getService(_serviceName);
+				_Data.exceptions = ["_nombreTipoServicio","_nombreContacto","_nombreEmpleado","_nombreAreaSoporte",
+					"_creado","_modificado","_creadoPor","_creado",	"_modificado","_creadoPor",
+					"_modificadoPor","_descripcionClienteFalla","_idCodigoError","_nombreEstatus","_idCliente",
+					"_idEquipo","_idTecnico","_fechaHabloCon","_prediagnosticoNumeroTiempo","_prediagnosticoUnidadTiempo",
+					"_servicioNumeroTiempo","_servicioUnidadTiempo","_habloCon"
+					
+				];
+				_MainService.addEventListener(FaultEvent.FAULT,onFault);
+				initData();
+				addValidations();
+			}
+			
+			// ------------------- View Extra Data -------------------------------
+			
+			
+			private function initData():void{
+				_MainService.getFields();
+				_MainService.getFields.addEventListener(ResultEvent.RESULT,onGetFieldsResult);
+				_dataReady = false;
+			}
+			
+			public function closeWindow():void{
+				dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
+				PopUpManager.removePopUp(this);
+			}
+			
+			//-------------------------------- MainInit --------------------------------------
+			
+			private function newData():void{
+				_Data.clear();
+				_newData = true;
+				_updateData = false;
+				Valid.validateAll();
+				this[_mainFocusField].setFocus();
+				createRecordExtras();
+			}
+			
+			private function createData():void{
+				if(Valid.validateAll()){
+					_dataReady = false;
+					var params:Object = extraCreateData(_Data.makeData());
+					_MainService.createRecord(params);
+					_MainService.createRecord.addEventListener(ResultEvent.RESULT,onCreateComplete);
+				}else{
+					Alert.show(Valid.errors,"Error");
+				}
+			}
+			
+			private function updateData():void{
+				if(Valid.validateAll()){
+					_dataReady = false;
+					var params:Object = extraUpdateData(_Data.makeData());
+					if(_clientSelected == true){
+						params["_idCliente"] = _cliente._idCliente;
+						_clientSelected = false;
+					}
+					//params[_idOrdenSelected] = _dataList.selectedItem[_mainId]; PREGUNTAR A CARLOS!
+					_MainService.updateRecord(params);
+					_MainService.updateRecord.addEventListener(ResultEvent.RESULT,onUpdateComplete);
+					//_dataIndex =_dataList.selectedIndex;
+				}else{
+					Alert.show(Valid.errors,"Error");
+				}
+			}
+			
+			private function recordIssue():void{
+				var codigo:String = _codigoFalla.text;
+				var descripcion:String = _descripcionFalla.text;
+				_fallasReportadas.addItem({_codigo:codigo,_falla:descripcion});
+				_MainService.recordFailure({_idOrden:_idOrdenSelected,_falla:descripcion,_codigo:codigo});
+				_codigoFalla.text = "";
+				_descripcionFalla.text = "";
+			}
+			
+			private function deleteDataAlert():void{
+				/*if(_dataList.selectedIndex!=-1){
+					Alert.show("Desea borrar el registro seleccionado?","Atención",Alert.YES|Alert.CANCEL,this,deleteData);
+				}else{
+					Alert.show("No hay registro selecionado","Error");
+				}*/
+			}
+			
+			private function deleteData(e:CloseEvent):void{
+				/*if(e.detail==Alert.YES){
+					var params:Object = new Object();
+					params[_mainId] = _dataList.selectedItem[_mainId];
+					_MainService.deleteRecord(params);
+					_MainService.deleteRecord.addEventListener(ResultEvent.RESULT,onDeleteComplete);
+					_dataReady = false;
+				}*/
+			}
+			
+			private function cancel():void{
+				onDataSelect();
+				resetBooleans();
+				getData();
+				Valid.validateAll();
+			}
+			
+			private function resetBooleans():void{
+				_newData = false;
+				_updateData = false;
+			}
+			
+			private function dataChange():void{
+				_updateData = true;
+			}
+			
+			private function openImageEditor():void{
+				/*if(_dataList.selectedIndex!=-1){
+					//_newsIdNumber 	= new Number(_dataList.selectedItem._blogId);
+					openPopUp("managers.ImageManager")
+				}else{
+					Alert.show("No hay registro selecionado","Error");
+				}*/
+			}
+			//-------------------------------- ResultsEvents --------------------------------------		
+			
+			private function onGetFieldsResult(e:ResultEvent):void{
+				_MainService.getFields.removeEventListener(ResultEvent.RESULT,onGetFieldsResult);
+				if(e){
+					if(e.result) {
+						_Data.createFields(Converter.arrayConverter(e.result));
+						getData();
+					}
+				}else{
+					Alert.show("Error al cargar los datos","Error");
+					_dataReady = false;
+				}
+				_DataResult= new ArrayCollection();
+				
+				
+			}
+			
+			private function getData():void{
+				_MainService.getSpecificOrder(_idOrdenSelected);
+				_MainService.getFailuresFromOrder(_idOrdenSelected);
+				_MainService.getSpecificOrder.addEventListener(ResultEvent.RESULT,onGetSpecificOrderResult);
+				_MainService.getFailuresFromOrder.addEventListener(ResultEvent.RESULT,onGetFailuresOrderResult);
+				reloadCurrentCatalogs(false);
+			}
+			
+			public function reloadCurrentCatalogs(clearComboBoxes:Boolean):void{
+				_idEquipo.selectedIndex = -1;
+				_idContacto.selectedIndex = -1;
+				_MainService.getListOfContacts(_cliente._idCliente);
+				_MainService.getListOfEquipments(_cliente._idCliente);
+				_MainService.getListOfContacts.addEventListener(ResultEvent.RESULT,onGetContactsResult);
+				_MainService.getListOfEquipments.addEventListener(ResultEvent.RESULT,onGetEquipmentsResult);
+			}
+			
+			private function onFault(e:FaultEvent):void{
+				Alert.show(e.fault.faultString,"Error");
+			}
+			
+			private function onDataSelect():void{
+				/*if(_dataList.selectedIndex!=-1) {
+					_Data.loadData(_dataList.selectedItem);
+					_dataIndex =_dataList.selectedIndex;
+					loadExtraFields(_dataList.selectedItem);
+					_selectedId = _dataList.selectedItem[_mainId];
+				}*/
+			}
+			
+			private function onCreateComplete(e:ResultEvent):void{				
+				_MainService.createRecord.removeEventListener(ResultEvent.RESULT,onCreateComplete);
+				_dataIndex = _DataResult.length;
+				getData();
+			}
+			
+			private function onUpdateComplete(e:ResultEvent):void{
+				_MainService.updateRecord.removeEventListener(ResultEvent.RESULT,onUpdateComplete);
+				getData();
+			}
+			
+			private function onDeleteComplete(e:ResultEvent):void{
+				_MainService.deleteRecord.removeEventListener(ResultEvent.RESULT,onDeleteComplete);
+				_dataIndex = _DataResult.length-2;
+				getData();
+			}
+			
+			//-------------------------------- ResultsEvents --------------------------------------	
+			private function onGetSpecificOrderResult(e:ResultEvent):void{
+				_MainService.getSpecificOrder.removeEventListener(ResultEvent.RESULT,onGetSpecificOrderResult);
+				_DataResult = Converter.arrayConverter(e.result);
+				_dataReady = true;
+				resetBooleans();
+			}
+			
+			public function onGetFailuresOrderResult(e:ResultEvent):void{
+				_MainService.getFailuresFromOrder.removeEventListener(ResultEvent.RESULT,onGetFailuresOrderResult);
+				_fallasReportadas = Converter.arrayConverter(e.result);
+			}
+			
+			public function onGetContactsResult(e:ResultEvent):void{
+				_MainService.getListOfContacts.removeEventListener(ResultEvent.RESULT,onGetContactsResult);
+				_contactos = Converter.arrayConverter(e.result);
+				if(_DataResult.length > 0  && _clientSelected == false) { //Actualizar sólo si no hemos sido invocados por cclientSelected
+					_Data.loadData(_DataResult[0]);//Sólamente tiene que haber una sóla orden
+				}
+			}
+			
+			public function onGetEquipmentsResult(e:ResultEvent):void{
+				_MainService.getListOfEquipments.removeEventListener(ResultEvent.RESULT,onGetEquipmentsResult);
+				_equipos = Converter.arrayConverter(e.result);
+				if(_DataResult.length > 0 && _clientSelected == false) { //Actualizar sólo si no hemos sido invocados por cclientSelected
+					_Data.loadData(_DataResult[0]);//Sólamente tiene que haber una sóla orden
+				}
+			}
+			
+			//-------------------------------- POP UP WINDOW --------------------------------------	
+			public function openPopUp(popUpName:String,modal:Boolean = true):void{
+				var pop:TitleWindow = PopUpManager.createPopUp(this, getDefinitionByName("views."+popUpName) as Class, modal) as TitleWindow;
+				pop.name = popUpName;
+				pop.addEventListener(CloseEvent.CLOSE, closePopup);
+				if(pop.hasOwnProperty("context")){
+					Object(pop).context = viewContext;
+				}
+				PopUpManager.centerPopUp(pop);
+			}
+			
+			private function closePopup(e:CloseEvent):void{
+				PopUpManager.removePopUp(e.target as TitleWindow);
+			}
+			//-------------------------------- POP UP WINDOW --------------------------------------
+			
+			//-------------------------------- Search Engine --------------------------------------
+			
+			private function searchFilter():void{
+				_DataResult.filterFunction = vlidateSearch;
+				_DataResult.refresh();
+			}
+			
+			private function vlidateSearch(item:Object):Boolean{
+				var isMatch:Boolean = false;           
+				/*if(item[_searchType.selectedItem.value].toLowerCase().search(_searchFilter.toLowerCase()) != -1){
+					isMatch = true
+				}        */      
+				return isMatch;              
+			}
+			
+			private function search():void{
+				/*_searchFilter = _searchField.text;
+				searchFilter();
+				*/
+			}
+			private var _searchFilter:String 			= new String();
+			[Bindable]	private var _searchTypes:ArrayCollection 	= new ArrayCollection([{label:"Id",     	value:"_idArea"},{label:"Nombre",     	value:"_nombre"}]);
+			
+			//-------------------------------- Search Engine --------------------------------------	
+			
+			
+			public function selectClient(client:Object){
+				_cliente = client;
+				_clientSelected = true;
+				_updateData = true;
+				reloadCurrentCatalogs(true);
+				//focusManager.setFocus(_codigo);
+			}
+			
+			
+		]]>
+	</fx:Script>
+	
+	
+	
+</s:TitleWindow>

@@ -1,0 +1,836 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow 
+	xmlns:mx="http://www.adobe.com/2006/mxml" 
+	width="1214" height="720" 
+	layout="absolute" 
+	horizontalCenter="0" 
+	title="Administración de Empleados" 
+	verticalCenter="0"
+	verticalScrollPolicy="off"
+	horizontalScrollPolicy="off"
+	showCloseButton="true">
+	<mx:states>
+		<mx:State name="Empleados">
+			<mx:SetProperty target="{button1}" name="x" value="618"/>
+			<mx:SetProperty target="{button1}" name="y" value="558"/>
+			<mx:SetProperty name="width" value="774"/>
+			<mx:SetProperty target="{button2}" name="x" value="862"/>
+			<mx:SetProperty target="{button2}" name="y" value="555"/>
+			<mx:SetProperty target="{button3}" name="y" value="558"/>
+			<mx:SetProperty target="{button4}" name="y" value="558"/>
+			<mx:SetProperty target="{button5}" name="x" value="859"/>
+			<mx:SetProperty target="{button5}" name="y" value="555"/>
+			<mx:SetProperty target="{button10}" name="enabled" value="false"/>
+		</mx:State>
+	</mx:states>
+
+	<mx:Script>
+		<![CDATA[
+			import views.Empleados.Empleados_Antecedentes_Academicos;
+			import mx.validators.ValidationResult;
+			import mx.random.events.SelectionEvent;
+			import mx.random.events.StaticEvent;
+			import mx.random.interfaces.WScrip;
+			import mx.rpc.wsdl.WSDLBinding;
+			import mx.random.interfaces.WScrip;
+			import mx.random.constants.GlobalData;
+			import mx.random.constants.ConstantData;
+			import mx.random.constants.Constantes;
+			import mx.random.constants.Catalogs;
+			
+			import mx.random.windowManagers.PopManager;
+			import mx.random.constants.Languages;
+			import mx.random.forms.Validator;
+			import mx.random.dataManagers.EventManager;
+			import mx.random.cms.converters.Converter;
+			import mx.random.dataManagers.DataManager;
+			import mx.random.cms.web.WebApplication;
+			import mx.managers.PopUpManager;
+			import mx.collections.ArrayCollection;
+			import mx.events.CloseEvent;
+			import mx.controls.Alert;
+			import mx.rpc.remoting.RemoteObject;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+
+			private var _webApplication:WebApplication;
+			private var Valid:Validator 			= new Validator();
+			private var _workManager:Object 		= new Object();
+			private var _MainService:RemoteObject 	= new RemoteObject();
+[Bindable]	private var _Data:DataManager 			= new DataManager(this);
+[Bindable]	private var _DataResult:ArrayCollection = new ArrayCollection();			
+			private var _eventManager:EventManager 	= new EventManager(this);
+			private var _dataIndex:Number 			= 0;
+			
+			//-----------Event Manager -----------
+
+[Bindable]	public var _dataReady:Boolean 			= false;
+[Bindable]	public var _newData:Boolean 			= false;
+[Bindable]	public var _updateData:Boolean 			= false;
+
+			//-----------Event Manager -----------
+			
+			
+			//-----------Local Vars -----------
+			
+			private var _selectedId:Number 		= 0;
+			private var _selectedName:String 	= "";
+			private var _serviceName  			= "Empleados";
+			private var _mainId  				= "_idEmpleado";
+			private var _mainFocusField:String  = "_nombre";
+			private var _path:String 			= "http://www.gith.com.mx/ASF_Data/_empleados/";
+[Bindable]	private var _picture:String 		= "";	
+			private var _FotosPersonal:FotosPersonal;	
+			
+[Bindable]	private var _range:Number = 0;
+			
+[Bindable]	private var _areas:ArrayCollection;				
+[Bindable]	private var _deptos:ArrayCollection;
+[Bindable]	private var _puestos:ArrayCollection;
+[Bindable]	private var _camReady:Boolean = false;
+[Bindable]	private var _accessType:Number = -1;
+
+			private var _selectMode:Boolean = false;
+			
+			
+			private var _idCompania:Number  	= -1 ;
+			private var _idArea:Number  		= -1 ;
+			private var _idDepartamento:Number  = -1 ;
+			private var _idPuesto:Number  		= -1 ;			
+			private var _idCECO:Number  		= -1 ;
+			private var _idCategoria:Number  	= -1 ;
+			
+			//-----------Local Vars -----------
+			
+//---------------------------- Context ---------------------------------------------            
+
+   			public function set context(contextObj:Object):void{
+				for( var p:String in contextObj){
+					if(this.hasOwnProperty(p)){
+						this[p] = contextObj[p];
+					}
+				}
+			}
+
+			public function set workManager(value:Object):void{
+				_workManager = value;
+			}
+
+			public function set webApplication(value:WebApplication):void{
+				_webApplication = value;
+				initView();
+			}
+			public function get webApplication():WebApplication{ return _webApplication; } 
+						
+//---------------------------- Context ---------------------------------------------  
+
+//-------------------------------- MainInit --------------------------------------
+			// ------------------- View Extra Data -------------------------------
+			
+			private function get viewContext():Object{
+				return {dataObject:_dataList.selectedItem,
+						selectionMode:_selectMode,
+						relationIdValue:_dataList.selectedItem._idEmpleado,
+						idEmpleado: _dataList.selectedItem._idEmpleado,
+						webApplication: _webApplication,
+						workManager: this
+						}					
+			}
+			
+			private function chageRange(val:Number):void{
+				_range = val;
+				_dataReady = false;	
+				_DataResult = new ArrayCollection();			
+				getData()
+			}
+			
+						
+			private function addValidations():void{
+				
+				Valid.addStringVal(_nombre,3,50,"Nombre");
+				Valid.addStringVal(_paterno,3,50,"A. Paterno");
+				Valid.addStringVal(_materno,3,50,"A. Materno");
+				Valid.addStringVal(_calle,3,50,"Calle");
+				Valid.addStringVal(_numero,1,8,"Número Casa");
+				Valid.addStringVal(_colonia,3,50,"Colonia");
+				Valid.addStringVal(_cp,5,5,"C.P.");
+				Valid.addStringVal(_estado,3,50,"Estado");
+				Valid.addStringVal(_municipio,3,50,"Minicipio");
+				
+				Valid.addComboVal(day,"Dia de Nacimiento");
+				Valid.addComboVal(month,"Mes de Nacimiento");
+				Valid.addComboVal(year,"Año de Nacimiento");
+				
+				Valid.addMailVal(_mail,false,"E-Mail");
+				
+				Valid.addPhoneVal(_telCasa,true,false,"Teléfono Casa");
+				Valid.addPhoneVal(_telEme,true,false,"Teléfono Emergencias");
+				Valid.addPhoneVal(_celular,true,false,"Teléfono Celular");
+				
+				
+				Valid.changeLanguage(Languages.SPANISH);	
+							
+				var validFields:ArrayCollection = Valid.validFields;
+				for(var n:Number = 0;n<validFields.length;n++){					
+					this[validFields[n].obj.name].addEventListener(Event.CHANGE,onFocusOut);
+				}
+				
+				Valid.setErrorKnot(Validator.CIRCLE_KNOT,0xFF0000);
+			}
+			
+			private function onFocusOut(e:Event):void{
+				if(_newData||_updateData) Valid.validateAll();//Valid.validateOne(e.currentTarget.name);
+			}
+			
+			private function extraCreateData(params:Object):Object{
+				//params["_newsImage"] = _image;
+				params['_fechaNacimiento'] = year.selectedItem.label+'-'+month.selectedItem.value+'-'+day.selectedItem.value;	
+				
+				params['_vencimientoLicencia'] = expira_year.selectedItem.label+'-'+expira_month.selectedItem.value+'-'+expira_day.selectedItem.value;	
+				
+							
+				params['_idCompania'] 		= _idCompania;
+				params['_idArea'] 			= _idArea;
+				params['_idDepartamento'] 	= _idDepartamento;
+				params['_idPuesto'] 		= _idPuesto;
+				params['_idCategoria']		= _idCategoria;
+				params['_idCECO']			= _idCECO;
+				
+				return params;
+			}
+			
+			private function createRecordExtras():void{
+				day.selectedIndex 	= 0;
+				month.selectedIndex = 0;
+				year.selectedIndex 	= 0;
+				_idCompania		= -1;
+				_idArea			= -1;
+				_idDepartamento	= -1;
+				_idPuesto		= -1;
+				_idCECO			= -1;
+				_idCategoria	= -1;
+				//_image = "defaultNew.jpg";
+				
+			}
+			
+			private function extraUpdateData(params:Object):Object{	
+				params['_fechaNacimiento'] = year.selectedItem.label+'-'+month.selectedItem.value+'-'+day.selectedItem.value;	
+				params['_vencimientoLicencia'] = expira_year.selectedItem.label+'-'+expira_month.selectedItem.value+'-'+expira_day.selectedItem.value;	
+				params['_idCompania'] 		= _idCompania;
+				params['_idArea'] 			= _idArea;
+				params['_idDepartamento'] 	= _idDepartamento;
+				params['_idPuesto'] 		= _idPuesto;
+				params['_idCategoria']		= _idCategoria;
+				params['_idCECO']			= _idCECO;		
+				return params;
+			}
+			
+			private function loadExtraFields(params:Object):void{
+				
+				var _expDate:Object = Converter.dateExploit(params['_vencimientoLicencia']);
+				expira_day.selectedIndex 	= _expDate.day;
+				expira_month.selectedIndex 	= _expDate.month;
+				expira_year.selectedIndex 	= _expDate.year;
+				
+				
+				_picture = _path+_numFortia.text+'.jpg?'+Math.random();
+				
+				var _bdDate:Object = Converter.dateExploit(params['_fechaNacimiento']);
+				day.selectedIndex 	= _bdDate.day;
+				month.selectedIndex = _bdDate.month;
+				year.selectedIndex 	= _bdDate.year;
+				
+				/*
+				var tempDate:String = params["_fechaNacimiento"];
+				if(tempDate){
+					var temp:Array 		= tempDate.split('-');
+					day.selectedIndex 	= parseInt(temp[2]);
+					month.selectedIndex = parseInt(temp[1]);
+					year.selectedIndex 	= ConstantData.FindYearindex(temp[0]);
+				}else{
+					day.selectedIndex 	= 0;
+					month.selectedIndex = 0;
+					year.selectedIndex 	= 0;
+				}
+				
+				
+				
+				_deptos.filterFunction=deptosFilter;
+				_deptos.refresh();
+				_idDepartamento.selectedIndex = findIndexDepto(_dataList.selectedItem._idDepartamento);
+				_puestos.filterFunction=deptosFilter;
+				_puestos.refresh();
+				_idPuesto.selectedIndex = findIndexPuesto(_dataList.selectedItem._idPuesto);
+				//_image = params["_newsImage"];*/
+			}
+			
+			
+			
+			private function findIndexDepto(value:Number):Number{
+				var res:Number = -1;
+				for(var n:Number = 0;n<_deptos.length;n++){
+					if(_deptos[n]._idDepartamento==value) res = n;
+				}
+				return res;
+			}
+			
+			private function findIndexPuesto(value:Number):Number{
+				var res:Number = -1;
+				for(var n:Number = 0;n<_puestos.length;n++){
+					if(_puestos[n]._idPuesto==value) res = n;
+				}
+				return res;
+			}
+			
+			
+			private function forceImports():void{
+				Firma;
+				Credenciales;
+				Intereses;
+				Inmuebles;
+				Catalogo_Departamentos;
+				Catalogo_Puestos;
+				Catalogo_Areas;
+				Empleados_Historial_Laboral;
+				Empleados_Dependientes_Economicos;
+				Empleados_Perfil_Carrera;
+				Empleados_Areas_Interes;
+				Empleados_Credenciales;
+				Empleados_Firma;
+				Empleados_Accesos;
+			}
+			
+			public function initView():void{
+				forceImports();
+				_areas = Converter.arrayConverter(Catalogs.DataObject['asf_areas']);
+				_deptos = Converter.arrayConverter(Catalogs.DataObject['asf_departamentos']);
+				_puestos = Converter.arrayConverter(Catalogs.DataObject['asf_puestos']);
+				_MainService = _webApplication.getService(_serviceName);
+				_Data.exceptions = ["_vencimientoLicencia","_idEmpleado","_fechaNacimiento","_idCECO","_idCompania","_idArea","_idPuesto","_idDepartamento","_idCategoria","_fechaBaja"];
+				_MainService.addEventListener(FaultEvent.FAULT,onFault);
+				initData();
+				addValidations();
+				loadScroll();
+				var cam:Camera = Camera.getCamera();
+				if(cam) _camReady = true;
+				
+				if(_webApplication.user.role=="Empleados") {
+					if(_webApplication.user.accessType==0) currentState = "Empleados";		
+					_accessType = 	_webApplication.user.accessType;		
+					PopUpManager.centerPopUp(this);
+				}
+			}
+			
+			public function imageUploadReady():void{				
+				_picture = _path+_numFortia.text+'.jpg?'+Math.random();
+			}
+			
+			private function openDepto():void{
+				openPopUp("Catalogo_Departamentos");
+			}
+						
+			private function openArea():void{
+				openPopUp("Catalogo_Areas");
+			}
+			
+			private function openPuesto():void{
+				_selectMode = true;
+				StaticEvent.addEventListener(SelectionEvent.SELECTION_COMPLETE,onPuestoSelectcomplete);
+				openPopUp("Catalogo_Puestos");
+			}
+			
+			private function openCeco():void{
+				openPopUp("Catalogo_CECO");
+			}
+			
+			private function openCompanias():void{
+				openPopUp("Catalogo_Companias");
+			}
+			
+			private function openUbicacion():void{
+				openPopUp("Catalogo_Ubicaciones");
+			}
+			
+			private function onPuestoSelectcomplete(e:SelectionEvent):void{
+				var idCia:Number 	= Converter.findIndex(Converter.arrayConverter(Catalogs.DataObject["asf_companias"]),		"_idCompania",		e.itemData._idCompania);
+				var idArea:Number 	= Converter.findIndex(Converter.arrayConverter(Catalogs.DataObject["asf_areas"]),			"_idArea",			e.itemData._idArea);
+				var idDepto:Number 	= Converter.findIndex(Converter.arrayConverter(Catalogs.DataObject["asf_departamentos"]),	"_idDepartamento",	e.itemData._idDepartamento);
+				var idPuesto:Number = Converter.findIndex(Converter.arrayConverter(Catalogs.DataObject["asf_puestos"]),			"_idPuesto",		e.itemData._idPuesto);
+				var idCategoria:Number = Converter.findIndex(Converter.arrayConverter(Catalogs.DataObject["asf_categorias"]),	"_idCategoria",		e.itemData._idCategoria);
+				var idCECO:Number = Converter.findIndex(Converter.arrayConverter(Catalogs.DataObject["asf_ceco"]),				"_idCECO",			e.itemData._idCECO);
+				
+				if(idCia!=-1)		{_cia.text 		= Catalogs.DataObject["asf_companias"][idCia]._nombre }else{ _cia.text 		= ""};
+				if(idArea!=-1)		{_area.text 	= Catalogs.DataObject["asf_areas"][idArea]._nombre }else{ _area.text 		= ""};
+				if(idDepto!=-1)		{_depto.text 	= Catalogs.DataObject["asf_departamentos"][idDepto]._nombre }else{ _depto.text 		= ""};
+				if(idPuesto!=-1)	{_puesto.text 	= Catalogs.DataObject["asf_puestos"][idPuesto]._nombre }else{ _puesto.text 		= ""};
+				if(idCategoria!=-1)	{_categoria.text= Catalogs.DataObject["asf_categorias"][idCategoria]._nombre }else{ _categoria.text 		= ""};
+				if(idCECO!=-1)	 	{_ceco.text 	= Catalogs.DataObject["asf_ceco"][idCECO]._nombre }else{ _ceco.text 		= "NA"};
+				
+				_idCompania 	= e.itemData._idCompania;			
+				_idArea 		= e.itemData._idArea;
+				_idDepartamento = e.itemData._idDepartamento;
+				_idPuesto 		= e.itemData._idPuesto;
+				_idCategoria 	= e.itemData._idCategoria;
+				_idCECO			= e.itemData._idCECO;
+				
+				_updateData = true;
+				StaticEvent.removeEventListener(SelectionEvent.SELECTION_COMPLETE,onPuestoSelectcomplete);
+			}
+			
+			
+			
+
+			// ------------------- View Extra Data -------------------------------
+
+			private function loadScroll():void{
+				_dataList.visible = false;
+				for(var n:Number = 0;n<100;n++){
+					_DataResult.addItem({i:0});
+				}
+			}
+
+			private function initData():void{
+				_MainService.getFields();
+				_MainService.getFields.addEventListener(ResultEvent.RESULT,onGetFieldsResult);
+				_dataReady = false;
+			}
+			
+			public function closeWindow():void{
+            		dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
+            		PopUpManager.removePopUp(this);
+            }
+            
+//-------------------------------- MainInit --------------------------------------
+			
+			private function newData():void{
+				_Data.clear();
+				_newData = true;
+				_updateData = false;
+				Valid.validateAll();
+				this[_mainFocusField].setFocus();
+				createRecordExtras();
+			}
+			
+			private function createData():void{
+				if(Valid.validateAll()){
+					_dataReady = false;
+					var params:Object = extraCreateData(_Data.makeData());
+					_MainService.createRecord(params);
+					_MainService.createRecord.addEventListener(ResultEvent.RESULT,onCreateComplete);
+				}else{
+					Alert.show(Valid.errors,"Error");
+				}
+			}
+
+			private function updateData():void{
+				if(Valid.validateAll()){
+					_dataReady = false;
+					var params:Object = extraUpdateData(_Data.makeData());
+					params[_mainId] = _dataList.selectedItem[_mainId];
+					_MainService.updateRecord(params);
+					_MainService.updateRecord.addEventListener(ResultEvent.RESULT,onUpdateComplete);
+					_dataIndex =_dataList.selectedIndex;
+				}else{
+					Alert.show(Valid.errors,"Error");
+				}
+			}
+			
+			private function deleteDataAlert():void{
+				if(_dataList.selectedIndex!=-1){
+					Alert.show("Desea borrar el registro seleccionado?","Atención",Alert.YES|Alert.CANCEL,this,deleteData);
+				}else{
+					Alert.show("No hay registro selecionado","Error");
+				}
+			}
+			
+			private function deleteData(e:CloseEvent):void{
+				if(e.detail==Alert.YES){
+					var params:Object = new Object();
+					params[_mainId] = _dataList.selectedItem[_mainId];
+					_MainService.deleteRecord(params);
+					_MainService.deleteRecord.addEventListener(ResultEvent.RESULT,onDeleteComplete);
+					_dataReady = false;
+				}
+			}
+			
+			private function cancel():void{
+				onDataSelect();
+				resetBooleans();
+				Valid.validateAll();
+			}
+			
+			private function resetBooleans():void{
+				_newData = false;
+				_updateData = false;
+			}
+
+			private function dataChange():void{
+				_updateData = true;
+			}
+
+			private function openImageEditor():void{
+				if(_dataList.selectedIndex!=-1){
+					//_newsIdNumber 	= new Number(_dataList.selectedItem._blogId);
+					openPopUp("managers.ImageManager")
+				}else{
+					Alert.show("No hay registro selecionado","Error");
+				}
+			}
+//-------------------------------- ResultsEvents --------------------------------------		
+			
+			private function onGetFieldsResult(e:ResultEvent):void{
+				_MainService.getFields.removeEventListener(ResultEvent.RESULT,onGetFieldsResult);
+				if(e){
+					if(e.result) {
+						_Data.createFields(Converter.arrayConverter(e.result));
+						getData();
+					}
+				}else{
+					Alert.show("Error al cargar los datos","Error");
+					_dataReady = false;
+				}
+				_DataResult= new ArrayCollection();
+				_dataList.visible = true;
+				
+			}
+			
+			public function getData():void{
+				var params:Object = {
+									_range:_range,
+									_idDepartamento:_webApplication.user.idDepartamento,
+									_idArea:_webApplication.user.idArea,
+									_idEmpleado:_webApplication.user.idEmpleado,
+									_idCECO:_webApplication.user.idCECO,
+									_idUbicacion:_webApplication.user.idUbicacion,
+									_idCategoria:_webApplication.user.idCategoria,
+									_idCompania:_webApplication.user.idCompania,
+									_accessType:_accessType
+									}
+				
+				_MainService.getRecords(params);
+				_MainService.getRecords.addEventListener(ResultEvent.RESULT,onGetDataResult);
+			}
+			
+			private function onGetDataResult(e:ResultEvent):void{
+				_MainService.getRecords.removeEventListener(ResultEvent.RESULT,onGetDataResult);
+				_DataResult = Converter.arrayConverter(e.result);
+				if(_DataResult.length==0) {
+					Alert.show("No hay registros en la base de datos","Atención")
+				}else{
+					if(_dataIndex<0) _dataIndex = 0;
+					_Data.loadData(_DataResult[_dataIndex]);
+					_dataList.selectedIndex = _dataIndex;
+					_dataList.scrollToIndex(_dataList.selectedIndex);
+					loadExtraFields(_DataResult[_dataIndex]);
+					updatePuestos();
+				}
+				_dataReady = true;
+				resetBooleans();
+			}
+			
+			private function onFault(e:FaultEvent):void{
+				Alert.show(e.fault.faultString,"Error");
+			}
+
+			private function onDataSelect():void{
+				if(_dataList.selectedIndex!=-1) {
+					_Data.loadData(_dataList.selectedItem);
+					_dataIndex =_dataList.selectedIndex;
+					loadExtraFields(_dataList.selectedItem);
+					_selectedId = _dataList.selectedItem[_mainId];		
+					updatePuestos()																	
+				}
+			}
+			
+			private function updatePuestos():void{
+				var idCia:Number 	= Converter.findIndex(Converter.arrayConverter(Catalogs.DataObject["asf_companias"]),		"_idCompania",		_dataList.selectedItem._idCompania);
+				var idArea:Number 	= Converter.findIndex(Converter.arrayConverter(Catalogs.DataObject["asf_areas"]),			"_idArea",			_dataList.selectedItem._idArea);
+				var idDepto:Number 	= Converter.findIndex(Converter.arrayConverter(Catalogs.DataObject["asf_departamentos"]),	"_idDepartamento",	_dataList.selectedItem._idDepartamento)
+				var idPuesto:Number = Converter.findIndex(Converter.arrayConverter(Catalogs.DataObject["asf_puestos"]),			"_idPuesto",		_dataList.selectedItem._idPuesto);
+				var idCECO:Number 	= Converter.findIndex(Converter.arrayConverter(Catalogs.DataObject["asf_ceco"]),			"_idCECO",			_dataList.selectedItem._idCECO);
+				var idCategoria:Number 	= Converter.findIndex(Converter.arrayConverter(Catalogs.DataObject["asf_categorias"]),	"_idCategoria",		_dataList.selectedItem._idCategoria);
+				
+				if(idCia!=-1)		{_cia.text 		= Catalogs.DataObject["asf_companias"][idCia]._nombre }else{ _cia.text 		= ""};
+				if(idArea!=-1)		{_area.text 	= Catalogs.DataObject["asf_areas"][idArea]._nombre }else{ _area.text 		= ""};
+				if(idDepto!=-1)		{_depto.text 	= Catalogs.DataObject["asf_departamentos"][idDepto]._nombre }else{ _depto.text 		= ""};
+				if(idPuesto!=-1)	{_puesto.text 	= Catalogs.DataObject["asf_puestos"][idPuesto]._nombre }else{ _puesto.text 		= ""};
+				if(idCECO!=-1)		{_ceco.text 		= Catalogs.DataObject["asf_ceco"][idCECO]._nombre }else{ _ceco.text 		= ""};
+				if(idCategoria!=-1)	{_categoria.text 	= Catalogs.DataObject["asf_categorias"][idCategoria]._nombre }else{ _categoria.text 		= ""};
+				
+				_idCompania 	= _dataList.selectedItem._idCompania;
+				_idArea 		= _dataList.selectedItem._idArea;
+				_idDepartamento = _dataList.selectedItem._idDepartamento;
+				_idPuesto 		= _dataList.selectedItem._idPuesto;
+				_idCategoria 	= _dataList.selectedItem._idCategoria;
+				_idCECO			= _dataList.selectedItem._idCECO;
+			}
+			
+			private function onCreateComplete(e:ResultEvent):void{				
+				_MainService.createRecord.removeEventListener(ResultEvent.RESULT,onCreateComplete);
+				_dataIndex = _DataResult.length;
+				getData();
+			}
+			
+			private function onUpdateComplete(e:ResultEvent):void{
+				_MainService.updateRecord.removeEventListener(ResultEvent.RESULT,onUpdateComplete);
+				getData();
+			}
+			
+			private function onDeleteComplete(e:ResultEvent):void{
+				_MainService.deleteRecord.removeEventListener(ResultEvent.RESULT,onDeleteComplete);
+				_dataIndex = _DataResult.length-2;
+				getData();
+			}
+	
+//-------------------------------- ResultsEvents --------------------------------------	
+
+//-------------------------------- POP UP WINDOW --------------------------------------	
+			public function openPopUp(popUpName:String,modal:Boolean = false):void{
+				var pop:TitleWindow = PopUpManager.createPopUp(this, getDefinitionByName("views."+popUpName) as Class, modal) as TitleWindow;
+				pop.name = popUpName;
+				pop.addEventListener(CloseEvent.CLOSE, closePopup);
+				if(pop.hasOwnProperty("context")){
+					Object(pop).context = viewContext;
+				}
+				PopUpManager.centerPopUp(pop);
+			}
+			
+			private function closePopup(e:CloseEvent):void{
+	            PopUpManager.removePopUp(e.target as TitleWindow);
+			}
+//-------------------------------- POP UP WINDOW --------------------------------------
+
+//-------------------------------- Search Engine --------------------------------------
+
+			private function searchFilter():void{
+               			_DataResult.filterFunction = vlidateSearch;
+               			_DataResult.refresh();
+           		}
+          
+	       		private function vlidateSearch(item:Object):Boolean{
+	           		var isMatch:Boolean = false;  
+	           		if(item[_searchType.selectedItem.value]){        
+		           		if(item[_searchType.selectedItem.value].toLowerCase().search(_searchFilter.toLowerCase()) != -1){
+		               			isMatch = true
+		           		}      
+		         	}        
+	           		return isMatch;              
+	       		}
+	       	
+	       		private function search():void{
+				_searchFilter = _searchField.text;
+				searchFilter();
+			}
+			private var _searchFilter:String 			= new String();
+[Bindable]	private var _searchTypes:ArrayCollection 	= new ArrayCollection([{label:"No. Empleado",     	value:"_numFortia"},{label:"Nombre",     	value:"_nombre"},{label:"Apellido Paterno",     	value:"_paterno"},{label:"Apellido Materno",     	value:"_materno"}]);
+
+//-------------------------------- Search Engine --------------------------------------	
+
+			private function getPicture():void{
+				if(_numFortia.text!=""){
+					GlobalData.EMPLEADO = _numFortia.text;
+					_FotosPersonal = FotosPersonal(PopUpManager.createPopUp(this,FotosPersonal,true));
+					_FotosPersonal.workManager = this;
+					_FotosPersonal.webApplication = _webApplication;
+					PopUpManager.centerPopUp(_FotosPersonal);
+				}else{
+					Alert.show("Falta el número de empleado","Error");
+				}
+			}	
+			/*
+			private function companiaChange():void{
+				_areas.filterFunction=areaFilter;
+				_areas.refresh();				
+				if(_areas.length>0){
+					_idArea.enabled = true;
+				}else{
+					_idArea.enabled = false;
+				}
+				_idArea.selectedIndex = 0;
+				areaChange()
+			}      
+			  
+		   	public function areaFilter(item:Object):Boolean{
+			  	var result:Boolean=false;    
+			  	if (!item._idCompania.length|| item._idCompania==_idCompania.selectedItem._idCompania) result=true;      
+			  	return result;
+		   	}
+			
+			private function areaChange():void{
+				_deptos.filterFunction=deptosFilter;
+				_deptos.refresh();
+				if(_deptos.length>0){
+					_idDepartamento.enabled = true;
+				}else{
+					_idDepartamento.enabled = false;
+				}
+				_idDepartamento.selectedIndex = 0;
+				deptosChange();
+			}      
+			  
+		   	public function deptosFilter(item:Object):Boolean{
+			  	var result:Boolean=false;    
+			  	if (!item._idArea.length|| item._idArea==_idArea.selectedItem._idArea) result=true;      
+			  	return result;
+		   	}
+		   	
+		   	private function deptosChange():void{
+				_puestos.filterFunction=puestosFilter;
+				_puestos.refresh();
+				if(_puestos.length>0){
+					_idPuesto.enabled = true;
+				}else{
+					_idPuesto.enabled = false;
+				}
+				_idPuesto.selectedIndex = 0;
+			}      
+			  
+		   	public function puestosFilter(item:Object):Boolean{
+			  	var result:Boolean=false;    
+			  	if (!item._idDepartamento.length|| item._idDepartamento==_idDepartamento.selectedItem._idDepartamento) result=true;      
+			  	return result; 
+		   	}		*/	
+			
+		]]>
+	</mx:Script>
+	<mx:Image x="10" y="10" width="138" height="177" source="{_picture}" brokenImageSkin="@Embed(source='../assets/Comps/fotoChB.jpg')" autoLoad="true" id="_img" scaleContent="true"/>
+	<mx:Button x="9" y="195" label="   Fotografía" width="150" click="getPicture();" textAlign="left" id="_fotografiaBt" enabled="{_dataReady&amp;&amp;_camReady&amp;&amp;_accessType==-1}"/>
+	<mx:Button x="9" y="223" label="   Firma" width="150" click="openPopUp('Empleados_Firma')" textAlign="left" enabled="{_dataReady&amp;&amp;_accessType==-1}"/>
+	<mx:Button x="9" y="251" label="   Credencial" width="150" click="openPopUp('Empleados_Credenciales',true)" textAlign="left" enabled="{_dataReady&amp;&amp;_accessType==-1}"/>
+	<mx:Button x="9" y="279" label="   Vivienda" width="150" click="openPopUp('Inmuebles',true)" enabled="{_dataReady}" textAlign="left"/>
+	<mx:Button x="9" y="307" label="   Intereses" width="150" click="openPopUp('Intereses',true)" enabled="{_dataReady}" textAlign="left"/>
+	<mx:Button x="9" y="363" label="   Historial Laboral" width="150" click="openPopUp('Empleados_Historial_Laboral',true)" enabled="{_dataReady}" textAlign="left"/>
+	<mx:Label x="225" y="456" text="CIA :" />
+<mx:TextInput x="603" y="10" id="_imss" change="dataChange();" width="160" tabIndex="2"/>
+	<mx:TextInput x="435" y="51" id="_rfc" change="dataChange();" width="160" editable="true" tabIndex="4"/>
+	<mx:Label x="436" y="35" text="rfc"  fontStyle="italic" fontSize="9" color="#C1C1C1"/>
+<mx:Label x="603" y="36" text="curp"  fontStyle="italic" fontSize="9" color="#C1C1C1"/>
+<mx:TextInput x="603" y="51" id="_curp" change="dataChange();" width="159" tabIndex="5"/>
+<mx:Label x="193" y="102" text="Empleado :" />
+	<mx:Label x="197" y="175" text="Dirección :" />
+<mx:TextInput x="268" y="100" id="_nombre" change="dataChange();" width="160" tabIndex="6"/>
+	<mx:Label x="544" y="245" text="E- Mail :" />
+	<mx:Label x="205" y="245" text="Celular :" />
+	<mx:TextInput x="603" y="243" id="_mail" change="dataChange();" width="160" tabIndex="21"/>
+	<mx:TextInput x="266" y="243" id="_celular" change="dataChange();" width="160" tabIndex="20"/>
+<mx:Label x="269" y="84" text="nombre(s)"  color="#C2C1C1" fontSize="10" fontStyle="italic"/>
+	<mx:Label x="267" y="157" text="calle"  color="#C2C1C1" fontSize="10" fontStyle="italic"/>
+	<mx:Label x="434" y="157" text="número"  color="#C2C1C1" fontSize="10" fontStyle="italic"/>
+	<mx:Label x="434" y="198" text="estado"  color="#C2C1C1" fontSize="10" fontStyle="italic"/>
+	<mx:Label x="266" y="197" text="municipio"  color="#C2C1C1" fontSize="10" fontStyle="italic"/>
+	<mx:Label x="602" y="197" text="teléfono"  color="#C2C1C1" fontSize="10" fontStyle="italic"/>
+	<mx:Label x="703" y="156" text="c.p."  color="#C2C1C1" fontSize="10" fontStyle="italic"/>
+	<mx:Label x="530" y="157" text="colonia"  color="#C2C1C1" fontSize="10" fontStyle="italic"/>
+	<mx:Label x="436" y="84" text="paterno"  color="#C2C1C1" fontSize="10" fontStyle="italic"/>
+	<mx:Label x="604" y="84" text="materno"  color="#C2C1C1" fontSize="10" fontStyle="italic"/>
+<mx:TextInput x="436" y="100" id="_paterno" change="dataChange();" width="160" tabIndex="7"/>
+<mx:TextInput x="604" y="100" id="_materno" change="dataChange();" width="160" tabIndex="8"/>
+<mx:Label x="194" y="14" text="No. Fortia :" />
+	<mx:Label x="203" y="53" text="Ingreso :" />
+	<mx:Label x="541" y="12" text="I.M.S.S :" />
+<mx:TextInput x="267" y="12" id="_numFortia" change="dataChange();" width="58" editable="false" tabIndex="1"/>
+<mx:TextInput x="266" y="173" id="_calle" change="dataChange();" width="160" tabIndex="13"/>
+<mx:TextInput x="529" y="173" id="_colonia" change="dataChange();" width="160" tabIndex="15"/>
+<mx:TextInput x="434" y="173" id="_numero" change="dataChange();" width="84" tabIndex="14"/>
+<mx:TextInput x="703" y="173" id="_cp" change="dataChange();" width="60" tabIndex="16"/>
+<mx:TextInput x="434" y="215" id="_estado" change="dataChange();" width="160" tabIndex="18"/>
+<mx:TextInput x="266" y="213" id="_municipio" change="dataChange();" width="160" tabIndex="17"/>
+<mx:Label x="608" y="417" text="Tipo Sangre :" />
+	<mx:Label x="605" y="387" text="Tel :" />
+<mx:ComboBox  x="693" y="415" id="_tipoSangre" change="dataChange();" width="70" dataProvider="{Constantes.TiposSangre}" labelField="label" tabIndex="28"/>
+	<mx:ComboBox  x="601" y="128" id="_sexo" change="dataChange();" width="160" dataProvider="{Constantes.Sexos}" labelField="label" tabIndex="12"/>
+<mx:Label x="180" y="387" text="Emergencia :" />
+<mx:TextInput x="266" y="385" id="_emergencia" change="dataChange();" width="328" tabIndex="25"/>
+	<mx:TextInput x="265" y="415" id="_alergias" change="dataChange();" width="328" tabIndex="27"/>
+<mx:Label x="199" y="417" text="Alergias :" />
+<mx:TextInput x="602" y="213" id="_telCasa" change="dataChange();" width="160" tabIndex="19"/>
+	<mx:TextInput x="644" y="385" id="_telEme" change="dataChange();" width="119" tabIndex="26"/>
+<mx:Label x="182" y="130" text="Fecha Nac.  :" />
+<mx:Label x="552" y="130" text="Sexo : " />
+
+	<mx:DataGrid height="532" dataProvider="{_DataResult}" id="_dataList" change="onDataSelect();" enabled="{_dataReady&amp;&amp;!_newData&amp;&amp;!_updateData}" y="69" width="409" x="790">
+		<mx:columns>	
+			<mx:DataGridColumn headerText="A/B" width="40" >			
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:HBox width="100%"  verticalAlign="middle" horizontalAlign="center">
+							<mx:Image source="assets/Icons/Status/auth_{data._estatus}.png"  width="13" height="13" scaleContent="false"/>
+						</mx:HBox>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>		
+			<mx:DataGridColumn headerText="Fortia" dataField="_numFortia" width="50"/>
+			<mx:DataGridColumn headerText="Nombre" dataField="_nombre" />
+			<mx:DataGridColumn headerText="Apellido Paterno" dataField="_paterno"/>
+			<mx:DataGridColumn headerText="Apellido Materno" dataField="_materno"/>
+			
+		</mx:columns>
+	</mx:DataGrid>
+	<mx:Button label="Nuevo" width="80" enabled="{_dataReady}" visible="{!_newData&amp;&amp;!_updateData&amp;&amp;_accessType==-1}" click="newData();" y="659" x="168" id="button5"/>
+	<mx:Button label="Cancelar" width="80" enabled="{_dataReady}" visible="{_newData||_updateData}" click="cancel();" y="659" x="256"/>
+	<mx:Button label="Aceptar" width="80" enabled="{_dataReady}" visible="{_newData}" click="createData();" y="659" x="168" id="button4"/>
+	<mx:Button label="Eliminar" width="80" enabled="{_dataReady&amp;&amp;!_newData}" visible="{!_newData&amp;&amp;!_updateData&amp;&amp;_accessType==-1}" click="deleteDataAlert();" y="659" x="256" id="button2"/>
+	<mx:Button label="Actualizar" width="80" enabled="{_dataReady&amp;&amp;!_newData&amp;&amp;_updateData}" visible="{_updateData&amp;&amp;!_newData}" click="updateData();" y="659" x="168" id="button3"/>
+	<mx:Button label="Regresar" click="closeWindow();" width="145"  enabled="{!_newData}" y="616" x="1053" id="button1"/>
+
+	<mx:ComboBox 	x="858" id="_searchType" 	dataProvider="{_searchTypes}" 	width="160" y="41"/>
+	<mx:TextInput 	x="1026" id="_searchField" 	change="search();" 		width="172" enabled="{!_newData}" y="41"/>
+	<mx:Label x="783" text="Filtrar por :" textAlign="right" y="43"/>
+	<mx:ComboBox x="267" y="128" id="day" dataProvider="{ConstantData.Days}" labelField="label" width="52" change="dataChange();" tabIndex="9"></mx:ComboBox>
+	<mx:ComboBox x="324" y="128" id="month" dataProvider="{ConstantData.Months}" labelField="label" width="101" change="dataChange();" tabIndex="10"></mx:ComboBox>
+	<mx:ComboBox x="433" y="128" id="year" dataProvider="{ConstantData.Years}" labelField="label" width="69" change="dataChange();" tabIndex="11"></mx:ComboBox>
+	<mx:CheckBox x="15" y="540" id="_verificacion" label="Verificación RH"/>
+	<mx:CheckBox x="15" y="562" id="_estatus" label="activo / baja"/>
+	<mx:HRule x="167" y="445" width="596" height="1"/>
+	<mx:HRule x="167" y="376" width="596" height="1"/>
+	<mx:HRule x="168" y="649" width="1030" height="1"/>
+	<mx:TextInput x="434" y="307" id="_numeroLicencia" change="dataChange();" width="161" tabIndex="23"/>
+	<mx:Label x="434" y="290" text="número"  color="#C2C1C1" fontSize="10" fontStyle="italic"/>
+	<mx:Label x="269" y="288" text="tipo"  color="#C2C1C1" fontSize="10" fontStyle="italic"/>
+	<mx:Label x="268" y="330" text="expira"  color="#C2C1C1" fontSize="10" fontStyle="italic"/>
+	<mx:ComboBox  x="268" y="305" id="_tipoLicencia" change="dataChange();" width="158" dataProvider="{ConstantData.LicenceType}" labelField="label" tabIndex="22"/>
+	<mx:Label x="199" y="307" text="Licencia : "  height="20"/>
+	<mx:DateField x="267" y="51" id="_fechaIngreso" width="109" tabIndex="3"/>
+	<mx:CheckBox x="13" y="282" enabled="false" id="_tieneInmueble"/>
+	<mx:CheckBox x="13" y="310" enabled="false" id="_tieneIntereses"/>
+	<mx:CheckBox x="14" y="366" enabled="false" id="_tieneHistorialLaboral"/>
+	<mx:Button x="9" y="391" label="   Historial Familiar" width="150" click="openPopUp('Empleados_Dependientes_Economicos',true)" enabled="{_dataReady}" textAlign="left"/>
+	<mx:Button x="9" y="419" label="   Perfil de Carrera" width="150" click="openPopUp('Empleados_Perfil_Carrera',true)" enabled="{_dataReady}" textAlign="left" id="button14"/>
+	<mx:CheckBox x="14" y="422" enabled="false" id="_tienePerfil"/>
+	<mx:Button x="9" y="446" label="   Areas de Interés" width="150" click="openPopUp('Empleados_Areas_Interes',true)" enabled="{_dataReady}" textAlign="left" id="button13"/>
+	<mx:CheckBox x="14" y="449" enabled="false" id="_tieneAreasInteres"/>
+	<mx:Button x="9" y="335" label="   Historial Académico" width="150" click="openPopUp('Empleados.Empleados_Antecedentes_Academicos',true)" enabled="{_dataReady}" textAlign="left"/>
+	<mx:CheckBox x="14" y="338" enabled="false" id="_tieneHistorialAcademico"/>
+	<mx:Button x="10" y="511" label="   Acceso al Sistema" width="150" click="openPopUp('Empleados_Accesos',true)" enabled="{_dataReady}" textAlign="left" id="button12" visible="{_accessType==-1}"/>
+	<mx:CheckBox x="15" y="514" enabled="false" id="_tieneAcceso" visible="{_accessType==-1}"/>
+	<mx:CheckBox x="14" y="394" enabled="false" id="_tieneDependientes"/>
+	<mx:CheckBox x="13" y="198" enabled="false" id="_tieneFotografia"/>
+	<mx:CheckBox x="13" y="226" enabled="false" id="_tieneFirma"/>
+	<mx:CheckBox x="13" y="254" enabled="false" id="_tieneCredencial"/>
+	<mx:Label x="167" y="511" text="Departamento :" />
+	<mx:Label x="209" y="539" text="Puesto :" />
+	<mx:Label x="209" y="539" text="Puesto :" />
+	<mx:Label x="214" y="566" text="CECO :" />
+	<mx:Label x="191" y="593" text="Categoría :" />
+	<mx:TextInput x="267" y="537" width="326" id="_puesto" editable="false"/>
+	<mx:Label x="222" y="483" text="Area :" />
+	<mx:Button x="601" y="536" icon="@Embed(source='../assets/Icons/Buttons/Search.png')" click="openPuesto()" id="button10" visible="{_accessType==-1}" width="162" label="Buscar Puesto" textAlign="left" tabIndex="29"/>
+	<mx:VRule x="771" y="10" width="7" height="591"/>
+	<mx:Label x="190" y="621" text="Ubicación  :" />
+	<mx:ComboBox x="267" y="618" id="_idUbicacion" change="dataChange();" width="328" dataProvider="{Catalogs.DataObject['asf_ubicaciones']}" labelField="_nombre" tabIndex="30"/>
+	<mx:Button x="603" y="617" icon="@Embed(source='../assets/Icons/Buttons/Edit.png')" click="openUbicacion()" id="button11" visible="{_accessType==-1}"/>
+	<mx:HRule x="167" y="281" width="596" height="1"/>
+	<mx:HRule x="168" y="81" width="596" height="1"/>
+	<mx:Button x="930" y="10" label="Todos" click="chageRange(2)" selected="{_range==2}"/>
+	<mx:Button x="855" y="10" label="En Baja" click="chageRange(1)" selected="{_range==1}"/>
+	<mx:Button x="786" y="10" label="Activos" click="chageRange(0)" selected="{_range==0}"/>
+	<mx:TextInput x="267" y="454" width="326" id="_cia" editable="false"/>
+	<mx:TextInput x="267" y="481" width="326" id="_area" editable="false"/>
+	<mx:TextInput x="267" y="509" width="326" id="_depto" editable="false"/>
+	<mx:TextInput x="267" y="564" width="326" id="_ceco" editable="false"/>
+	<mx:TextInput x="267" y="591" width="326" id="_categoria" editable="false"/>
+	<mx:ComboBox x="268" y="346" id="expira_day" dataProvider="{ConstantData.Days}" labelField="label" width="52" change="dataChange();" tabIndex="9"></mx:ComboBox>
+	<mx:ComboBox x="325" y="346" id="expira_month" dataProvider="{ConstantData.Months}" labelField="label" width="101" change="dataChange();" tabIndex="10"></mx:ComboBox>
+	<mx:ComboBox x="434" y="346" id="expira_year" dataProvider="{ConstantData.Years}" labelField="label" width="69" change="dataChange();" tabIndex="11"></mx:ComboBox>
+	
+</mx:TitleWindow>

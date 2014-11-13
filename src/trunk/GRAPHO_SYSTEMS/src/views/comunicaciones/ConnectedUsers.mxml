@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="298" height="528" xmlns:ns1="views.components.*" right="10" top="50" creationComplete="initApp()">
+	<mx:Script>
+		<![CDATA[
+			import mx.random.files.PathData;
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.random.constants.SystemGlobals;
+			
+			private function colesApp():void{
+		    	dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
+		    }
+		    
+		    private function initApp():void{
+    			if(SystemGlobals.USE_SOCKET_SYNK&&SystemGlobals.SOCKET_MANAGER.connected){
+		    		SystemGlobals.SOCKET_MANAGER.requestUserList();
+		    	}else{
+		    		Alert.show("El servidor de comunicaciones no está activo","Error");
+		    		colesApp();
+		    	}	    
+		    }
+		]]>
+	</mx:Script>
+	<ns1:ClearPanel x="0" y="0" width="298" height="528">
+		<mx:List x="10" y="34" width="278" height="432" dataProvider="{SystemGlobals.SOCKET_MANAGER.connectedUsers}" labelField="userName"></mx:List>
+		<mx:Text x="10" text="Usuarios Conectados :" 
+		width="168.20001" height="23" 		
+		fontSize="15"
+		fontFamily="ArialEmbedded" 
+		textAlign="left" 
+		fontWeight="normal" 
+		selectable="false"
+		fontAntiAliasType="advanced"
+		
+ 		styleName="myText" verticalCenter="-243"/>
+		<mx:Button x="260" y="8" width="29" click="colesApp();">
+			<mx:icon>@Embed(source='../../assets/Icons/Buttons/Delete.png')</mx:icon>
+		</mx:Button>
+	</ns1:ClearPanel>
+	<mx:Style>
+		@font-face {
+		    src:url("../../assets/Custom/arial.ttf");        
+		    fontFamily: ArialEmbedded;
+		    advancedAntiAliasing: true;		
+		}			
+	</mx:Style> 
+</mx:Canvas>

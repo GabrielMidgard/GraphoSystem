@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="994" height="546" showCloseButton="true" title="Mail Reader">
+	
+	
+	
+	
+	<mx:Script>
+		<![CDATA[
+			
+			import com.coltware.airxmail.MimeMessage;
+			import com.coltware.airxmail.pop3.POP3Client;
+			import com.coltware.airxmail.pop3.POP3ListEvent;
+			import com.coltware.airxmail.pop3.POP3MessageEvent		
+			//import com.hurlant.crypto.tls.TLSSocket;
+			
+			private function initApp():void{
+			}
+
+			private function pop3():void{
+				var client:POP3Client = new POP3Client();
+				client.host = "mail.random.mx";
+				client.port = 110;  // default port is 110
+				client.setAuth("carlos","cmm151693");
+				//var tlssocket:TLSSocket = new TLSSocket();
+				//client.socketObject = tlssocket;   
+				client.addEventListener(POP3ListEvent.POP3_RESULT_UIDL,result_uidl);
+				client.addEventListener(POP3MessageEvent.POP3_MESSAGE,result_message);
+				client.connect();
+				client.uidl();
+			}
+		 
+			private function result_uidl(e:POP3ListEvent):void{
+				for(var i:int=0; i<e.length; i++){
+					e.client.retr(e.getNumber(i),e.getValue(i));
+				}
+				e.client.quit();
+			}
+			 
+			private function result_message(e:POP3MessageEvent):void{
+				var message:MimeMessage = e.getMimeMessage(); 
+				output.text += message.subjectUTF8 + "\n";
+				output.text += message.fromUTF8 + "\n";
+				output.text += message.bodyText + "\n";
+			}
+	
+			
+		]]>
+	</mx:Script>
+	<mx:Button x="10" y="482" label="get Mail" click="pop3()" width="166"/>
+	<mx:TextArea x="16" y="37" width="368" height="437" id="output"/>
+	
+	
+</mx:TitleWindow>

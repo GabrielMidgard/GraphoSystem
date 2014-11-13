@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ClearPanel xmlns="views.components.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="360" height="73" borderStyle="solid" borderColor="#52da6f">
+	<mx:Canvas width="20" backgroundColor="{__color}" backgroundAlpha="0.6" top="2" left="2" bottom="2" blendMode="screen"  cornerRadius="4" borderStyle="solid" ></mx:Canvas>
+	<mx:Text x="23.8" text="{__razonSocial}" 
+		width="168.20001" height="45" 		
+		fontSize="12"
+		fontFamily="ArialEmbedded" 
+		textAlign="center" 
+		fontWeight="normal" 
+		selectable="false"
+		fontAntiAliasType="advanced"
+		
+ styleName="myText" verticalCenter="0"/>
+	<mx:Text x="207" text="{__folio}" 
+		width="110" height="30" 
+		fontFamily="ArialEmbedded" 
+		fontSize="18" 
+		textAlign="center" 		
+		selectable="false"
+		fontAntiAliasType="advanced" verticalCenter="3"/>
+		
+	<mx:Image x="331" y="28" source="assets/Custom/Edit.png" width="19" height="19"/>
+	 
+	 
+	<mx:Style>
+		@font-face {
+		    src:url("../../assets/Custom/arial.ttf");        
+		    fontFamily: ArialEmbedded;
+		    advancedAntiAliasing: true;		
+		}			
+	</mx:Style> 
+
+	<mx:Script>
+		<![CDATA[
+			import mx.random.constants.ConstantData;
+			import mx.random.constants.SystemGlobals;
+			import mx.random.events.StaticEvent;
+			import mx.random.events.SelectionEvent;
+			import mx.random.events.SelectEvent;			
+			import mx.random.converters.Converter;
+			
+			
+			
+[Bindable]	private var __folio:String 			= "";
+[Bindable]	private var __razonSocial:String 	= "";
+[Bindable]	private var __color:uint 			= 0x000000;
+[Bindable]	private var _alpha:Number 			= 0;
+[Bindable]	private var _border:Number  		= 0;
+			private var __idOdt:Number			= 0;
+			private var __ODTData:Object		= new Object();			
+			
+					
+			public function set _razonSocial(value:String):void {__razonSocial = value}
+			
+			public function set _idODT(value:String):void {				
+				__folio = "ODT_"+Converter.fillString(value,"0",4);
+				__idOdt = Number(value);
+			}
+			
+			public function set _idEstatus(value:String):void {
+				switch(Number(value)){
+					case 1:
+						__color = 0x00e4e2;
+						break;
+					case 2:
+						__color = 0xfa8b2e;
+						break;
+					case 3:
+						__color = 0x941c4e;
+						break;
+					case 4:
+						__color = 0x586b32;
+						break;
+				} 
+				
+			}
+			
+			
+			
+			public function set context(contextObj:Object):void{
+				__ODTData = contextObj;
+				for( var p:String in contextObj){
+					if(this.hasOwnProperty(p)){
+						this[p] = contextObj[p];
+					}
+				}				
+				initItem();
+			}
+			
+			private function initItem():void{
+				this.buttonMode = true;
+				this.doubleClickEnabled = true;
+				this.addEventListener(MouseEvent.MOUSE_OVER,mouseControl);
+				this.addEventListener(MouseEvent.MOUSE_OUT,mouseControl);
+				this.addEventListener(MouseEvent.MOUSE_UP,mouseControl);
+				this.addEventListener(MouseEvent.MOUSE_DOWN,mouseControl);
+				this.addEventListener(MouseEvent.DOUBLE_CLICK,mouseControl);
+				StaticEvent.addEventListener(SelectionEvent.SELECTION_COMPLETE,updateSelection);
+			}
+			
+			private function updateSelection(e:SelectionEvent):void{
+				if(e.itemData==this){
+					this._border = 1;
+				}else{
+					this._border = 0;
+				}
+			}
+			
+			private function mouseControl(e:MouseEvent):void{
+				switch(e.type){
+					case MouseEvent.MOUSE_OVER:
+						_alpha = 0.5;
+						break;
+					case MouseEvent.MOUSE_OUT:
+						_alpha = 0.0;
+						break;
+					case MouseEvent.MOUSE_UP:
+						_alpha = 0.0;
+						break;
+					case MouseEvent.MOUSE_DOWN:				
+						StaticEvent.dispatchEvent(new SelectionEvent(SelectionEvent.SELECTION_COMPLETE,this));
+						_alpha = 0.7;
+						break;
+					case MouseEvent.DOUBLE_CLICK:
+						break;
+				}
+			}
+			
+			public function getCoors():Point{
+				var coor:Point = this.localToGlobal(new Point(SystemGlobals.mainStage.x,SystemGlobals.mainStage.y)); 
+				return coor;
+			}
+			public function getODT():Object{
+				return __ODTData;
+			}
+			
+			
+			
+		]]>
+	</mx:Script>
+	<mx:Image width="2" source="assets/Custom/Separator.png"  x="25"  height="55" verticalCenter="0"/>
+	<mx:Image width="2" source="assets/Custom/Separator.png"  x="200"  height="55" verticalCenter="0"/>
+	<mx:Image width="2" source="assets/Custom/Separator.png" x="322"  height="55" verticalCenter="0"/>
+</ClearPanel>

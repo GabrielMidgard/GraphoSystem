@@ -1,0 +1,86 @@
+<?php
+require_once("DataSource.php");
+class Ordenes{
+
+  protected $ds;
+  protected $table           = "ordenes_orden_servicio";
+  protected $clientTable     = "fiscales_clientes";
+  protected $statesTable     = "estados";
+  protected $statusTable     = "estatus";
+  protected $typesTable      = "tipos_equipo";
+  protected $tradeMarksTable = "marcas";
+  protected $employeesTable  = "empleados";
+  protected $systemsTable    = "equipos";
+  protected $contactsTable   = "fiscales_clientes_contactos";
+  protected $serviceTypesTable    = "gs_areasSoporteTecnico";
+  protected $technicalSupportAreasTable    = "tipos_servicio";
+  protected $mainId          = "_idOrden";
+
+  public function __construct(){
+    $this->ds 		= new DataSource();
+  }
+
+  public function getFields(){
+       return $this->ds->normalize($this->ds->query("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.Columns where TABLE_NAME = '".$this->table."'"));
+  }
+
+  public function createRecord($params){
+      return $this->ds->insertSQL($this->table,$params);
+  }
+
+  public function getRecords($params){
+      return $this->ds->selectSQL($this->table,"*");
+  }
+
+  public function deleteRecord($params){
+     return $this->ds->deleteSQL($this->table,$this->mainId,"=",$params[$this->mainId]);
+  }
+
+  public function updateRecord($params){
+      return $this->ds->updateSQL($this->table,$params,$this->mainId,"=",$params[$this->mainId]);
+  }
+
+  public function getSpecificOrder($params){      
+    $this->ds->normalizeData = true;
+    $query = "SELECT orden_cliente.*, e._nombreEstado,es._nombreEstatus,DATE(orden_cliente._creado) as _fechaCreacion,
+                     TIME(orden_cliente._creado) as _horaCreacion, st._modelo, st._serie, st._anioFabricacion, 
+                     tp._nombreTipo, tm._nombreMarca, 
+                     CONCAT(trim(et._nombre),' ',trim(et._paterno),' ',trim(et._materno)) as _nombreEmpleado,
+                     CONCAT(trim(ct._nombre),' ',trim(ct._paterno),' ',trim(ct._materno)) as _nombreContacto,
+                     tsa._areaSoporteTecnico as _nombreAreaSoporte, stt._nombre as _nombreTipoServicio
+    FROM 
+	(
+		SELECT  cl._nombreEmpresa,cl._telefonoOficina,cl._telefonoMovil,cl._idEstado,
+				cl._ciudad,cl._mailPrincipal,cl._mailSecundario,ods._idTipoServicio, ods._idAreaSoporteTecnico,
+        ods._nota,ods._operador,ods._idEstatus,ods._creado,
+        ods._idEquipo, ods._idEmpleado, ods._idContacto
+		FROM ordenes_orden_servicio ods 
+		LEFT JOIN fiscales_clientes cl 
+		ON ods._idCliente = cl._idCliente 
+		where ods._idOrden = ".$params."
+	) AS orden_cliente LEFT JOIN estados e 
+    ON orden_cliente._idEstado = e._idEstado
+    LEFT JOIN estatus es
+    ON orden_cliente._idEstatus = es._idEstatus
+    LEFT JOIN equipos st
+    ON orden_cliente._idEquipo = st._idEquipo
+    LEFT JOIN tipos_equipo tp
+    ON st._idTipoEquipo = tp._idTipoEquipo
+    LEFT JOIN marcas tm
+    ON st._idMarca = tm._idMarca
+    LEFT JOIN empleados et
+    ON orden_cliente._idEmpleado = et._idEmpleado
+    LEFT JOIN fiscales_clientes_contactos ct
+    ON orden_cliente._idContacto = ct._idContacto
+    LEFT JOIN tipos_servicio stt
+    ON orden_cliente._idTipoServicio = stt._idTipoServicio
+    LEFT JOIN gs_areasSoporteTecnico tsa
+    ON orden_cliente._idAreaSoporteTecnico = tsa._idAreaSoporteTecnico
+    ";
+
+    return $this->ds->query($query);
+  }
+
+
+}
+?>

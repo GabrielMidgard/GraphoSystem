@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100" backgroundColor="#FFFFFF">
+	<mx:Script>
+		<![CDATA[
+			
+[Bindable]	public var titulo:String 		= "";
+[Bindable]	public var bgColor:uint 		= 4565162;
+[Bindable]	public var bgAlpha:Number		= 0.5;
+[Bindable]	public var autor:String			= "";
+[Bindable]	public var fecha:String 		= "";
+[Bindable]	public var descripcion:String 		= "";
+			
+		public function set setDescripcion(value:String):void{
+			descripcion = value;
+		}
+		
+		private function resizeField():void{
+			desc.validateNow();
+			desc.mx_internal::getTextField().autoSize = TextFieldAutoSize.LEFT;
+			desc.height = desc.mx_internal::getTextField().height;
+			this.height = desc.y+desc.height+7;
+		}
+			
+			
+		]]>
+	</mx:Script>
+	<mx:Canvas y="0" width="100%" height="100%" x="0" backgroundColor="{bgColor}" backgroundAlpha="{bgAlpha}" >
+		<mx:Text y="27" text="{autor}" fontWeight="bold" width="356" textAlign="right" color="#000000" right="10"/>
+		<mx:Text fontStyle="italic" 
+			enabled="true" top="45" 			
+			right="10" left="10"
+			bottom="7" height="100%"
+			text="{descripcion}" color="#000000" id="desc"
+			creationComplete="resizeField()"/>
+		<mx:Canvas height="20" backgroundColor="#FFFFFF" backgroundAlpha="0.3" left="5" top="5" right="5">
+			<mx:Text text="{fecha}" fontWeight="bold" width="201" textAlign="right" color="#000000" right="5" verticalCenter="1"/>
+			<mx:Text text="{titulo}" fontWeight="bold" width="261" color="#000000" y="2" x="19"/>
+			<mx:Image x="3" y="3" source="assets/CRM/OrbeGreen.png" width="15" height="15" scaleContent="true"/>
+		</mx:Canvas>
+	</mx:Canvas>
+	
+</mx:Canvas>

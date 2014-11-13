@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CMS_Random>
+
+	<webApplication gateway="http://192.168.1.26/___WebOrb___/weborb.php" channelId="my-amf" destination="GenericDestination" >
+		<services> 
+			<service name='userAuth' 				source='com.nice.webTools.System_UserAccess'>				<method name=''/></service>	
+			<service name='Users' 					source='com.nice.webTools.System_Users'>					<method name=''/></service>
+			<service name='UserAdmin' 				source='com.nice.webTools.System_UserAdmin'>				<method name=''/></service>
+			<service name='AdminUsers' 				source='com.nice.webTools.System_AdminUsers'>				<method name=''/></service>
+			<service name='Groups' 					source='com.nice.webTools.System_Groups'>					<method name=''/></service>	
+			<service name='Catalogs' 				source='com.nice.webTools.System_Catalogs'>					<method name=''/></service>
+			<service name='MailButler' 				source='com.nice.webTools.MailButlerClass'>					<method name=''/></service>
+			
+			
+			<service name='Bancos' 				source='com.nice.webTools.Bancos'>				<method name=''/></service>
+			<service name='Empleados' 				source='com.nice.webTools.Empleados'>				<method name=''/></service>
+			<service name='ImageManager'			source='com.nice.webTools.ImageManager'>				<method name=''/></service>
+			<service name='Inmuebles'				source='com.nice.webTools.Inmuebles'>				<method name=''/></service>
+			<service name='Intereses'				source='com.nice.webTools.Intereses'>				<method name=''/></service>
+			<service name='Companias'				source='com.nice.webTools.Companias'>				<method name=''/></service>
+			<service name='Ubicaciones'				source='com.nice.webTools.Ubicaciones'>				<method name=''/></service>
+			<service name='CECOS'					source='com.nice.webTools.CECOS'>					<method name=''/></service>
+			<service name='Categorias'				source='com.nice.webTools.Categorias'>				<method name=''/></service>
+			
+			<service name='Empleados_Accesos'		source='com.nice.webTools.Empleados_Accesos'>		<method name=''/></service>
+			
+			<service name='Areas' 					source='com.nice.webTools.Areas'>					<method name=''/></service>
+			<service name='Departamentos' 			source='com.nice.webTools.Departamentos'>			<method name=''/></service>
+			<service name='Puestos' 				source='com.nice.webTools.Puestos'>					<method name=''/></service>			
+			<service name='Organigrama' 			source='com.nice.webTools.Organigrama'>				<method name=''/></service>	
+			<service name='Groups' 					source='com.nice.webTools.Groups'>					<method name=''/></service>	
+			<service name='HistorialLaboral' 		source='com.nice.webTools.HistorialLaboral'>			<method name=''/></service>
+			<service name='DependientesEconomicos' 	source='com.nice.webTools.DependientesEconomicos'>	<method name=''/></service>	
+			<service name='PerfilCarrera' 			source='com.nice.webTools.PerfilCarrera'>			<method name=''/></service>	
+			<service name='AreasInteres' 			source='com.nice.webTools.AreasInteres'>				<method name=''/></service>	
+			<service name='Credenciales' 			source='com.nice.webTools.Credenciales'>				<method name=''/></service>	
+			<service name='BarCode' 				source='com.nice.webTools.BarCode'>					<method name=''/></service>	
+			<service name='BarCodeFunctions' 		source='com.nice.webTools.BarCodeFunctions'>			<method name=''/></service>	
+			<service name='Validations' 			source='com.nice.webTools.Validations'>				<method name=''/></service>
+			<service name='AltasBajas' 				source='com.nice.webTools.AltasBajas'>				<method name=''/></service>
+			<service name='CambioUbicacion' 		source='com.nice.webTools.CambioUbicacion'>			<method name=''/></service>
+			<service name='EmpleadosDocumentos' 	source='com.nice.webTools.Empleados_Documentos'>		<method name=''/></service>
+			
+			
+			
+			<service name='Empresa_Competencias' 							source='com.nice.webTools.Empresa_Competencias'>	<method name=''/></service>
+			<service name='Empresa_Competencias_Tipos' 						source='com.nice.webTools.Empresa_Competencias_Tipos'>	<method name=''/></service>
+			<service name='Empresa_Competencias_Funciones_Especificas' 		source='com.nice.webTools.Empresa_Competencias_Funciones_Especificas'>	<method name=''/></service>
+			<service name='Empresa_Competencias_Conocimientos' 				source='com.nice.webTools.Empresa_Competencias_Conocimientos'>	<method name=''/></service>			
+			<service name='Empresa_Competencias_Niveles' 					source='com.nice.webTools.Empresa_Competencias_Niveles'>	<method name=''/></service>
+			
+			<service name='Empresa_Competencias_Medios_Adquisicion' 		source='com.nice.webTools.Empresa_Competencias_Medios_Adquisicion'>	<method name=''/></service>
+			<service name='Empresa_Competencias_Conocimientos_Tipo' 		source='com.nice.webTools.Empresa_Competencias_Conocimientos_Tipo'>	<method name=''/></service>
+			<service name='Empresa_Competencias_Habilidades' 				source='com.nice.webTools.Empresa_Competencias_Habilidades'>	<method name=''/></service>
+			<service name='Empresa_Competencias_Actitudes' 					source='com.nice.webTools.Empresa_Competencias_Actitudes'>	<method name=''/></service>			
+			<service name='Empresa_Competencias_Escalas' 				    source='com.nice.webTools.Empresa_Competencias_Escalas'>	<method name=''/></service>
+			<service name='Empresa_Competencias_Indicadores' 				source='com.nice.webTools.Empresa_Competencias_Indicadores'>	<method name=''/></service>
+			<service name='Empresa_Competencias_Indicadores_Tipos' 			source='com.nice.webTools.Empresa_Competencias_Indicadores_Tipos'>	<method name=''/></service>
+			<service name='Empresa_Competencias_Conocimientos_Niveles' 		source='com.nice.webTools.Empresa_Competencias_Conocimientos_Niveles'>	<method name=''/></service>
+			<service name='Empresa_Competencias_Conocimientos_Catalogo' 	source='com.nice.webTools.Empresa_Competencias_Conocimientos_Catalogo'>	<method name=''/></service>
+			<service name='Empresa_Competencias_Actitudes_Catalogo' 		source='com.nice.webTools.Empresa_Competencias_Actitudes_Catalogo'>	<method name=''/></service>
+			<service name='Empresa_Competencias_Habilidades_Catalogo' 		source='com.nice.webTools.Empresa_Competencias_Habilidades_Catalogo'>	<method name=''/></service>
+			<service name='Empresa_Competencias_HabilidadesActitudes_Niveles' 		source='com.nice.webTools.Empresa_Competencias_HabilidadesActitudes_Niveles'>	<method name=''/></service>
+			<service name='Empresa_Competencias_Configuracion' 				source='com.nice.webTools.Empresa_Competencias_Configuracion'>	<method name=''/></service>
+			
+			
+			<service name='Empresa_Puestos_Informacion_General' 			source='com.nice.webTools.Empresa_Puestos_Informacion_General'>	<method name=''/></service>
+			<service name='Empresa_Puestos_Turnos' 							source='com.nice.webTools.Empresa_Puestos_Turnos'>	<method name=''/></service>
+			<service name='Empresa_Puestos_Contratos_Tipos' 				source='com.nice.webTools.Empresa_Puestos_Contratos_Tipos'>	<method name=''/></service>
+			<service name='Empresa_Puestos_Niveles' 						source='com.nice.webTools.Empresa_Puestos_Niveles'>	<method name=''/></service>
+			<service name='Empresa_Puestos_Descripcion_Empleado' 			source='com.nice.webTools.Empresa_Puestos_Descripcion_Empleado'>	<method name=''/></service>
+			<service name='Empresa_Puestos_Idiomas' 						source='com.nice.webTools.Empresa_Puestos_Idiomas'>	<method name=''/></service>
+			<service name='Empresa_Puestos_Escolaridad' 					source='com.nice.webTools.Empresa_Puestos_Escolaridad'>	<method name=''/></service>
+			<service name='Empresa_Puestos_Perfil_Carrera' 					source='com.nice.webTools.Empresa_Puestos_Perfil_Carrera'>	<method name=''/></service>
+			<service name='Empresa_Puestos_Competencias' 					source='com.nice.webTools.Empresa_Puestos_Competencias'>	<method name=''/></service>
+			<service name='Empresa_Puestos_Observaciones' 					source='com.nice.webTools.Empresa_Puestos_Observaciones'>	<method name=''/></service>
+			<service name='Empleados_Competencias' 							source='com.nice.webTools.Empleados_Competencias'>	<method name=''/></service>
+			
+			<service name='Empleados_Seleccion' 							source='com.nice.webTools.Empleados_Seleccion'>	<method name=''/></service>
+			<service name='Evaluaciones' 									source='com.nice.webTools.Evaluaciones'>			<method name=''/></service>
+			
+			
+			<service name='IdiomasService' 			source='com.nice.webTools.IdiomasService'>			<method name=''/></service>
+			<service name='AcademicosService' 		source='com.nice.webTools.AcademicosService'>		<method name=''/></service>
+			<service name='CursosServices' 			source='com.nice.webTools.CursosServices'>			<method name=''/></service>
+			<service name='SignManager' 			source='com.nice.webTools.SignManager'>			<method name=''/></service>
+			
+			
+			
+			
+			
+			
+		</services>	
+   	</webApplication>
+   	
+   	<navMenu>
+
+		<menuitem label="Administración" 	roles="System" method="openPopup">						
+			<menuitem label="Administrativos" 	roles="System" method="openPopup">
+				<menuitem label="Usuarios" 				className="system.Users" 			roles="System" method="openPopup"/>
+				<menuitem label="Grupos de Trabajo" 	className="system.UsersGroups" 		roles="System" method="openPopup"/>
+			</menuitem>	
+		</menuitem>	
+		
+		
+						
+		<menuitem label="POS" 				roles="*" method="openPopup">
+			<menuitem label="Caja" 			className="pos.Caja" 			roles="System" method="openPopup"/>
+			<menuitem label="Almacen" 	    className="pos.Almacen" 		roles="System" method="openPopup"/>
+			<menuitem label="Entregas" 	    className="pos.Entregas" 		roles="System" method="openPopup"/>
+		</menuitem>	
+		
+		
+		
+		<menuitem label="Gerardo" 				roles="*" method="openPopup">
+			<menuitem label="Bancos" 			className="bancos.Bancos" 			roles="System" method="openPopup"/>
+			<menuitem label="Empresa Areas" 			className="empresa.Empresa_Areas" 			roles="System" method="openPopup"/>
+			<menuitem label="Empresa Cecos" 			className="empresa.Empresa_Cecos" 			roles="System" method="openPopup"/>
+		</menuitem>	
+		
+		<menuitem label="Gabriel" 				roles="*" method="openPopup">
+			<menuitem label="Caja" 			className="pos.Caja" 			roles="System" method="openPopup"/>
+		</menuitem>	
+
+		
+						
+	   	<menuitem label="Ayuda" roles="*">	    		
+	    		<menuitem label="Soporte"  					className="system.Support"	roles="*" method="openPopup"/>
+	  	 </menuitem>
+	    
+	   	<menuitem label="Salir" roles="*">
+	    		<menuitem label="Logout"  						roles="*" method="logout"/>
+	   	</menuitem>
+	   		   		  
+   	</navMenu>  
+
+</CMS_Random>

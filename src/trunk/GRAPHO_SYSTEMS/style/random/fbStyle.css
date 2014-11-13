@@ -1,0 +1,70 @@
+/* CSS file */
+@namespace s "library://ns.adobe.com/flex/spark";
+@namespace mx "library://ns.adobe.com/flex/mx";
+
+@font-face { 
+	src: url("assets/Fonts/LatoLatinThin-Regular.ttf"); 
+	fontFamily: LatoThinRegular; 
+	fontStyle: normal  ; 
+	fontWeight: normal ; 
+	embedAsCFF:true; 
+	advancedAntiAliasing: true; 
+	/*fontFamily:LatoThinRegular*/;
+}
+
+mx|Application{
+	
+}
+
+mx|TitleWindow{
+	
+	backgroundColor:'0xF5F5F5';
+	backgroundAlpha:0.8;
+	borderStyle:none;
+	borderVisible:false;
+	chromeColor:'0x042b36';
+	color:'0xFFFFFF';
+	fontSize:12;
+	headerHeight:35;
+}
+
+mx|Panel{
+	
+	backgroundColor:'0xF5F5F5';
+	backgroundAlpha:0.8;
+	borderStyle:none;
+	borderVisible:false;
+	chromeColor:'0x042b36';
+	color:'0xFFFFFF';
+	fontSize:12;
+	headerHeight:35;
+}
+
+
+mx|Alert{
+	color:'0x333333';
+
+}
+
+mx|Label{
+	fontSize:10;
+	color:'0x333333';
+}
+
+s|Label{
+	fontSize:10;
+	color:'0x333333';
+}
+
+mx|TextInput{
+	borderColor:'0xd0d0d0';
+	color:'0x333333';
+}
+
+mx|Button{
+	color:'0x333333';
+	cornerRadius:0;
+	chromeColor:'0xFFFFFF';
+	
+	
+}

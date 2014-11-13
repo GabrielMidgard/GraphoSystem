@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" 
+	width="474" height="185" 
+	layout="absolute" 
+	showCloseButton="true" 
+	close="closeWindow();"
+ 	title="Estatus de Conciliación">
+ 	
+	<mx:Script>
+        <![CDATA[
+        	import mx.random.events.PaymentEvent;
+        	import mx.random.events.StaticEvent;
+        	import mx.rpc.remoting.RemoteObject;
+        	import mx.binding.utils.BindingUtils;
+        	import mx.random.constants.Languages;
+        	import mx.random.forms.Validator;
+        	import mx.random.converters.Converter;
+        	import mx.managers.PopUpManager;
+        	import mx.random.constants.ConstantData;
+        	import mx.controls.Alert;
+        	import mx.rpc.events.ResultEvent;
+        	import mx.rpc.events.FaultEvent;
+        	import mx.events.CloseEvent;
+        	import mx.random.web.WebApplication;
+            private var _webApplication:WebApplication;
+            private var _workManager:Object = new Object();
+[Bindable]	private var _dataObject:Object = new Object();
+			private var Valid:Validator 			= new Validator();
+[Bindable]	private var _dataReady:Boolean = false;   
+			private var _MainService:RemoteObject = new RemoteObject();         
+            
+            
+//---------------------------- Context ---------------------------------------------            
+
+            public function set context(contextObj:Object):void{
+				for( var p:String in contextObj){
+					if(this.hasOwnProperty(p)){
+						this[p] 	= contextObj[p];
+					}
+				}
+				initView();
+			}
+
+			public function set workManager(value:Object):void{
+				_workManager 		= value;
+			}
+			
+			public function set dataObject(value:Object):void{
+				_dataObject 		= value;
+			}
+			
+			public function set webApplication(value:WebApplication):void{
+				_webApplication 	= value;
+				
+			}
+			
+//---------------------------- Context ---------------------------------------------  
+			
+			public function initView():void{
+				_estatus.selectedIndex 	= Number(_dataObject._idEstatusPago);
+				_monto.text				= Converter.numberFormat(_dataObject._monto);
+				_fechaConciliacion.selectedDate = new Date();
+				_fechaPago.selectedDate = new Date();
+				_referencia.text = _dataObject._numeroReferencia;	
+				_MainService = _webApplication.getService("Conciliaciones");
+				addValidations();
+				_dataReady = true;	
+			}            
+                       
+            
+            public function closeWindow():void{
+            	PopUpManager.removePopUp(this);
+            }
+            
+            private function addValidations():void{
+				Valid.changeLanguage(Languages.SPANISH);						
+				Valid.setErrorKnot(Validator.CIRCLE_KNOT,0xFF0000);
+				Valid.addDateVal(_fechaPago,true,"Fecha de Pago");
+				Valid.addStringVal(_referencia,1,30,"Número de Referencia");				
+			}
+            
+            
+            private function changeStatus():void{
+            	if(Valid.validateAll()){
+            		if(_dataObject._idEstatusPago!=_estatus.selectedItem.value){
+	            		Alert.show("Cambiar el estatus del pago a '"+_estatus.selectedItem.label+"' ?","Cambio de estatus de pago",Alert.OK|Alert.CANCEL,this,changeStatusAlert);
+	            	}else{
+	            		Alert.show("El estatus del pago es el mismo","Error");
+	            	}					
+				}else{
+					Alert.show(Valid.errors,"Error");
+				}
+            }
+            
+            private function changeStatusAlert(e:CloseEvent):void{
+            	if(e.detail==Alert.OK){
+	            	_dataReady = false;
+					var params:Object = new Object();
+					var estatus = "false";
+					if(_estatus.selectedItem.value==2) estatus = "true";
+					params['_idPago'] = _dataObject._idPago;
+					params['_numeroReferencia'] = _referencia.text;
+					params['_fechaConciliacion'] = Converter.dateToSQL(_fechaConciliacion.selectedDate);
+					params['_fechaPagoRealizado'] = Converter.dateToSQL(_fechaPago.selectedDate);
+					params['_idEstatusPago'] = _estatus.selectedItem.value;
+					params['_idEstatusConciliacion'] = estatus;
+					_MainService.updateRecord(params);
+					_MainService.updateRecord.addEventListener(ResultEvent.RESULT,changeStatusRady);
+            	}
+            }
+            
+            private function onFault(e:FaultEvent):void{
+            	Alert.show(e.fault.toString(),"Error");
+            }
+            
+            private function changeStatusRady(e:ResultEvent):void{
+            	StaticEvent.dispatchEvent(new PaymentEvent(PaymentEvent.PAYMETN_REFERRED));
+            	closeWindow();
+            }
+            
+       ]]>
+       
+	</mx:Script>
+	<mx:Label x="10" y="10" text="Estatus Actual : "/>
+	<mx:ComboBox x="10" y="27"  dataProvider="{ConstantData.PaymentStatus}" width="170" id="_estatus" change="Valid.validateAll();"></mx:ComboBox>
+	<mx:Label x="235" y="76" text="Fecha del pago:"/>
+	<mx:Label x="219" y="29" text="Fecha Conciliación:"/>
+	<mx:Label x="10" y="104" text="Número de Transacción :"/>
+	<mx:Label x="10" y="57" text="Monto del Pago :"/>
+	<mx:TextInput x="10" y="74" text="" width="116" editable="false" enabled="false" id="_monto"/>
+	<mx:TextInput x="10" y="122" width="195" editable="true" enabled="true" id="_referencia"/>
+	<mx:Button x="213" y="121" label="Conciliar" click="changeStatus();" width="117" enabled="{_dataReady}"/>
+	<mx:Button x="338" y="121" label="Cancelar" click="closeWindow();" width="117"/>
+	<mx:DateField x="338" y="27" id="_fechaConciliacion" width="117" formatString="{ConstantData.ViewFormatString}" monthNames="{ConstantData.MonthNames}" dayNames="{ConstantData.DayNames}" enabled="false"/>
+	<mx:DateField x="338" y="74" id="_fechaPago" width="117" formatString="{ConstantData.ViewFormatString}" monthNames="{ConstantData.MonthNames}" dayNames="{ConstantData.DayNames}" enabled="true"/>
+	
+</mx:TitleWindow>	
+

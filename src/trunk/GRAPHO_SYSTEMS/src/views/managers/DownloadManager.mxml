@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="326" title="Download Manager" showCloseButton="true" close="closeWindow();" height="146">
+<mx:Script>
+	<![CDATA[
+		import mx.rpc.events.ResultEvent;
+		import mx.rpc.remoting.RemoteObject;
+		import mx.random.web.WebApplication;
+		import mx.random.users.UserData;
+		import mx.random.files.FileData;
+		import mx.controls.Alert;
+		import mx.managers.PopUpManager;
+		import mx.utils.ArrayUtil;
+		import mx.collections.ArrayCollection;
+		
+		
+			private var fileReferenceList:FileReferenceList;
+[Bindable]	public var _fileName:String;
+			private var _url:String = "";
+			private var _urlRequest:URLRequest;
+			private var _currentFile:Number = 0;
+			private var _fileRef:FileReference;
+			private var _webApplication:WebApplication;
+			private var _tempFile:String = "";
+			
+			public function set url(value:String):void{
+				_urlRequest = new URLRequest(value);
+				var path:Array = value.split("/");
+				_tempFile = path[path.length-1];
+				_loader.visible = false;
+			}
+		
+		
+		public function set webApplication(value:WebApplication):void{
+				_webApplication 	= value;
+			}
+		
+		 private function download():void{
+		 		downloadBt.enabled = false;
+		 		_loader.visible = true;
+		 		_loader.indeterminate = true;
+		 		_loader.mode = "manual";
+		 		_loader.label = "DOWNLOADING %3%%";
+
+		 		_fileRef = new FileReference();
+        		_fileRef.download(_urlRequest);
+        		_fileRef.addEventListener(Event.COMPLETE,fileDownloadReady)
+        		_fileRef.addEventListener(ProgressEvent.PROGRESS,onProgress);
+        		_fileRef.addEventListener(Event.CANCEL,cancel);
+            }
+		
+		private function onProgress(e:ProgressEvent):void{
+			_loader.indeterminate = false;
+			_loader.setProgress(e.bytesLoaded,e.bytesTotal);
+		}
+		
+		
+		private function cancel(e:Event){
+			downloadBt.enabled = true; 
+		}
+		
+		
+		private function fileDownloadReady(e:Event){
+	 		downloadBt.enabled = true; 
+        	_fileRef.removeEventListener(Event.COMPLETE,fileDownloadReady);	
+        	 destroyTempFile();
+        }
+        
+        private var _fileService:RemoteObject;
+        
+        private function destroyTempFile():void{
+        	_fileService = _webApplication.getService("ZipFunctions");
+        	_fileService.destroyTempFile(_tempFile);
+        	_fileService.addEventListener(ResultEvent.RESULT,onDestroyTempFile);
+
+        }
+        
+        private function onDestroyTempFile(e:ResultEvent):void{
+        	_fileService.removeEventListener(ResultEvent.RESULT,onDestroyTempFile);
+        	Alert.show("File Download Complete","Download Manager");
+        	closeWindow();
+        }
+	    
+	    private function closeWindow():void{
+	    	PopUpManager.removePopUp(this);
+	    }
+	]]>
+</mx:Script>
+	<mx:VBox>
+		<mx:HBox width="100%">
+			<mx:Spacer width="100%"/>
+		</mx:HBox>
+	</mx:VBox>
+	<mx:Button label="Download" click="download();" id="downloadBt" x="10" y="82"/>
+	<mx:Button label="Cancel" click="closeWindow()" id="cancelBt" width="101" x="206" y="82"/>
+	<mx:Label x="10" y="11" text="File Package : "/>
+	<mx:Label x="95" y="11" text="{_fileName}" id="_file" width="212"/>
+	<mx:ProgressBar x="10" y="37" width="297" id="_loader"/>
+
+</mx:TitleWindow>

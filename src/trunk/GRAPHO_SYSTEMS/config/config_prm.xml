@@ -1,0 +1,297 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CMS_Random>
+
+<webApplication gateway="http://www.clubeatandtravel.com/___WebOrb___/weborb.php" channelId="my-amf" destination="GenericDestination" >
+<services> 
+
+<service name='userAuth' source='com.saet_mod.webTools.System_UserAccess'>	<method name=''/></service>
+<service name='Users' source='com.saet_mod.webTools.System_Users'>	<method name=''/></service>
+<service name='UserAdmin' source='com.saet_mod.webTools.System_UserAdmin'>	<method name=''/></service>
+<service name='AdminUsers' source='com.saet_mod.webTools.System_AdminUsers'>	<method name=''/></service>
+<service name='Groups' source='com.saet_mod.webTools.System_Groups'>	<method name=''/></service>
+<service name='Catalogs' source='com.saet_mod.webTools.System_Catalogs'>	<method name=''/></service>
+<service name='ImageManager'	source='com.saet_mod.webTools.Component_ImageManager'>	<method name=''/></service>
+<service name='CuentasEmpresa' source='com.saet_mod.webTools.Empresa_Cuentas_Bancarias'>	<method name=''/></service>
+<service name='Companias' source='com.saet_mod.webTools.Empresa_Companias'>	<method name=''/></service>
+<service name='Areas' source='com.saet_mod.webTools.Empresa_Areas'>	<method name=''/></service>
+<service name='Departamentos' source='com.saet_mod.webTools.Empresa_Departamentos'>	<method name=''/></service>
+<service name='Puestos' source='com.saet_mod.webTools.Empresa_Puestos'>	<method name=''/></service>
+<service name='Cecos' source='com.saet_mod.webTools.Empresa_Cecos'>	<method name=''/></service>
+<service name='Ubicaciones' source='com.saet_mod.webTools.Empresa_Ubicaciones'>	<method name=''/></service>
+<service name='Sucursales' source='com.saet_mod.webTools.Empresa_Sucursales'>	<method name=''/></service>
+<service name='Organigrama' source='com.saet_mod.webTools.Empresa_Organigrama'>	<method name=''/></service>
+<service name='TiposComisiones' source='com.saet_mod.webTools.Empresa_Tipos_Comisiones'>	<method name=''/></service>
+<service name='GruposSucursales' source='com.saet_mod.webTools.Empresa_Sucursales_Grupos'>	<method name=''/></service>
+<service name='Comisiones' source='com.saet_mod.webTools.Empresa_Comisiones'>	<method name=''/></service>
+<service name='ComisionesSemanales' source='com.saet_mod.webTools.Empresa_Comisiones_Semanales'>    <method name=''/></service>
+<service name='Empleados' source='com.saet_mod.webTools.Empleados'>	<method name=''/></service>
+<service name='Empleados_Vendedores' source='com.saet_mod.webTools.Empleados_Vendedores'>	<method name=''/></service>
+<service name='Inmuebles'	source='com.saet_mod.webTools.Empleados_Inmuebles'>	<method name=''/></service>
+<service name='Intereses'	source='com.saet_mod.webTools.Empleados_Intereses'>	<method name=''/></service>
+<service name='HistorialLaboral' source='com.saet_mod.webTools.Empleados_Historial_Laboral'>	<method name=''/></service>
+<service name='DependientesEconomicos' source='com.saet_mod.webTools.Empleados_Dependientes_Economicos'>	<method name=''/></service>
+<service name='PerfilCarrera' source='com.saet_mod.webTools.Empleados_Perfil_Carrera'>	<method name=''/></service>
+<service name='AreasInteres' source='com.saet_mod.webTools.Empleados_Areas_Interes'>	<method name=''/></service>
+<service name='Credenciales' source='com.saet_mod.webTools.Empleados_Credenciales'>	<method name=''/></service>
+<service name='Empleados_Accesos'	source='com.saet_mod.webTools.Empleados_Accesos'>	<method name=''/></service>
+<service name='Prestaciones'  	source='com.saet_mod.webTools.Empleados_Prestaciones'>	<method name=''/></service>
+<service name='BarCode' source='com.saet_mod.webTools.Comonents_BarCode'>	<method name=''/></service>
+<service name='BarCodeFunctions' source='com.saet_mod.webTools.Comonents_BarCodeFunctions'>	<method name=''/></service>
+
+<service name='Clientes' source='com.saet_mod.webTools.Clientes'>	<method name=''/></service>
+<service name='Clientes_Familiares' source='com.saet_mod.webTools.Clientes_Familiares'>	<method name=''/></service>
+<service name='Clientes_Preferencias' source='com.saet_mod.webTools.Clientes_Preferencias'>	<method name=''/></service>
+<service name='Clientes_Cuentas_Bancarias' source='com.saet_mod.webTools.Clientes_Cuentas_Bancarias'>	<method name=''/></service>
+<service name='Clientes_Renovacion' source='com.saet_mod.webTools.Clientes_Renovacion'>	<method name=''/></service>
+<service name='Clientes_Empleados_Relacion' source='com.saet_mod.webTools.Clientes_Empleados_Relacion'>	<method name=''/></service>
+   <service name='Clientes_Log'            source='com.saet_mod.webTools.Clientes_Log'>	<method name=''/></service>
+<service name='BancosTipoMoneda' source='com.saet_mod.webTools.Bancos_Tipo_Moneda'>	<method name=''/></service>
+<service name='Bancos' source='com.saet_mod.webTools.Bancos'>	<method name=''/></service>
+<service name='Productos' source='com.saet_mod.webTools.Productos'>	<method name=''/></service>
+<service name='Subproductos' source='com.saet_mod.webTools.Subproductos'>	<method name=''/></service>
+<service name='Programas' source='com.saet_mod.webTools.Productos_Programas'>	<method name=''/></service>
+<service name='Codigos' source='com.saet_mod.webTools.Productos_Codigos_Membresias'>	<method name=''/></service>
+<service name='Comunicaciones_Blog' source='com.saet_mod.webTools.Comunicaciones_Blog'>	<method name=''/></service>
+<service name='Comunicaciones_Blog_Temas' source='com.saet_mod.webTools.Comunicaciones_Blog_Temas'>	<method name=''/></service>
+<service name='Comunicaciones_Blog_NuevoComentario' source='com.saet_mod.webTools.Comunicaciones_Blog_NuevoComentario'>	<method name=''/></service>
+<service name='Pagos_Ingresos' source='com.saet_mod.webTools.Pagos_Ingresos'>	<method name=''/></service>
+<service name='Pagos_Condiciones' source='com.saet_mod.webTools.Pagos_Condiciones'>	<method name=''/></service>
+<service name='Ventas' source='com.saet_mod.webTools.Ventas'>	<method name=''/></service>
+<service name='Ventas_Subproductos' source='com.saet_mod.webTools.Ventas_Subproductos'>	<method name=''/></service>
+<service name='Conciliaciones' source='com.saet_mod.webTools.Conciliaciones'>	<method name=''/></service>
+<service name='Nominas' source='com.saet_mod.webTools.Nominas'>	<method name=''/></service>
+<service name='DV_Regiones' source='com.saet_mod.webTools.DV_Regiones'>	<method name=''/></service>
+<service name='DV_Paises' source='com.saet_mod.webTools.DV_Paises'>	<method name=''/></service>
+<service name='DV_Ciudades' source='com.saet_mod.webTools.DV_Ciudades'>	<method name=''/></service>
+<service name='DV_Hoteles' source='com.saet_mod.webTools.DV_Hoteles'>	<method name=''/></service>
+<service name='Mailing' source='com.saet_mod.webTools.Mailing'>	   <method name=''/></service>
+<service name='FullFitment' source='com.saet_mod.webTools.FullFitment'>	   <method name=''/></service>
+<service name='Varios' source='com.saet_mod.webTools.Varios'>	   <method name=''/></service>
+<service name='Directorio' source='com.saet_mod.webTools.Directorio'>	   <method name=''/></service>
+</services>
+   	</webApplication>
+   
+   	<navMenu>
+
+<menuitem label="Administración" roles="System,Contador" method="openPopup">
+<menuitem label="Administrativos" roles="System" method="openPopup">
+<menuitem label="Usuarios" className="system.Users" roles="System" method="openPopup"/>
+<menuitem label="Grupos de Trabajo" className="system.UsersGroups" roles="System" method="openPopup"/>
+</menuitem>
+<menuitem label="Bancos" roles="System" method="openPopup">
+<menuitem label="Bancos" className="bancos.Bancos" roles="System,Contador" method="openPopup"/>
+<menuitem label="Cuentas Bancarias" className="bancos.Bancos_Cuentas_Empresa" roles="System,Contador" method="openPopup"/>
+<menuitem label="Monedas y TcFix" className="bancos.Bancos_Tipo_Moneda" roles="System,Contador" method="openPopup"/>
+</menuitem>
+<menuitem label="Empresa" roles="System,Contador" method="openPopup">
+<menuitem label="Menu" className="empresa.Empresa_Menu" roles="System" method="openPopup"/>
+<menuitem label="Organigrama" className="empresa.Empresa_Organigrama" roles="System,Contador" method="openPopup"/>
+<menuitem label="Compañias" className="empresa.Empresa_Companias" roles="System,Contador" method="openPopup"/>
+<menuitem label="Áreas" className="empresa.Empresa_Areas" roles="System,Contador" method="openPopup"/>
+<menuitem label="Departamentos" className="empresa.Empresa_Departamentos" roles="System,Contador" method="openPopup"/>
+<menuitem label="Puestos" className="empresa.Empresa_Puestos" roles="System,Contador" method="openPopup"/>
+<menuitem label="CECOS" className="empresa.Empresa_Cecos" roles="System,Contador" method="openPopup"/>
+<menuitem label="Sucursales" className="empresa.Empresa_Sucursales" roles="System,Contador" method="openPopup"/>
+<menuitem label="Sucursales Grupos" className="empresa.Empresa_Grupos_Sucursales" roles="System,Contador" method="openPopup"/>
+</menuitem>
+<menuitem label="Comisiones" roles="System,Contador" method="openPopup">
+<menuitem label="Comisiones" className="empresa.Empresa_Comisiones" roles="System,Contador" method="openPopup"/>
+<menuitem label="Tipos de Comisiones" className="empresa.Empresa_Tipos_Comisiones" roles="System,Contador" method="openPopup"/>
+</menuitem>
+<menuitem label="Productos" roles="System,Contador" method="openPopup">
+<menuitem label="Programas" className="productos.Productos_Programas" roles="System,Contador" method="openPopup"/>
+<menuitem label="Productos" className="productos.Productos" roles="System,Contador" method="openPopup"/>
+<menuitem label="Subproductos"	className="demo.Subproductos_Captura"	roles="*" method="openPopup"/>
+<menuitem label="Condiciones de Pago" className="pagos.Pagos_Condiciones" roles="System,Contador" method="openPopup"/>
+</menuitem>
+<menuitem label="Credenciales" className="empleados.Empleados_Credenciales" roles="System" method="openPopup"/>
+</menuitem>
+<menuitem label="Empleados" roles="System,Director,RH,Administrador" method="openPopup">
+<menuitem label="Empleados" className="empleados.Empleados" roles="System,Director,RH,Administrador" method="openPopup"/>
+<menuitem label="Nóminas"    className="nominas.Nominas" roles="System,Director,RH,Administrador" method="openPopup"/>
+</menuitem>
+<menuitem label="Empleados" roles="Gerente,Supervisor" method="openPopup">
+<menuitem label="Empleados" className="empleados.Empleados_Sucursales" roles="Gerente,Supervisor" method="openPopup"/>
+<menuitem label="Nóminas"    className="nominas.Nominas" roles="Gerente,Supervisor" method="openPopup"/>
+</menuitem>
+
+<menuitem label="Membresias" roles="Gerente,Supervisor,Vendedor" method="openPopup">
+<menuitem label="Socios" className="clientes.Clientes_Captura" roles="Gerente,Supervisor,Vendedor" method="openPopup"/>
+</menuitem>
+
+<menuitem label="Contabilidad" roles="System,Contador" method="openPopup">
+<menuitem label="Conciliaciones" className="contabilidad.Conciliaciones" roles="System,Contador" method="openPopup"/>
+</menuitem>
+<menuitem label="ATC" roles="Supervisor,Gerente,Director,System,ATC,Vendedor" method="openPopup">
+<menuitem label="Socios" className="clientes.Clientes_Busqueda" roles="Supervisor,Gerente,Director,System,ATC" method="openPopup"/>
+<menuitem label="Socios Historial"	className="demo.Clientes_Log"	roles="Supervisor,Gerente,Director,System,ATC" method="openPopup"/>
+<menuitem label="Renovación Clientes"	className="demo.Clientes_Renovacion"	roles="*" method="openPopup"/>
+<menuitem label="Ventas TSR"	className="demo.Ventas_Vendedor_TSR"	roles="*" method="openPopup"/>
+<menuitem label="Ventas TSR Productos"	className="demo.Ventas_Vendedor_TSR_Productos"	roles="*" method="openPopup"/>
+<menuitem label="Reporte Cancelaciones"	className="demo.Reporte_Cancelaciones"	roles="*" method="openPopup"/>
+<menuitem label="Reportes Gerenciales"	className="demo.Reportes_Varios"	roles="*" method="openPopup"/>
+</menuitem>
+<menuitem label="Reservaciones" roles="Reservaciones,System,Administrador" method="openPopup">
+<menuitem label="ATC" className="clientes.Clientes_Busqueda" roles="Reservaciones,System,Administrador" method="openPopup"/>
+<menuitem label="Cancelaciones" className="system.UC" roles="Reservaciones,System,Administrador" method="openPopup"/>
+</menuitem>
+<menuitem label="FullFillment" roles="FullFillment,System,Administrador" method="openPopup">
+<menuitem label="Empaque y Envío" className="system.UC" roles="FullFillment,System,Administrador" method="openPopup"/>
+</menuitem>
+<menuitem label="Mailing" roles="ATC,Gerente,System,Administrador" method="openPopup">
+<menuitem label="Mail Blast" className="mailing.MailingAdmin" roles="ATC,Gerente,System,Administrador" method="openPopup"/>
+</menuitem>
+<menuitem label="WEB" roles="System,Administrador,WebMaster" method="openPopup">
+<menuitem label="Ofertas"        roles="System,WebMaster" method="openPopup">
+<menuitem label="Header" className="dreamVacations.DV_Regiones" roles="System,WebMaster" method="openPopup"/>
+<menuitem label="Alta"    className="dreamVacations.DV_Paises" roles="System,WebMaster" method="openPopup"/>
+</menuitem>
+<menuitem label="Catálogos DVW" roles="System,WebMaster" method="openPopup">
+<menuitem label="Regiones" className="dreamVacations.DV_Regiones" roles="System,WebMaster" method="openPopup"/>
+<menuitem label="Paises" className="dreamVacations.DV_Paises" roles="System,WebMaster" method="openPopup"/>
+<menuitem label="Ciudades" className="dreamVacations.DV_Ciudades" roles="System,WebMaster" method="openPopup"/>
+<menuitem label="Hoteles" className="dreamVacations.DV_Hoteles" roles="System,WebMaster" method="openPopup"/>
+</menuitem>
+</menuitem>
+  <menuitem label="Ayuda" roles="*">	   
+   	<menuitem label="Soporte"  	className="Support"	roles="*" method="openPopup"/>
+ 	</menuitem>
+ 	 
+ 	 
+ 	<menuitem label="Renovación" roles="System,Director,Vendedor">	   
+   	<menuitem label="Renovación Clientes"	className="demo.Clientes_Renovacion"	roles="System,Director,Vendedor" method="openPopup"/>
+   	<menuitem label="Relacion Clientes/Empleados"    className="demo.Clientes_Empleados"   roles="System,Director"    method="openPopup"/>
+ 	</menuitem>
+   
+  <menuitem label="Salir" roles="*">
+   	<menuitem label="Logout"  	roles="*" method="logout"/>
+  </menuitem>
+     
+   	</navMenu>  
+
+</CMS_Random>
+
+
+
+
+
+
+
+<?xml version="1.0" encoding="utf-8"?>
+<CMS_Random>
+
+<webApplication gateway="http://asfaltos.gith.com.mx/___WebOrb___/weborb.php" channelId="my-amf" destination="GenericDestination" >
+<services> 
+<service name='userAuth' source='com.prm.webTools.UserAccess'>	<method name=''/></service>
+<service name='Users' source='com.prm.webTools.Users'>	<method name=''/></service>
+<service name='UserAdmin' source='com.prm.webTools.UserAdmin'>	<method name=''/></service>
+<service name='AdminUsers' source='com.prm.webTools.AdminUsers'>	<method name=''/></service>
+<service name='Catalogs' source='com.prm.webTools.Catalogs'>	<method name=''/></service>
+<service name='Empleados' source='com.prm.webTools.Empleados'>	<method name=''/></service>
+<service name='ImageManager'	source='com.prm.webTools.ImageManager'>	<method name=''/></service>
+<service name='Inmuebles'	source='com.prm.webTools.Inmuebles'>	<method name=''/></service>
+<service name='Intereses'	source='com.prm.webTools.Intereses'>	<method name=''/></service>
+<service name='Companias'	source='com.prm.webTools.Companias'>	<method name=''/></service>
+<service name='Ubicaciones'	source='com.prm.webTools.Ubicaciones'>	<method name=''/></service>
+<service name='CECOS'	source='com.prm.webTools.CECOS'>	<method name=''/></service>
+<service name='Categorias'	source='com.prm.webTools.Categorias'>	<method name=''/></service>
+<service name='Empleados_Accesos'	source='com.prm.webTools.Empleados_Accesos'>	<method name=''/></service>
+<service name='Areas' source='com.prm.webTools.Areas'>	<method name=''/></service>
+<service name='Departamentos' source='com.prm.webTools.Departamentos'>	<method name=''/></service>
+<service name='Puestos' source='com.prm.webTools.Puestos'>	<method name=''/></service>
+<service name='Organigrama' source='com.prm.webTools.Organigrama'>	<method name=''/></service>
+<service name='Groups' source='com.prm.webTools.Groups'>	<method name=''/></service>
+<service name='HistorialLaboral' source='com.prm.webTools.HistorialLaboral'>	<method name=''/></service>
+<service name='DependientesEconomicos' source='com.prm.webTools.DependientesEconomicos'>	<method name=''/></service>
+<service name='PerfilCarrera' source='com.prm.webTools.PerfilCarrera'>	<method name=''/></service>
+<service name='AreasInteres' source='com.prm.webTools.AreasInteres'>	<method name=''/></service>
+<service name='Credenciales' source='com.prm.webTools.Credenciales'>	<method name=''/></service>
+<service name='BarCode' source='com.prm.webTools.BarCode'>	<method name=''/></service>
+<service name='BarCodeFunctions' source='com.prm.webTools.BarCodeFunctions'>	<method name=''/></service>
+<service name='Validations' source='com.prm.webTools.Validations'>	<method name=''/></service>
+<service name='AltasBajas' source='com.prm.webTools.AltasBajas'>	<method name=''/></service>
+<service name='CambioUbicacion' source='com.prm.webTools.CambioUbicacion'>	<method name=''/></service>
+<service name='EmpleadosDocumentos' source='com.prm.webTools.Empleados_Documentos'>	<method name=''/></service>
+<service name='Empresa_Competencias' source='com.prm.webTools.Empresa_Competencias'>	<method name=''/></service>
+<service name='Empresa_Competencias_Tipos' source='com.prm.webTools.Empresa_Competencias_Tipos'>	<method name=''/></service>
+<service name='Empresa_Competencias_Funciones_Especificas' source='com.prm.webTools.Empresa_Competencias_Funciones_Especificas'>	<method name=''/></service>
+<service name='Empresa_Competencias_Conocimientos' source='com.prm.webTools.Empresa_Competencias_Conocimientos'>	<method name=''/></service>
+<service name='Empresa_Competencias_Niveles' source='com.prm.webTools.Empresa_Competencias_Niveles'>	<method name=''/></service>
+<service name='Empresa_Competencias_Medios_Adquisicion' source='com.prm.webTools.Empresa_Competencias_Medios_Adquisicion'>	<method name=''/></service>
+<service name='Empresa_Competencias_Conocimientos_Tipo' source='com.prm.webTools.Empresa_Competencias_Conocimientos_Tipo'>	<method name=''/></service>
+<service name='Empresa_Competencias_Habilidades' source='com.prm.webTools.Empresa_Competencias_Habilidades'>	<method name=''/></service>
+<service name='Empresa_Competencias_Actitudes' source='com.prm.webTools.Empresa_Competencias_Actitudes'>	<method name=''/></service>
+<service name='Empresa_Competencias_Escalas'    source='com.prm.webTools.Empresa_Competencias_Escalas'>	<method name=''/></service>
+<service name='Empresa_Competencias_Indicadores' source='com.prm.webTools.Empresa_Competencias_Indicadores'>	<method name=''/></service>
+<service name='Empresa_Competencias_Indicadores_Tipos' source='com.prm.webTools.Empresa_Competencias_Indicadores_Tipos'>	<method name=''/></service>
+<service name='Empresa_Competencias_Conocimientos_Niveles' source='com.prm.webTools.Empresa_Competencias_Conocimientos_Niveles'>	<method name=''/></service>
+<service name='Empresa_Competencias_Conocimientos_Catalogo' source='com.prm.webTools.Empresa_Competencias_Conocimientos_Catalogo'>	<method name=''/></service>
+<service name='Empresa_Competencias_Actitudes_Catalogo' source='com.prm.webTools.Empresa_Competencias_Actitudes_Catalogo'>	<method name=''/></service>
+<service name='Empresa_Competencias_Habilidades_Catalogo' source='com.prm.webTools.Empresa_Competencias_Habilidades_Catalogo'>	<method name=''/></service>
+<service name='Empresa_Competencias_HabilidadesActitudes_Niveles' source='com.prm.webTools.Empresa_Competencias_HabilidadesActitudes_Niveles'>	<method name=''/></service>
+<service name='Empresa_Competencias_Configuracion' source='com.prm.webTools.Empresa_Competencias_Configuracion'>	<method name=''/></service>
+<service name='Empresa_Puestos_Informacion_General' source='com.prm.webTools.Empresa_Puestos_Informacion_General'>	<method name=''/></service>
+<service name='Empresa_Puestos_Turnos' source='com.prm.webTools.Empresa_Puestos_Turnos'>	<method name=''/></service>
+<service name='Empresa_Puestos_Contratos_Tipos' source='com.prm.webTools.Empresa_Puestos_Contratos_Tipos'>	<method name=''/></service>
+<service name='Empresa_Puestos_Niveles' source='com.prm.webTools.Empresa_Puestos_Niveles'>	<method name=''/></service>
+<service name='Empresa_Puestos_Descripcion_Empleado' source='com.prm.webTools.Empresa_Puestos_Descripcion_Empleado'>	<method name=''/></service>
+<service name='Empresa_Puestos_Idiomas' source='com.prm.webTools.Empresa_Puestos_Idiomas'>	<method name=''/></service>
+<service name='Empresa_Puestos_Escolaridad' source='com.prm.webTools.Empresa_Puestos_Escolaridad'>	<method name=''/></service>
+<service name='Empresa_Puestos_Perfil_Carrera' source='com.prm.webTools.Empresa_Puestos_Perfil_Carrera'>	<method name=''/></service>
+<service name='Empresa_Puestos_Competencias' source='com.prm.webTools.Empresa_Puestos_Competencias'>	<method name=''/></service>
+<service name='Empresa_Puestos_Observaciones' source='com.prm.webTools.Empresa_Puestos_Observaciones'>	<method name=''/></service>
+<service name='Empleados_Competencias' source='com.prm.webTools.Empleados_Competencias'>	<method name=''/></service>
+<service name='Empleados_Seleccion' source='com.prm.webTools.Empleados_Seleccion'>	<method name=''/></service>
+<service name='Evaluaciones' source='com.prm.webTools.Evaluaciones'>	<method name=''/></service>
+<service name='IdiomasService' source='com.prm.webTools.IdiomasService'>	<method name=''/></service>
+<service name='AcademicosService' source='com.prm.webTools.AcademicosService'>	<method name=''/></service>
+<service name='CursosServices' source='com.prm.webTools.CursosServices'>	<method name=''/></service>
+<service name='SignManager' source='com.prm.webTools.SignManager'>	<method name=''/></service>
+</services>
+   	</webApplication>  
+   
+   	<navMenu>
+
+<menuitem label="Administración" roles="System" method="openPopup">
+<menuitem label="Catálogos" roles="System" method="openPopup">
+<menuitem label="Administrativos" roles="System" method="openPopup">
+<menuitem label="Usuarios" className="system.Users" roles="System" method="openPopup"/>
+<menuitem label="Grupos de Trabajo" className="system.UsersGroups" roles="System" method="openPopup"/>
+</menuitem>
+<menuitem label="Empresa" roles="System" method="openPopup">
+<menuitem label="Compañías" className="Catalogo_Companias" roles="System" method="openPopup"/>
+<menuitem label="Áreas" className="Catalogo_Areas" roles="System" method="openPopup"/>
+<menuitem label="Departamentos" className="Catalogo_Departamentos" roles="System" method="openPopup"/>
+<menuitem label="Puestos" className="Catalogo_Puestos" roles="System" method="openPopup"/>
+<menuitem label="CECOS" className="Catalogo_CECOS" roles="System" method="openPopup"/>
+<menuitem label="Categorías" className="Catalogo_Categorias" roles="System" method="openPopup"/>
+<menuitem label="Ubicaciones" className="Catalogo_Ubicaciones" roles="System" method="openPopup"/>
+<menuitem label="Competencias"    className="Empresa.Empresa_Competencias"	roles="System" method="openPopup"/>
+<menuitem label="Organigrama" className="Organigrama" roles="System" method="openPopup"/>
+</menuitem>
+<menuitem label="Credenciales" roles="System" method="openPopup">
+<menuitem label="Codigo de Barras" className="components.BarCodeGen" roles="System" method="openPopup"/>
+</menuitem>
+</menuitem>
+<menuitem label="Empleados" className="Empleados" roles="System" method="openPopup"/>
+<menuitem label="Importar"    className="Interface" roles="System" method="openPopup"/>
+<menuitem type="separator" roles="*"/>
+<menuitem label="Menu Empresa"    className="Empresa.Empresa_Menu" roles="System" method="openPopup"/>
+<menuitem type="separator" roles="*"/>
+<menuitem label="LogOut" roles="Clerk,Manager,Administrator,System" method="logout"/>
+</menuitem>
+<menuitem label="Empleados" roles="Empleados" method="openPopup">
+<menuitem label="Empleados" className="Empleados" roles="Empleados" method="openPopup"/>
+</menuitem>
+ 
+  <menuitem label="Ayuda" roles="System,Empleados">	   
+   	<menuitem label="Soporte"  	className="system.Support"	roles="System,Empleados" method="openPopup"/>
+ 	</menuitem>
+   
+  <menuitem label="Salir" roles="System,Empleados">
+   	<menuitem label="Logout"  	roles="System,Empleados" method="logout"/>
+  </menuitem>
+
+   	</navMenu>  
+
+</CMS_Random>

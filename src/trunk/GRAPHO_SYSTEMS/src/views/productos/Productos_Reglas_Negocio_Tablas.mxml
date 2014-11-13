@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow 
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:mx="library://ns.adobe.com/flex/mx" 
+	width="504" height="368"  
+	horizontalCenter="0" 
+	title="Tablas Relacionadas" 
+	>
+
+	
+	<s:Button x="347" y="61" width="144" label="Seleccionar" click="selectInfo();"/>
+	<s:Button x="348" y="285" width="144" label="Cancelar" click="closeWindow();"/>
+	<s:List id="_tables" x="10" y="30" width="160" height="285" change="tableSelect()"
+			dataProvider="{_tableResult}" enabled="{_dataReady}" labelField="nombre"></s:List>
+	<s:List id="_fields" x="180" y="30" width="160" height="285" dataProvider="{_fieldsResult}"
+			enabled="{_dataReady}" labelField="nombre"></s:List>
+	<s:Label x="10" y="14" text="Tablas :"/>
+	<s:Label x="180" y="15" text="Campos :"/>
+	<s:ComboBox id="_key" x="346" y="30" dataProvider="{_keys}" enabled="{_dataReady}" labelField="nombre"/>
+	<s:Label x="346" y="16" text="Llave :"/>
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.managers.PopUpManager;
+			import mx.random.constants.Catalogs;
+			import mx.random.constants.Languages;
+			import mx.random.constants.SystemGlobals;
+			import mx.random.converters.Converter;
+			import mx.random.dataManagers.DataManager;
+			import mx.random.dataManagers.EventManager;
+			import mx.random.forms.Validator;
+			import mx.random.web.WebApplication;
+			import mx.random.windowManagers.PopManager;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.remoting.RemoteObject;
+			
+			private var _webApplication:WebApplication;
+			private var _workManager:Object 				= new Object();
+			private var _MainService:RemoteObject 			= new RemoteObject();
+[Bindable]	private var _tableResult:ArrayCollection 		= new ArrayCollection();
+[Bindable]	private var _fieldsResult:ArrayCollection 		= new ArrayCollection();
+[Bindable]	private var _keys:ArrayCollection 				= new ArrayCollection([{nombre:'_idDin'},{nombre:'_idProducto'}]);
+[Bindable]	private var _dataReady:Boolean					= false;
+			
+			
+			
+			//-----------Local Vars -----------
+			
+			private var _selectedName:String 		= "";
+			private var _serviceName  				= "Productos_Reglas_Negocio";
+			
+			
+			//-----------Local Vars -----------
+			
+			//---------------------------- Context ---------------------------------------------            
+			
+			public function set context(contextObj:Object):void{
+				for( var p:String in contextObj){
+					if(this.hasOwnProperty(p)){
+						this[p] = contextObj[p];
+					}
+				}
+				initView();
+			}
+			
+			public function set workManager(value:Object):void{
+				_workManager = value;
+			}
+			
+			public function set webApplication(value:WebApplication):void{
+				_webApplication = value;				
+			}
+			public function get webApplication():WebApplication{ return _webApplication; } 
+			
+			//---------------------------- Context ---------------------------------------------  
+			
+			//-------------------------------- MainInit --------------------------------------
+			// ------------------- View Extra Data -------------------------------
+			
+			private function get viewContext():Object{
+				return {webApplication: _webApplication,
+					workManager: this
+				}					
+			}
+
+			
+			public function initView():void{				
+				_MainService = _webApplication.getService(_serviceName);
+				_MainService.addEventListener(FaultEvent.FAULT,onFault);
+				initData();
+			
+			}
+			
+			public function imageUploadReady(data:Object):void{
+				
+			}
+			
+			// ------------------- View Extra Data -------------------------------
+				
+			private function initData():void{
+				_fieldsResult = new ArrayCollection();
+				_MainService.getTables();
+				_MainService.getTables.addEventListener(ResultEvent.RESULT,onGetTablesResult);
+				_dataReady = false; 
+			}
+			
+			public function closeWindow():void{
+				dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
+				PopUpManager.removePopUp(this);
+			}
+			
+			//-------------------------------- MainInit --------------------------------------
+			
+		
+			//-------------------------------- ResultsEvents --------------------------------------		
+			
+			private function onGetTablesResult(e:ResultEvent):void{
+				_MainService.getFields.removeEventListener(ResultEvent.RESULT,onGetTablesResult);
+				if(e){
+					if(e.result) {
+						_tableResult= Converter.arrayConverter(e.result);
+						_dataReady = true; 
+					}
+				}else{
+					Alert.show("Error al cargar los datos","Error");
+					_dataReady = false;
+				}
+				
+				
+				
+			}
+			
+			
+			private function onFault(e:FaultEvent):void{
+				Alert.show(e.fault.faultString,"Error");
+			}
+			
+			private function tableSelect():void{
+				_fieldsResult = new ArrayCollection();
+				var params:Object = {_table:_tables.selectedItem.nombre}
+				_MainService.getTableFields(params);
+				_MainService.getTableFields.addEventListener(ResultEvent.RESULT,onGetTableFieldsResult);
+				_dataReady = true; 
+			}
+			
+			private function onGetTableFieldsResult(e:ResultEvent):void{
+				_MainService.getFields.removeEventListener(ResultEvent.RESULT,onGetTableFieldsResult);
+				if(e){
+					if(e.result) {
+						_fieldsResult= Converter.arrayConverter(e.result);
+						_dataReady = true; 
+					}
+				}else{
+					Alert.show("Error al cargar los datos","Error");
+					_dataReady = false;
+				}
+				
+				
+				
+			}
+			
+			private function selectInfo():void{
+				if(_tables.selectedIndex!=-1 && _fields.selectedIndex!=-1 && _key.selectedIndex!=-1){
+					var params:Object = {
+						_tabla:_tables.selectedItem.nombre,
+						_campo:_fields.selectedItem.nombre,
+						_llave:_key.selectedItem.nombre
+					}
+					_workManager.tableSelectioncomplete(params);
+					closeWindow();
+				}else{
+					Alert.show("Faltan listas por seleccionar","Error");
+				}
+			}
+			
+			
+						
+			
+		]]>
+	</fx:Script>
+	
+</s:TitleWindow>

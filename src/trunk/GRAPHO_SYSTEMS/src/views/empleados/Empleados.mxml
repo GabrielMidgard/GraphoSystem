@@ -1,0 +1,855 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow 
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:mx="library://ns.adobe.com/flex/mx" 
+	width="1274" height="700" 
+	horizontalCenter="0" 
+	title="Administración de Empleados" >
+
+
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.managers.PopUpManager;
+			import mx.random.*;
+			import mx.random.files.PathData;
+			
+			import mx.random.converters.Converter;
+			import mx.random.web.WebApplication;
+			import mx.random.constants.Catalogs;
+			import mx.random.constants.ConstantData;
+			import mx.random.constants.Constantes;
+			import mx.random.constants.GlobalData;
+			import mx.random.constants.Languages;
+			import mx.random.constants.SystemGlobals;
+			import mx.random.dataManagers.DataManager;
+			import mx.random.dataManagers.EventManager;
+			import mx.random.events.SelectionEvent;
+			import mx.random.events.StaticEvent;
+			import mx.random.forms.Validator;
+			import mx.random.interfaces.WScrip;
+			import mx.random.windowManagers.PopManager;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.remoting.RemoteObject;
+			import mx.rpc.wsdl.WSDLBinding;
+			import mx.validators.ValidationResult;
+			
+
+			import views.empresa.Empresa_Areas;
+			import views.empresa.Empresa_Departamentos;
+			import views.empresa.Empresa_Puesto_Inmediato;
+
+			import views.managers.ImageManager;
+
+			private var _webApplication:WebApplication;
+			private var Valid:Validator 			= new Validator();
+			private var _workManager:Object 		= new Object();
+			private var _MainService:RemoteObject 	= new RemoteObject();
+[Bindable]	private var _Data:DataManager 			= new DataManager(this);
+[Bindable]	private var _DataResult:ArrayCollection = new ArrayCollection();			
+			private var _eventManager:EventManager 	= new EventManager(this);
+			private var _dataIndex:Number 			= 0;
+			
+			//-----------Event Manager -----------
+
+[Bindable]	public var _dataReady:Boolean 			= false;
+[Bindable]	public var _newData:Boolean 			= false;
+[Bindable]	public var _updateData:Boolean 			= false;
+
+			//-----------Event Manager -----------
+			
+			
+			//-----------Local Vars -----------
+			
+			private var _selectedId:Number 		= 0;
+			private var _selectedName:String 	= "";
+			private var _serviceName  			= "Empleados";
+			private var _mainId  				= "_idEmpleado";
+			private var _mainFocusField:String  = "_nombre";
+			private var _path:String 			= PathData.HOST+"/PRM_Data/_empleados/";
+[Bindable]	private var _picture:String 		= "../../assets/Comps/foto.jpg";	
+			//private var _FotosPersonal:FotosPersonal;	
+			
+[Bindable]	private var _range:Number = 0;
+			
+[Bindable]	private var _areas:ArrayCollection;				
+[Bindable]	private var _deptos:ArrayCollection;
+[Bindable]	private var _puestos:ArrayCollection;
+[Bindable]	private var _camReady:Boolean = false;
+[Bindable]	private var _accessType:Number = -1;
+
+			private var _selectMode:Boolean = false;
+			
+			
+			private var _idCompania:Number  	= -1 ;
+			private var _idArea:Number  		= -1 ;
+			private var _idDepartamento:Number  = -1 ;
+			private var _idPuesto:Number  		= -1 ;			
+			private var _idCECO:Number  		= -1 ;
+			private var _idCategoria:Number  	= -1 ;
+			private var _extraData:Object;
+			private var _imageName:String       ="";;
+			//-----------Local Vars -----------
+[Bindable]	private var _years:ArrayCollection = new ArrayCollection([{label:"Año",value:0},
+																		{label:"2011",value:2011},
+																		{label:"2012",value:2012},
+																		{label:"2013",value:2013},
+																		{label:"2014",value:2014},
+																		{label:"2015",value:2015},
+																		{label:"2016",value:2016},
+																		{label:"2017",value:2017},
+																		{label:"2018",value:2018},
+																		{label:"2019",value:2019},
+																		{label:"2020",value:2020}]);			
+//---------------------------- Context ---------------------------------------------            
+
+   			public function set context(contextObj:Object):void{
+				for( var p:String in contextObj){
+					if(this.hasOwnProperty(p)){
+						this[p] = contextObj[p];
+					}
+				}
+				initView();
+			}
+
+			public function set workManager(value:Object):void{
+				_workManager = value;
+			}
+
+			public function set webApplication(value:WebApplication):void{
+				_webApplication = value;				
+			}
+			public function get webApplication():WebApplication{ return _webApplication; } 
+						
+//---------------------------- Context ---------------------------------------------  
+
+//-------------------------------- MainInit --------------------------------------
+			// ------------------- View Extra Data -------------------------------
+			
+			private function get viewContext():Object{
+				return {dataObject:_dataList.selectedItem,
+						extraData:_extraData,
+						selectionMode:_selectMode,
+						area: _area.text,
+						puesto: _puesto.text,
+						relationIdValue:_dataList.selectedItem._idEmpleado,
+						idEmpleado: _dataList.selectedItem._idEmpleado,
+						webApplication: _webApplication,
+						thumbExist:false,
+						keepAspect:true,
+						imagePath:"PRM_Data/_empleados/",
+						resHT:200,
+						resWD:156,
+						imageName:_imageName+".jpg",
+						workManager: this
+						}					
+			}
+			
+			private function chageRange(val:Number):void{
+				_range = val;
+				_dataReady = false;	
+				_DataResult = new ArrayCollection();			
+				getData()
+			}
+			
+						
+			private function addValidations():void{
+				
+				Valid.addStringVal(_nombre,3,50,"Nombre");
+				Valid.addStringVal(_paterno,3,50,"A. Paterno");
+				Valid.addStringVal(_materno,3,50,"A. Materno");
+				/*
+				Valid.addStringVal(_calle,3,50,"Calle");
+				Valid.addStringVal(_numero,1,8,"Número Casa");
+				Valid.addStringVal(_colonia,3,50,"Colonia");
+				Valid.addStringVal(_cp,5,5,"C.P.");
+				Valid.addStringVal(_estado,3,50,"Estado");
+				Valid.addStringVal(_municipio,3,50,"Minicipio");
+				
+				Valid.addComboVal(day,"Dia de Nacimiento");
+				Valid.addComboVal(month,"Mes de Nacimiento");
+				Valid.addComboVal(year,"Año de Nacimiento");
+				
+				Valid.addMailVal(_mail,false,"E-Mail");
+				
+				Valid.addPhoneVal(_telCasa,true,false,"Teléfono Casa");
+				Valid.addPhoneVal(_telEme,true,false,"Teléfono Emergencias");
+				Valid.addPhoneVal(_celular,true,false,"Teléfono Celular");
+				
+				*/
+				Valid.changeLanguage(Languages.SPANISH);	
+				Valid.setErrorKnot(Validator.CIRCLE_KNOT,0xFF0000);
+				Valid.validateOnChange = true;		
+				
+			}
+			
+			private function extraCreateData(params:Object):Object{
+				//params["_newsImage"] = _image;
+				params['_fechaNacimiento'] = year.selectedItem.label+'-'+month.selectedItem.value+'-'+day.selectedItem.value;	
+				
+				params['_vencimientoLicencia'] = expira_year.selectedItem.label+'-'+expira_month.selectedItem.value+'-'+expira_day.selectedItem.value;	
+				
+							
+				params['_idCompania'] 		= _idCompania;
+				params['_idArea'] 			= _idArea;
+				params['_idDepartamento'] 	= _idDepartamento;
+				params['_idPuesto'] 		= _idPuesto;
+				params['_idCategoria']		= _idCategoria;
+				params['_idCECO']			= _idCECO;
+				
+				return params;
+			}
+			
+			private function createRecordExtras():void{
+				day.selectedIndex 	= 0;
+				month.selectedIndex = 0;
+				year.selectedIndex 	= 0;
+				_idCompania		= -1;
+				_idArea			= -1;
+				_idDepartamento	= -1;
+				_idPuesto		= -1;
+				_idCECO			= -1;
+				_idCategoria	= -1;
+				//_image = "defaultNew.jpg";
+				
+			}
+			
+			private function extraUpdateData(params:Object):Object{	
+				params['_fechaNacimiento'] = year.selectedItem.label+'-'+month.selectedItem.value+'-'+day.selectedItem.value;	
+				params['_vencimientoLicencia'] = expira_year.selectedItem.label+'-'+expira_month.selectedItem.value+'-'+expira_day.selectedItem.value;	
+				params['_idCompania'] 		= _idCompania;
+				params['_idArea'] 			= _idArea;
+				params['_idDepartamento'] 	= _idDepartamento;
+				params['_idPuesto'] 		= _idPuesto;
+				params['_idCategoria']		= _idCategoria;
+				params['_idCECO']			= _idCECO;		
+				return params;
+			}
+			
+			private function loadExtraFields(params:Object):void{
+				_dataReady = false;
+				var _expDate:Object = Converter.dateExploitUP(params['_vencimientoLicencia']);
+				expira_day.selectedIndex 	= _expDate.day;
+				expira_month.selectedIndex 	= _expDate.month;
+				expira_year.selectedIndex 	= _expDate.year;
+				
+				
+				_picture = _path+_dataList.selectedItem._idEmpleado+'.jpg?'+Math.random();
+				
+				var _bdDate:Object = Converter.dateExploit(params['_fechaNacimiento']);
+				day.selectedIndex 	= _bdDate.day;
+				month.selectedIndex = _bdDate.month;
+				year.selectedIndex 	= _bdDate.year;
+				
+				_MainService.getExtraData(_dataList.selectedItem._idEmpleado,_dataList.selectedItem._numFortia);
+				_MainService.getExtraData.addEventListener(ResultEvent.RESULT,onExtraDataReady);
+			}
+			
+			private function onExtraDataReady(e:ResultEvent):void{
+				_MainService.getExtraData.removeEventListener(ResultEvent.RESULT,onExtraDataReady);
+				if(e.result){
+					var data:Object = e.result as Object;
+					_extraData = data;
+					_extraData["_idEmpleado"] = _dataList.selectedItem._idEmpleado;
+					for( var prop:String in data){
+						if(this.hasOwnProperty(prop)){
+							this[prop].selected = Converter.bool(data[prop]);
+						}
+					}
+				}
+				_dataReady = true;
+			}
+			
+			
+			
+			private function findIndexDepto(value:Number):Number{
+				var res:Number = -1;
+				for(var n:Number = 0;n<_deptos.length;n++){
+					if(_deptos[n]._idDepartamento==value) res = n;
+				}
+				return res;
+			}
+			
+			private function findIndexPuesto(value:Number):Number{
+				var res:Number = -1;
+				for(var n:Number = 0;n<_puestos.length;n++){
+					if(_puestos[n]._idPuesto==value) res = n;
+				}
+				return res;
+			}
+			
+			
+			private function forceImports():void{
+				//Firma;
+				//Credenciales;
+				//Intereses;
+				//Inmuebles;
+				Empresa_Departamentos;
+				Empresa_Puesto_Inmediato;
+				Empresa_Areas;
+				Empleados_Historial_Laboral;
+				Empleados_Dependientes_Economicos;
+				Empleados_Perfil_Carrera;
+				Empleados_Areas_Interes;
+				Empleados_Credenciales;
+				Empleados_Firma;
+				Empleados_Accesos;
+				//Evaluaciones;
+			}
+			
+			public function initView():void{
+				forceImports();
+				_areas = SystemGlobals.AREAS;
+				_deptos = SystemGlobals.DEPARTAMENTOS;
+				_puestos = SystemGlobals.PUESTOS;
+				_MainService = _webApplication.getService(_serviceName);
+				_Data.exceptions = ["_vencimientoLicencia","_idEmpleado","_fechaNacimiento","_idCECO","_idCompania","_idArea","_idPuesto","_idDepartamento","_idCategoria","_fechaBaja"];
+				_MainService.addEventListener(FaultEvent.FAULT,onFault);
+				initData();
+				addValidations();
+				loadScroll();
+				var cam:Camera = Camera.getCamera();
+				if(cam) _camReady = true;
+				
+				if(_webApplication.user.role=="Empleados") {
+					if(_webApplication.user.accessType==0) currentState = "Empleados";		
+					_accessType = 	_webApplication.user.accessType;		
+					PopUpManager.centerPopUp(this);
+				}
+			}
+			
+			public function imageUploadReady():void{				
+				_picture = _path+_dataList.selectedItem._idEmpleado+'.jpg?'+Math.random();
+			}
+			
+			private function openDepto():void{
+				openPopUp("Catalogo_Departamentos");
+			}
+						
+			private function openArea():void{
+				openPopUp("Catalogo_Areas");
+			}
+			
+			private function openPuesto():void{
+				_selectMode = true;
+				StaticEvent.addEventListener(SelectionEvent.SELECTION_COMPLETE,onPuestoSelectcomplete);
+				openPopUp("Catalogo_Puestos",true);
+			}
+			
+			private function openCeco():void{
+				openPopUp("Catalogo_CECO");
+			}
+			
+			private function openCompanias():void{
+				openPopUp("Catalogo_Companias");
+			}
+			
+			private function openUbicacion():void{
+				openPopUp("Catalogo_Ubicaciones");
+			}
+			
+			private function onPuestoSelectcomplete(e:SelectionEvent):void{ 
+				var idCia:Number 		= Converter.findIndex(SystemGlobals.COMPANIAS,		"_idCompania",		e.itemData._idCompania);
+				var idArea:Number 		= Converter.findIndex(SystemGlobals.AREAS,			"_idArea",			e.itemData._idArea);
+				var idDepto:Number 		= Converter.findIndex(SystemGlobals.DEPARTAMENTOS,	"_idDepartamento",	e.itemData._idDepartamento);
+				var idPuesto:Number 	= Converter.findIndex(SystemGlobals.PUESTOS,		"_idPuesto",		e.itemData._idPuesto);
+				var idCategoria:Number 	= Converter.findIndex(SystemGlobals.CATEGORIAS,		"_idCategoria",		e.itemData._idCategoria);
+				var idCECO:Number 		= Converter.findIndex(SystemGlobals.CECO,			"_idCECO",			e.itemData._idCECO);
+				
+				if(idCia!=-1)		{_cia.text 		= SystemGlobals.COMPANIAS[idCia]._nombre }else{ _cia.text 		= ""};
+				if(idArea!=-1)		{_area.text 	= SystemGlobals.AREAS[idArea]._nombre }else{ _area.text 		= ""};
+				if(idDepto!=-1)		{_depto.text 	= SystemGlobals.DEPARTAMENTOS[idDepto]._nombre }else{ _depto.text 		= ""};
+				if(idPuesto!=-1)	{_puesto.text 	= SystemGlobals.PUESTOS[idPuesto]._nombre }else{ _puesto.text 		= ""};
+				if(idCategoria!=-1)	{_categoria.text= SystemGlobals.CATEGORIAS[idCategoria]._nombre }else{ _categoria.text 		= ""};
+				if(idCECO!=-1)	 	{_ceco.text 	= SystemGlobals.CECO[idCECO]._nombre }else{ _ceco.text 		= "NA"};
+				
+				_idCompania 	= e.itemData._idCompania;			
+				_idArea 		= e.itemData._idArea;
+				_idDepartamento = e.itemData._idDepartamento;
+				_idPuesto 		= e.itemData._idPuesto;
+				_idCategoria 	= e.itemData._idCategoria;
+				_idCECO			= e.itemData._idCECO;
+				
+				_updateData = true;
+				StaticEvent.removeEventListener(SelectionEvent.SELECTION_COMPLETE,onPuestoSelectcomplete);
+			}
+			
+			
+			
+
+			// ------------------- View Extra Data -------------------------------
+
+			private function loadScroll():void{
+				_dataList.visible = false;
+				for(var n:Number = 0;n<100;n++){
+					_DataResult.addItem({i:0});
+				}
+			}
+
+			private function initData():void{
+				_MainService.getFields();
+				_MainService.getFields.addEventListener(ResultEvent.RESULT,onGetFieldsResult);
+				_dataReady = false;
+			}
+			
+			public function closeWindow():void{
+            		dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
+            		PopUpManager.removePopUp(this);
+            }
+            
+//-------------------------------- MainInit --------------------------------------
+			
+			private function newData():void{
+				_Data.clear();
+				_newData = true;
+				_updateData = false;
+				Valid.validateAll();
+				this[_mainFocusField].setFocus();
+				createRecordExtras();
+			}
+			
+			private function createData():void{
+				if(Valid.validateAll()){
+					_dataReady = false;
+					var params:Object = extraCreateData(_Data.makeData());
+					_MainService.createRecord(params);
+					_MainService.createRecord.addEventListener(ResultEvent.RESULT,onCreateComplete);
+				}else{
+					Alert.show(Valid.errors,"Error");
+				}
+			}
+
+			private function updateData():void{
+				if(Valid.validateAll()){
+					_dataReady = false;
+					var params:Object = extraUpdateData(_Data.makeData());
+					params[_mainId] = _dataList.selectedItem[_mainId];
+					_MainService.updateRecord(params);
+					_MainService.updateRecord.addEventListener(ResultEvent.RESULT,onUpdateComplete);
+					_dataIndex =_dataList.selectedIndex;
+				}else{
+					Alert.show(Valid.errors,"Error");
+				}
+			}
+			
+			private function deleteDataAlert():void{
+				if(_dataList.selectedIndex!=-1){
+					Alert.show("Desea borrar el registro seleccionado?","Atención",Alert.YES|Alert.CANCEL,this,deleteData);
+				}else{
+					Alert.show("No hay registro selecionado","Error");
+				}
+			}
+			
+			private function deleteData(e:CloseEvent):void{
+				if(e.detail==Alert.YES){
+					var params:Object = new Object();
+					params[_mainId] = _dataList.selectedItem[_mainId];
+					_MainService.deleteRecord(params);
+					_MainService.deleteRecord.addEventListener(ResultEvent.RESULT,onDeleteComplete);
+					_dataReady = false;
+				}
+			}
+			
+			private function cancel():void{
+				onDataSelect();
+				resetBooleans();
+				Valid.validateAll();
+			}
+			
+			private function resetBooleans():void{
+				_newData = false;
+				_updateData = false;
+			}
+
+			private function dataChange():void{
+				_updateData = true;
+			}
+
+			private function openImageEditor():void{
+				if(_dataList.selectedIndex!=-1){
+					//_newsIdNumber 	= new Number(_dataList.selectedItem._blogId);
+					_imageName = _dataList.selectedItem._idEmpleado;
+					openPopUp("managers.ImageManager")
+				}else{
+					Alert.show("No hay registro selecionado","Error");
+				}
+			}
+//-------------------------------- ResultsEvents --------------------------------------		
+			
+			private function onGetFieldsResult(e:ResultEvent):void{
+				_MainService.getFields.removeEventListener(ResultEvent.RESULT,onGetFieldsResult);
+				if(e){
+					if(e.result) {
+						_Data.createFields(Converter.arrayConverter(e.result));
+						getData();
+					}
+				}else{
+					Alert.show("Error al cargar los datos","Error");
+					_dataReady = false;
+				}
+				_DataResult= new ArrayCollection();
+				_dataList.visible = true;
+				
+			}
+			
+			public function getData():void{
+				var sp:Number = 0;				
+				var params:Object = {
+									_range:_range,
+									_idDepartamento:_webApplication.user.idDepartamento,
+									_idArea:_webApplication.user.idArea,
+									_idEmpleado:_webApplication.user.idEmpleado,
+									_idCECO:_webApplication.user.idCECO,
+									_idUbicacion:_webApplication.user.idUbicacion,
+									_idCategoria:_webApplication.user.idCategoria,
+									_idCompania:_webApplication.user.idCompania,
+									_accessType:_accessType								
+									}
+				
+				_MainService.getRecords(params);
+				_MainService.getRecords.addEventListener(ResultEvent.RESULT,onGetDataResult);
+			}
+			
+			private function onGetDataResult(e:ResultEvent):void{
+				_MainService.getRecords.removeEventListener(ResultEvent.RESULT,onGetDataResult);
+				_DataResult = Converter.arrayConverter(e.result);
+				if(_DataResult.length==0) {
+					Alert.show("No hay registros en la base de datos","Atención")
+				}else{
+					if(_dataIndex<0) _dataIndex = 0;
+					_Data.loadData(_DataResult[_dataIndex]);
+					_dataList.selectedIndex = _dataIndex;
+					_dataList.setSelectedIndex(_dataList.selectedIndex);
+					loadExtraFields(_DataResult[_dataIndex]);
+					updatePuestos();
+				}
+				_dataReady = true;
+				resetBooleans();
+			}
+			
+			private function onFault(e:FaultEvent):void{
+				Alert.show(e.fault.faultString,"Error");
+			}
+
+			private function onDataSelect():void{
+				if(_dataList.selectedIndex!=-1) {
+					_Data.loadData(_dataList.selectedItem);
+					_dataIndex =_dataList.selectedIndex;
+					loadExtraFields(_dataList.selectedItem);
+					_selectedId = _dataList.selectedItem[_mainId];		
+					updatePuestos()																	
+				}
+			}
+			
+			private function updatePuestos():void{
+				var idCia:Number 	= Converter.findIndex(SystemGlobals.COMPANIAS,		"_idCompania",		_dataList.selectedItem._idCompania);
+				var idArea:Number 	= Converter.findIndex(SystemGlobals.AREAS,			"_idArea",			_dataList.selectedItem._idArea);
+				var idDepto:Number 	= Converter.findIndex(SystemGlobals.DEPARTAMENTOS,	"_idDepartamento",	_dataList.selectedItem._idDepartamento)
+				var idPuesto:Number = Converter.findIndex(SystemGlobals.PUESTOS,		"_idPuesto",		_dataList.selectedItem._idPuesto);
+				var idCECO:Number 	= Converter.findIndex(SystemGlobals.CECO,			"_idCECO",			_dataList.selectedItem._idCECO);
+				var idCategoria:Number 	= Converter.findIndex(SystemGlobals.CATEGORIAS,	"_idCategoria",		_dataList.selectedItem._idCategoria);
+				
+				if(idCia!=-1)		{_cia.text 		= SystemGlobals.COMPANIAS[idCia]._nombre }else{ _cia.text 		= ""};
+				if(idArea!=-1)		{_area.text 	= SystemGlobals.AREAS[idArea]._nombre }else{ _area.text 		= ""};
+				if(idDepto!=-1)		{_depto.text 	= SystemGlobals.DEPARTAMENTOS[idDepto]._nombre }else{ _depto.text 		= ""};
+				if(idPuesto!=-1)	{_puesto.text 	= SystemGlobals.PUESTOS[idPuesto]._nombre }else{ _puesto.text 		= ""};
+				if(idCECO!=-1)		{_ceco.text 		= SystemGlobals.CECO[idCECO]._nombre }else{ _ceco.text 		= ""};
+				if(idCategoria!=-1)	{_categoria.text 	= SystemGlobals.CATEGORIAS[idCategoria]._nombre }else{ _categoria.text 		= ""};
+				
+				_idCompania 	= _dataList.selectedItem._idCompania;
+				_idArea 		= _dataList.selectedItem._idArea;
+				_idDepartamento = _dataList.selectedItem._idDepartamento;
+				_idPuesto 		= _dataList.selectedItem._idPuesto;
+				_idCategoria 	= _dataList.selectedItem._idCategoria;
+				_idCECO			= _dataList.selectedItem._idCECO;
+			}
+			
+			private function onCreateComplete(e:ResultEvent):void{				
+				_MainService.createRecord.removeEventListener(ResultEvent.RESULT,onCreateComplete);
+				_dataIndex = _DataResult.length;
+				getData();
+			}
+			
+			private function onUpdateComplete(e:ResultEvent):void{
+				_MainService.updateRecord.removeEventListener(ResultEvent.RESULT,onUpdateComplete);
+				getData();
+			}
+			
+			private function onDeleteComplete(e:ResultEvent):void{
+				_MainService.deleteRecord.removeEventListener(ResultEvent.RESULT,onDeleteComplete);
+				_dataIndex = _DataResult.length-2;
+				getData();
+			}
+	
+//-------------------------------- ResultsEvents --------------------------------------	
+
+//-------------------------------- POP UP WINDOW --------------------------------------	
+			public function openPopUp(popUpName:String,modal:Boolean = false):void{
+				var pop:TitleWindow = PopUpManager.createPopUp(this, getDefinitionByName("views."+popUpName) as Class, modal) as TitleWindow;
+				pop.name = popUpName;
+				pop.addEventListener(CloseEvent.CLOSE, closePopup);
+				if(pop.hasOwnProperty("context")){
+					Object(pop).context = viewContext;
+				}
+				PopUpManager.centerPopUp(pop);
+			}
+			
+			private function closePopup(e:CloseEvent):void{
+	            PopUpManager.removePopUp(e.target as TitleWindow);
+			}
+//-------------------------------- POP UP WINDOW --------------------------------------
+
+//-------------------------------- Search Engine --------------------------------------
+
+			private function searchFilter():void{
+               			_DataResult.filterFunction = vlidateSearch;
+               			_DataResult.refresh();
+           		}
+          
+	       		private function vlidateSearch(item:Object):Boolean{
+	           		var isMatch:Boolean = false;  
+	           		if(item[_searchType.selectedItem.value]){        
+		           		if(item[_searchType.selectedItem.value].toLowerCase().search(_searchFilter.toLowerCase()) != -1){
+		               			isMatch = true
+		           		}      
+		         	}        
+	           		return isMatch;              
+	       		}
+	       	
+	       		private function search():void{
+				_searchFilter = _searchField.text;
+				searchFilter();
+			}
+			private var _searchFilter:String 			= new String();
+[Bindable]	private var _searchTypes:ArrayCollection 	= new ArrayCollection([{label:"No. Empleado",     	value:"_numFortia"},{label:"Nombre",     	value:"_nombre"},{label:"Apellido Paterno",     	value:"_paterno"},{label:"Apellido Materno",     	value:"_materno"}]);
+
+//-------------------------------- Search Engine --------------------------------------	
+
+			private function getPicture():void{
+				if(_numFortia.text!=""){
+					GlobalData.EMPLEADO = _dataList.selectedItem._idEmpleado;
+					//_FotosPersonal = FotosPersonal(PopUpManager.createPopUp(this,FotosPersonal,true));
+					//_FotosPersonal.workManager = this;
+					//_FotosPersonal.webApplication = _webApplication;
+					//PopUpManager.centerPopUp(_FotosPersonal);
+				}else{
+					Alert.show("Falta el número de empleado","Error");
+				}
+			}	
+			
+			private function openImageManager():void{
+				openPopUp("managers.ImageManager",true);
+			}
+			
+			
+		]]>
+	</fx:Script>
+	<s:Image x="10" y="10" width="138" height="177" source="{_picture}" toolTip="{_picture}"  id="_img" />
+	<s:Button id="_fotografiaBt" x="9" y="195" width="123" label="   Fotografía"
+			  click="getPicture();"
+			  enabled="{_dataReady&amp;&amp;_camReady&amp;&amp;_accessType==-1}"
+			  skinClass="skins.Custom_Button_Light_Skin"/>
+	<s:Button x="9" y="226" width="150" label="   Firma" click="openPopUp('empleados.Empleados_Firma',true)"
+			  enabled="{_dataReady&amp;&amp;_accessType==-1}"
+			  skinClass="skins.Custom_Button_Light_Skin"/>
+	<s:Button x="9" y="257" width="96" label="   Credencial"
+			  skinClass="skins.Custom_Button_Light_Skin"/>
+	<s:Button x="107" y="257" width="25" click="openPopUp('empleados.Empleados_Credenciales',true)"
+			  enabled="{_dataReady&amp;&amp;_accessType==-1}"
+			  skinClass="skins.Custom_Button_Light_Skin">
+		<s:icon>@Embed(source='../../assets/Icons/Buttons/Cred_Horizontal.png')</s:icon>
+	</s:Button>
+	<s:Button x="134" y="257" width="25" click="openPopUp('empleados.Empleados_Credenciales_Vertical',true)"
+			  enabled="{_dataReady&amp;&amp;_accessType==-1}"
+			  skinClass="skins.Custom_Button_Light_Skin">
+		<s:icon>@Embed(source='../../assets/Icons/Buttons/Cred_Vertical.png')</s:icon>
+	</s:Button>
+	<s:Button x="134" y="195" width="25" click="openImageEditor()"
+			  enabled="{_dataReady&amp;&amp;_accessType==-1&amp;&amp;!_newData}"
+			  skinClass="skins.Custom_Button_Light_Skin">
+		<s:icon>@Embed(source='../assets/Icons/Buttons/UpLoad.png')</s:icon>
+	</s:Button>
+	<s:Button x="9" y="288" width="150" label="   Vivienda" click="openPopUp('Inmuebles',true)"
+			  enabled="{_dataReady}" skinClass="skins.Custom_Button_Light_Skin"/>
+	<s:Button x="9" y="319" width="150" label="   Intereses" click="openPopUp('Intereses',true)"
+			  enabled="{_dataReady}" skinClass="skins.Custom_Button_Light_Skin"/>
+	<s:Button x="9" y="381" width="150" label="   Historial Laboral"
+			  click="openPopUp('empleados.Empleados_Historial_Laboral',true)" enabled="{_dataReady}"
+			  skinClass="skins.Custom_Button_Light_Skin"/>
+	<s:Label x="232" y="430" text="CIA :" />
+<s:TextInput x="603" y="10" id="_imss" change="dataChange();" width="160" tabIndex="2"/>
+	<s:TextInput x="435" y="46" id="_rfc" change="dataChange();" width="160" editable="true" tabIndex="4"/>
+	<s:Label x="437" y="36" text="rfc"  fontStyle="italic" fontSize="9" color="#8B8B8B"/>
+<s:Label x="604" y="37" text="curp"  fontStyle="italic" fontSize="9" color="#8B8B8B"/>
+<s:TextInput x="604" y="46" id="_curp" change="dataChange();" width="159" tabIndex="5"/>
+<s:Label x="199" y="97" text="Empleado :" />
+	<s:Label x="203" y="165" text="Dirección :" />
+<s:TextInput x="265" y="90" id="_nombre" change="dataChange();" width="160" tabIndex="6"/>
+	<s:Label x="544" y="222" text="E- Mail :" />
+	<s:Label x="215" y="227" text="Celular :" />
+	<s:TextInput x="603" y="220" id="_mail" change="dataChange();" width="160" tabIndex="21"/>
+	<s:TextInput x="265" y="220" id="_celular" change="dataChange();" width="160" tabIndex="20"/>
+<s:Label x="265" y="80" text="nombre(s)"  color="#8B8B8B" fontSize="10" fontStyle="italic"/>
+	<s:Label x="265" y="148" text="calle"  color="#8B8B8B" fontSize="10" fontStyle="italic"/>
+	<s:Label x="435" y="148" text="número"  color="#8B8B8B" fontSize="10" fontStyle="italic"/>
+	<s:Label x="435" y="185" text="estado"  color="#8B8B8B" fontSize="10" fontStyle="italic"/>
+	<s:Label x="265" y="184" text="municipio"  color="#8B8B8B" fontSize="10" fontStyle="italic"/>
+	<s:Label x="603" y="184" text="teléfono"  color="#8B8B8B" fontSize="10" fontStyle="italic"/>
+	<s:Label x="704" y="147" text="c.p."  color="#8B8B8B" fontSize="10" fontStyle="italic"/>
+	<s:Label x="531" y="148" text="colonia"  color="#8B8B8B" fontSize="10" fontStyle="italic"/>
+	<s:Label x="437" y="80" text="paterno"  color="#8B8B8B" fontSize="10" fontStyle="italic"/>
+	<s:Label x="605" y="80" text="materno"  color="#8B8B8B" fontSize="10" fontStyle="italic"/>
+<s:TextInput x="436" y="90" id="_paterno" change="dataChange();" width="160" tabIndex="7"/>
+<s:TextInput x="603" y="90" id="_materno" change="dataChange();" width="160" tabIndex="8"/>
+<s:Label x="177" y="18" text="No. Empleado :" />
+	<s:Label x="213" y="53" text="Ingreso :" />
+	<s:Label x="547" y="16" text="I.M.S.S :" />
+<s:TextInput x="265" y="11" id="_numFortia" change="dataChange();" width="58" editable="true" tabIndex="1"/>
+<s:TextInput x="265" y="158" id="_calle" change="dataChange();" width="160" tabIndex="13"/>
+<s:TextInput x="529" y="158" id="_colonia" change="dataChange();" width="160" tabIndex="15"/>
+<s:TextInput x="434" y="158" id="_numero" change="dataChange();" width="84" tabIndex="14"/>
+<s:TextInput x="703" y="158" id="_cp" change="dataChange();" width="60" tabIndex="16"/>
+<s:TextInput x="434" y="196" id="_estado" change="dataChange();" width="160" tabIndex="18"/>
+<s:TextInput x="265" y="194" id="_municipio" change="dataChange();" width="160" tabIndex="17"/>
+<s:Label x="616" y="367" text="Tipo Sangre :" />
+	<s:Label x="613" y="337" text="Tel :" />
+<s:ComboBox  x="693" y="362" id="_tipoSangre" change="dataChange();" width="70" dataProvider="{Constantes.TiposSangre}" labelField="label" tabIndex="28"/>
+	<s:ComboBox  x="603" y="120" id="_sexo" change="dataChange();" width="160" dataProvider="{Constantes.Sexos}" labelField="label" tabIndex="12"/>
+<s:Label x="189" y="339" text="Emergencia :" />
+<s:TextInput x="265" y="332" id="_emergencia" change="dataChange();" width="328" tabIndex="25"/>
+	<s:TextInput x="265" y="362" id="_alergias" change="dataChange();" width="328" tabIndex="27"/>
+<s:Label x="209" y="369" text="Alergias :" />
+<s:TextInput x="603" y="194" id="_telCasa" change="dataChange();" width="160" tabIndex="19"/>
+	<s:TextInput x="644" y="332" id="_telEme" change="dataChange();" width="119" tabIndex="26"/>
+<s:Label x="188" y="127" text="Fecha Nac.  :" />
+<s:Label x="552" y="122" text="Sexo : " />
+
+	<s:DataGrid height="504" dataProvider="{_DataResult}" id="_dataList" selectionChange="onDataSelect();" enabled="{_dataReady&amp;&amp;!_newData&amp;&amp;!_updateData}" y="76" width="474" x="790">
+		<s:columns>	
+			<s:ArrayList>	
+				<s:GridColumn headerText="A/B" width="40" >			
+					<!--s:itemRenderer>
+						<s:Component>
+							<s:HBox width="100%"  verticalAlign="middle" horizontalAlign="center">
+								<s:Image source="assets/Icons/Status/auth_{data._estatus}.png"  width="13" height="13" scaleContent="false"/>
+							</s:HBox>
+						</s:Component>
+					</s:itemRendere-->
+				</s:GridColumn>		
+				<s:GridColumn headerText="Número" dataField="_numFortia" width="50"/>
+				<s:GridColumn headerText="Nombre" dataField="_nombre" />
+				<s:GridColumn headerText="Apellido Paterno" dataField="_paterno"/>
+				<s:GridColumn headerText="Apellido Materno" dataField="_materno"/>
+			</s:ArrayList>
+		</s:columns>
+	</s:DataGrid>
+	
+	<s:Button label="Nuevo" width="80" enabled="{_dataReady}" visible="{!_newData&amp;&amp;!_updateData&amp;&amp;_accessType==-1}" click="newData();" y="621" x="265" id="button5"/>
+	<s:Button label="Cancelar" width="80" enabled="{_dataReady}" visible="{_newData||_updateData}" click="cancel();" y="621" x="353"/>
+	<s:Button label="Aceptar" width="80" enabled="{_dataReady}" visible="{_newData}" click="createData();" y="621" x="265" id="button4"/>
+	<s:Button label="Eliminar" width="80" enabled="{_dataReady&amp;&amp;!_newData}" visible="{!_newData&amp;&amp;!_updateData&amp;&amp;_accessType==-1}" click="deleteDataAlert();" y="621" x="353" id="button2"/>
+	<s:Button label="Actualizar" width="80" enabled="{_dataReady&amp;&amp;!_newData&amp;&amp;_updateData}" visible="{_updateData&amp;&amp;!_newData}" click="updateData();" y="621" x="265" id="button3"/>
+	<s:Button label="Regresar" click="closeWindow();" width="145"  enabled="{!_newData}" y="588" x="1117" id="button1"/>
+
+	<s:ComboBox 	x="858" id="_searchType" 	dataProvider="{_searchTypes}" 	width="160" y="41"/>
+	<s:TextInput 	x="1026" id="_searchField" 	change="search();" 		width="238" enabled="{!_newData}" y="41"/>
+	<s:Label x="790" text="Filtrar por :" textAlign="right" y="47"/>
+	<s:ComboBox x="265" y="120" id="day" dataProvider="{ConstantData.Days}" labelField="label" width="52" change="dataChange();" tabIndex="9"></s:ComboBox>
+	<s:ComboBox x="324" y="120" id="month" dataProvider="{ConstantData.Months}" labelField="label" width="104" change="dataChange();" tabIndex="10"></s:ComboBox>
+	<s:ComboBox x="436" y="120" id="year" dataProvider="{ConstantData.Years}" labelField="label" width="69" change="dataChange();" tabIndex="11"></s:ComboBox>
+	<s:CheckBox x="437" y="11" id="_verificacion" label="Verificación RH" click="dataChange();"/>
+	<s:CheckBox x="333" y="11" id="_estatus" label="activo / baja" click="dataChange();"/>
+
+	<s:TextInput x="434" y="264" id="_numeroLicencia" change="dataChange();" width="161" tabIndex="23"/>
+	<s:Label x="435" y="253" text="número"  color="#8B8B8B" fontSize="10" fontStyle="italic"/>
+	<s:Label x="265" y="251" text="tipo"  color="#8B8B8B" fontSize="10" fontStyle="italic"/>
+	<s:Label x="265" y="288" text="expira"  color="#8B8B8B" fontSize="10" fontStyle="italic"/>
+	<s:ComboBox  x="265" y="262" id="_tipoLicencia" change="dataChange();" width="158" dataProvider="{ConstantData.LicenceType}" labelField="label" tabIndex="22"/>
+	<s:ComboBox  x="265" y="390" id="_idDiscapacidad" change="dataChange();" width="161" dataProvider="{ConstantData.Discapacidades}" labelField="label" tabIndex="22"/>
+	<s:Label x="181" y="400" text="Discapacidad : "  height="20"/>
+	<s:Label x="209" y="269" text="Licencia : "  height="20"/>
+	<mx:TextInput x="265" y="46" id="_fechaIngreso" width="109" tabIndex="3"/>
+	<s:CheckBox x="13" y="291" enabled="false" id="_tieneInmueble"/>
+	<s:CheckBox x="13" y="322" enabled="false" id="_tieneIntereses"/>
+	<s:CheckBox x="14" y="384" enabled="false" id="_tieneHistorialLaboral"/>
+	<s:Button x="9" y="412" width="150" label="   Historial Familiar"
+			  click="openPopUp('empleados.Empleados_Dependientes_Economicos',true)" enabled="{_dataReady}"
+			  skinClass="skins.Custom_Button_Light_Skin"/>
+	<s:Button id="button14" x="9" y="443" width="150" label="   Perfil de Carrera"
+			  click="openPopUp('empleados.Empleados_Perfil_Carrera',true)" enabled="{_dataReady}"
+			  skinClass="skins.Custom_Button_Light_Skin"/>
+	<s:CheckBox x="14" y="446" enabled="false" id="_tienePerfil"/>
+	<s:Button id="button13" x="9" y="474" width="150" label="   Areas de Interés"
+			  click="openPopUp('empleados.Empleados_Areas_Interes',true)" enabled="{_dataReady}"
+			  skinClass="skins.Custom_Button_Light_Skin"/>
+	<s:Button id="button0" x="9" y="505" width="150" label="   Competencias"
+			  click="openPopUp('empleados.Empleados.Empleados_Competencias',true)" enabled="{_dataReady}"
+			  skinClass="skins.Custom_Button_Light_Skin"/>
+	<s:CheckBox x="14" y="505" enabled="false" id="_tieneCompetencias"/>
+	<s:CheckBox x="14" y="477" enabled="false" id="_tieneAreasInteres"/>
+	<s:Button x="9" y="350" width="150" label="   Historial Académico"
+			  click="openPopUp('empleados.Empleados_Antecedentes_Academicos',true)"
+			  enabled="{_dataReady}" skinClass="skins.Custom_Button_Light_Skin"/>
+	<s:CheckBox x="14" y="353" enabled="false" id="_tieneHistorialAcademico"/>
+	<s:Button id="button12" visible="{_accessType==-1}" x="601" y="426" width="162"
+			  label="   Acceso al Sistema" click="openPopUp('Empleados_Accesos',true)"
+			  enabled="{_dataReady}" skinClass="spark.skins.spark.ButtonSkin" />
+	<s:Button visible="{_accessType==-1}" x="790" y="588" width="37" click="initData();"
+			  enabled="{_dataReady}" skinClass="spark.skins.spark.ButtonSkin" >
+		<s:icon>@Embed(source='../assets/Icons/Buttons/refresh.png')</s:icon>
+	</s:Button>
+	<s:CheckBox x="606" y="427" enabled="false" id="_tieneAcceso" visible="{_accessType==-1}"/>
+	<s:CheckBox x="14" y="415" enabled="false" id="_tieneDependientes"/>
+	<s:CheckBox x="13" y="198" enabled="false" id="_tieneFotografia"/>
+	<s:CheckBox x="13" y="229" enabled="false" id="_tieneFirma"/>
+	<s:CheckBox x="13" y="260" enabled="false" id="_tieneCredencial"/>
+	<s:Label x="177" y="496" text="Departamento :" />
+	<s:Label x="215" y="515" text="Puesto :" />
+	<s:Label x="215" y="515" text="Puesto :" />
+	<s:Label x="218" y="542" text="CECO :" />
+	<s:Label x="200" y="569" text="Categoría :" />
+	<s:TextInput x="265" y="508" width="326" id="_puesto" editable="false"/>
+	<s:Label x="227" y="459" text="Area :" />
+	<s:Button id="button10" visible="{_accessType==-1}" x="601" y="507" width="162"
+			  label="Buscar Puesto" click="openPuesto()"
+			  icon="@Embed(source='../assets/Icons/Buttons/Search.png')"
+			  skinClass="spark.skins.spark.ButtonSkin" tabIndex="29" />
+
+	<s:Label x="197" y="597" text="Ubicación  :" />
+	<s:ComboBox x="265" y="589" id="_idUbicacion" change="dataChange();" width="328" dataProvider="{SystemGlobals.UBICACIONES}" labelField="_nombre" tabIndex="30"/>
+	<s:Button id="button11" visible="{_accessType==-1}" x="603" y="588" click="openUbicacion()"
+			  icon="@Embed(source='../assets/Icons/Buttons/Edit.png')"
+			  skinClass="spark.skins.spark.ButtonSkin"/>
+
+	<s:Button x="940" y="10" label="Todos" click="chageRange(2)"
+			  skinClass="spark.skins.spark.ButtonSkin"/>
+	<s:Button x="865" y="10" label="En Baja" click="chageRange(1)" 
+			  skinClass="spark.skins.spark.ButtonSkin"/>
+	<s:Button x="790" y="10" label="Activos" click="chageRange(0)"
+			  skinClass="spark.skins.spark.ButtonSkin"/>
+	<s:TextInput x="265" y="425" width="326" id="_cia" editable="false"/>
+	<s:TextInput x="265" y="452" width="326" id="_area" editable="false"/>
+	<s:TextInput x="265" y="480" width="326" id="_depto" editable="false"/>
+	<s:TextInput x="265" y="535" width="326" id="_ceco" editable="false"/>
+	<s:TextInput x="265" y="562" width="326" id="_categoria" editable="false"/>
+	<s:ComboBox x="265" y="298" id="expira_day" dataProvider="{ConstantData.Days}" labelField="label" width="52" change="dataChange();" tabIndex="9"></s:ComboBox>
+	<s:ComboBox x="325" y="298" id="expira_month" dataProvider="{ConstantData.Months}" labelField="label" width="101" change="dataChange();" tabIndex="10"></s:ComboBox>
+	<s:ComboBox x="434" y="298" id="expira_year" dataProvider="{ConstantData.YearsUP}" labelField="label" width="69" change="dataChange();" tabIndex="11"></s:ComboBox>
+	<s:Button x="10" y="536" width="149" label="   Evaluaciones"
+			  click="openPopUp('evaluaciones.Evaluaciones',true);" enabled="{_dataReady}"
+			  skinClass="skins.Custom_Button_Light_Skin"/>
+	<s:CheckBox x="14" y="533" enabled="false" id="_tieneEvaluaciones"/>
+	<s:Button x="10" y="567" width="149" label="   Expedientes"
+			  click="openPopUp('empleados.Empleados_Documentos',true);" enabled="{_dataReady}"
+			  skinClass="skins.Custom_Button_Light_Skin"/>
+	<s:CheckBox x="14" y="561" enabled="false" id="_tieneExpediente"/>
+	<s:Button x="10" y="598" width="149" label="Reportes"
+			  click="openPopUp('reportes.Reportes_Manager',true);" enabled="{_dataReady}"
+			  skinClass="skins.Custom_Button_Light_Skin">
+	</s:Button>
+	
+</s:TitleWindow>

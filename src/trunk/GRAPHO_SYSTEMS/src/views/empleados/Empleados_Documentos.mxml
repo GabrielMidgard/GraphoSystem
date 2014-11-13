@@ -1,0 +1,377 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow 
+	xmlns:mx="http://www.adobe.com/2006/mxml" 
+	width="566" height="630" 
+	layout="absolute" 
+	horizontalCenter="0" 
+	title="Expediente" 
+	verticalCenter="0"
+	verticalScrollPolicy="off"
+	horizontalScrollPolicy="off"
+	showCloseButton="true">
+
+	<mx:Script>
+		<![CDATA[
+			import mx.random.constants.ConstantData;
+			
+			import mx.random.constants.Catalogs;
+			import mx.random.windowManagers.PopManager;
+			import mx.random.constants.Languages;
+			import mx.random.forms.Validator;
+			import mx.random.dataManagers.EventManager;
+			import mx.random.cms.converters.Converter;
+			import mx.random.dataManagers.DataManager;
+			import mx.random.cms.web.WebApplication;
+			import mx.managers.PopUpManager;
+			import mx.collections.ArrayCollection;
+			import mx.events.CloseEvent;
+			import mx.controls.Alert;
+			import mx.rpc.remoting.RemoteObject;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+
+			private var _webApplication:WebApplication;
+			private var Valid:Validator 			= new Validator();
+			private var _workManager:Object 		= new Object();
+			private var _MainService:RemoteObject 		= new RemoteObject();
+[Bindable]	private var _Data:DataManager 				= new DataManager(this);
+[Bindable]	private var _DataResult:ArrayCollection 		= new ArrayCollection();			
+			private var _eventManager:EventManager 		= new EventManager(this);
+			private var _dataIndex:Number 			= 0;
+			
+			//-----------Event Manager -----------
+
+[Bindable]	public var _dataReady:Boolean 			= false;
+[Bindable]	public var _newData:Boolean 			= false;
+[Bindable]	public var _updateData:Boolean 			= false;
+
+			//-----------Event Manager -----------
+			
+			
+			//-----------Local Vars -----------
+			
+			private var _selectedId:Number 		= 0;
+			private var _selectedName:String 	= "";
+			private var _serviceName  			= "EmpleadosDocumentos";
+			private var _mainId  				= "_idDocumento";
+			private var _relationId  			= "_idEmpleado";
+			private var _mainFocusField:String  = "";
+//<------->			
+[Bindable]	private var _id:Number 		= 0;
+[Bindable]	private var _idEmpleado:Number 		= 0;
+[Bindable]	private var _idDocumento:Number 		= 0;
+[Bindable]	private var _nombreEmpleado:String 	= "";
+	
+			public function set relationIdValue(value:Number):void { _idEmpleado = value }
+			public function set dataObject(value:Object):void	{
+				_nombreEmpleado = value._nombre+" "+value._paterno+" "+value._materno;
+			}
+			
+			//-----------Local Vars -----------
+
+			
+//---------------------------- Context ---------------------------------------------            
+
+   			public function set context(contextObj:Object):void{
+				for( var p:String in contextObj){
+					if(this.hasOwnProperty(p)){
+						this[p] = contextObj[p];
+					}
+				}
+			}
+
+			public function set workManager(value:Object):void{
+				_workManager = value;
+			}
+
+			public function set webApplication(value:WebApplication):void{
+				_webApplication = value;
+				initView();
+			}
+			public function get webApplication():WebApplication{ return _webApplication; } 
+						
+//---------------------------- Context ---------------------------------------------  
+
+//-------------------------------- MainInit --------------------------------------
+			// ------------------- View Extra Data -------------------------------
+			
+			private function get viewContext():Object{
+				return {webApplication: _webApplication,
+						workManager: this
+						}					
+			}
+
+			private function addValidations():void{
+				Valid.changeLanguage(Languages.SPANISH);
+
+
+				var validFields:ArrayCollection = Valid.validFields;
+				for(var n:Number = 0;n<validFields.length;n++){					
+					this[validFields[n].obj.name].addEventListener(Event.CHANGE,onFocusOut);
+				}
+				Valid.setErrorKnot(Validator.CIRCLE_KNOT,0xFF0000);
+			}
+
+			private function onFocusOut(e:Event):void{
+				if(_newData||_updateData) Valid.validateAll();//Valid.validateOne(e.currentTarget.name);
+			}
+			
+			private function extraCreateData(params:Object):Object{
+				params[_relationId] = this[_relationId];
+				//params["_newsImage"] = _image;
+				//params['_fechaNacimiento'] 	= _year.selectedItem.label+'-'+_month.selectedItem.value+'-'+_day.selectedItem.value;
+				return params;
+			}
+			
+			private function createRecordExtras():void{
+				//_image = "defaultNew.jpg";
+				/*_day.selectedIndex 	= 0;
+				_month.selectedIndex 	= 0;
+				_year.selectedIndex 	= 0;*/
+			}
+			
+			private function extraUpdateData(params:Object):Object{	
+				//params['_fechaNacimiento'] = _year.selectedItem.label+'-'+_month.selectedItem.value+'-'+_day.selectedItem.value;			
+				return params;
+			}
+			
+			private function loadExtraFields(params:Object):void{
+				//_image = params["_newsImage"];
+				/*
+				if(tempDate){
+					var temp:Array 		 = tempDate.split('-');
+					_day.selectedIndex 	 = parseInt(temp[2]);
+					_month.selectedIndex = parseInt(temp[1]);
+					_year.selectedIndex  = ConstantData.FindYearindex(temp[0]);
+				}else{
+					_day.selectedIndex 		= 0;
+					_month.selectedIndex 	= 0;
+					_year.selectedIndex 	= 0;
+				}*/
+			}
+			
+			private function forceImports():void{
+				Catalogs;
+			}
+			
+			public function initView():void{
+				forceImports();
+				_MainService = _webApplication.getService(_serviceName);
+				_Data.exceptions = ["_idDocumento","_idEmpleado"];
+				_MainService.addEventListener(FaultEvent.FAULT,onFault);
+				initData();
+				addValidations();				
+			}
+			
+			public function imageUploadReady(data:Object):void{
+				
+			}
+
+			// ------------------- View Extra Data -------------------------------			
+
+			private function initData():void{
+				_MainService.getFields();
+				_MainService.getFields.addEventListener(ResultEvent.RESULT,onGetFieldsResult);
+				_dataReady = false;
+			}
+			
+			public function closeWindow():void{
+            		dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
+            		PopUpManager.removePopUp(this);
+            }
+            
+//-------------------------------- MainInit --------------------------------------
+			
+			private function newData():void{
+				_Data.clear();
+				_newData = true;
+				_updateData = false;				
+				//this[_mainFocusField].setFocus();
+				createRecordExtras();
+				Valid.validateAll();
+			}
+			
+			private function createData():void{
+				if(Valid.validateAll()){
+					_dataReady = false;					
+					var params:Object = extraCreateData(_Data.makeData());
+					_MainService.createRecord(params);
+					_MainService.createRecord.addEventListener(ResultEvent.RESULT,onCreateComplete);
+				}else{
+					Alert.show(Valid.errors,"Error");
+				}
+			}
+
+			private function updateData():void{
+				if(Valid.validateAll()){
+					_dataReady = false;
+					var params:Object = extraUpdateData(_Data.makeData());
+					params[_mainId] = this[_mainId];
+					_MainService.updateRecord(params);
+					_MainService.updateRecord.addEventListener(ResultEvent.RESULT,onUpdateComplete);					
+				}else{
+					Alert.show(Valid.errors,"Error");
+				}
+			}
+			
+			private function cancel():void{				
+				resetBooleans();
+				Valid.validateAll();
+			}
+			
+			private function resetBooleans():void{
+				_newData = false;
+				_updateData = false;
+			}
+
+			private function dataChange():void{
+				_updateData = true;
+			}
+			
+			
+			
+			
+			
+			
+//-------------------------------- ResultsEvents --------------------------------------		
+			
+			private function onGetFieldsResult(e:ResultEvent):void{
+				_MainService.getFields.removeEventListener(ResultEvent.RESULT,onGetFieldsResult);
+				if(e){
+					if(e.result) {
+						_Data.createFields(Converter.arrayConverter(e.result));
+						getData();
+					}
+				}else{
+					Alert.show("Error al cargar los datos","Error");
+					_dataReady = false;
+				}
+				_DataResult= new ArrayCollection();								
+			}
+			
+			private function getData():void{
+//-------->			
+				var params:Object = new Object();
+				params[_relationId] = this[_relationId];  
+				_MainService.getRecordsById(params);
+				_MainService.getRecordsById.addEventListener(ResultEvent.RESULT,onGetDataResult);
+			}
+			
+			private function onGetDataResult(e:ResultEvent):void{
+				_MainService.getRecordsById.removeEventListener(ResultEvent.RESULT,onGetDataResult);
+				_DataResult = Converter.arrayConverter(e.result);
+				if(_DataResult.length==0) {
+					Alert.show("No hay datos para este registro...\nCrear un registro nuevo?","Atención",Alert.OK|Alert.NO,this,alertNewHandler);
+				}else{			
+					_Data.loadData(_DataResult[_dataIndex]);					
+					loadExtraFields(_DataResult[_dataIndex]);
+					this[_mainId] = _DataResult[_dataIndex][_mainId];
+				}
+				_dataReady = true;
+				resetBooleans();				
+			}
+			
+			private function alertNewHandler(e:CloseEvent):void{
+				if(e.detail == Alert.OK){
+					newData()
+				}
+			}
+			
+			private function onFault(e:FaultEvent):void{
+				Alert.show(e.fault.faultString,"Error");
+			}			
+			
+			private function onCreateComplete(e:ResultEvent):void{				
+				_MainService.createRecord.removeEventListener(ResultEvent.RESULT,onCreateComplete);
+				_dataIndex = 0;
+				_workManager.getData();
+				getData();
+			}
+			
+			private function onUpdateComplete(e:ResultEvent):void{
+				_MainService.updateRecord.removeEventListener(ResultEvent.RESULT,onUpdateComplete);
+				_workManager.getData();
+				getData();
+			}					
+			
+//-------------------------------- ResultsEvents --------------------------------------	
+
+//-------------------------------- POP UP WINDOW --------------------------------------	
+			public function openPopUp(popUpName:String,modal:Boolean=false):void{
+				var pop:TitleWindow = PopUpManager.createPopUp(this, getDefinitionByName("views."+popUpName) as Class, modal) as TitleWindow;
+				pop.name = popUpName;
+				pop.addEventListener(CloseEvent.CLOSE, closePopup);
+				if(pop.hasOwnProperty("context")){
+					Object(pop).context = viewContext;
+				}
+				PopUpManager.centerPopUp(pop);
+			}
+			
+			private function closePopup(e:CloseEvent):void{
+	            PopUpManager.removePopUp(e.target as TitleWindow);
+			}
+//-------------------------------- POP UP WINDOW --------------------------------------
+				
+			
+		]]>
+	</mx:Script>
+<mx:Label x="73" y="10" text="Empleado :" textAlign="right"/>
+<mx:TextInput x="150" y="10" change="dataChange();" width="402" text="{_nombreEmpleado}" editable="false"/>
+<mx:CheckBox x="39" y="69" id="_comprobante_imss" label="COMPROBANTE ALTA IMSS" change="dataChange();"/>
+	<mx:CheckBox x="39" y="84" id="_validacion_documentos" label="VALIDACION DE DOCUMENTOS" change="dataChange();"/>
+	<mx:CheckBox x="39" y="98" id="_solidictud_elaborada" label="SOLICITUD ELABORADA" change="dataChange();"/>
+	<mx:CheckBox x="39" y="113" id="_curriculum" label="CURRICULUM" change="dataChange();"/>
+	<mx:CheckBox x="39" y="128" id="_identificacion_oficial" label="IDENTIFICACION OFICIAL IFE/PASAPORTE" change="dataChange();"/>
+	<mx:CheckBox x="39" y="143" id="_cartilla_militar" label="CARTILLA MILITAR" change="dataChange();"/>
+	<mx:CheckBox x="39" y="158" id="_licencia_conducir" label="LICENCIA DE CONDUCIR" change="dataChange();"/>
+	<mx:CheckBox x="39" y="173" id="_curp" label="CURP" change="dataChange();"/>
+	<mx:CheckBox x="39" y="213" id="_primaria" label="PRIMARIA" change="dataChange();"/>
+	<mx:CheckBox x="39" y="228" id="_secundaria" label="SECUNDARIA" change="dataChange();"/>
+	<mx:CheckBox x="39" y="260" id="_prepa" label="PREPA" change="dataChange();"/>
+	<mx:CheckBox x="305" y="213" id="_prepa_tecnica" label="PREPA/COMERCIAL O TECNICA" change="dataChange();"/>
+	<mx:CheckBox x="305" y="229" id="_licenciatura" label="LICENCIATURA O INGENIERIA" change="dataChange();"/>
+	<mx:CheckBox x="305" y="245" id="_especialidad" label="ESPECIALIDAD" change="dataChange();"/>
+	<mx:CheckBox x="305" y="260" id="_maestria_doctorado" label="MAESTRIA/DOCTORADO" change="dataChange();"/>
+	<mx:CheckBox x="39" y="244" id="_secundaria_tecnica" label="SECUNDARIA TECNICA" change="dataChange();"/>
+	<mx:CheckBox x="39" y="292" id="_superacion_personal" label="SUPERACION PERSONAL" change="dataChange();"/>
+	<mx:CheckBox x="39" y="322" id="_promocion_producto" label="PROMOCION DE PRODUCTO" change="dataChange();"/>
+	<mx:CheckBox x="39" y="307" id="_especializante" label="ESPECIALIZANTE" change="dataChange();"/>
+	<mx:CheckBox x="305" y="69" id="_acta_nacimiento" label="ACTA DE NACIMIENTO" change="dataChange();"/>
+	<mx:CheckBox x="305" y="84" id="_comprobante_domicilio" label="COMPROBANTE DE DOMICILO" change="dataChange();"/>
+	<mx:CheckBox x="305" y="98" id="_carta_policia" label="CARTA POLICIA" change="dataChange();"/>
+	<mx:CheckBox x="39" y="422" id="_psicometria_figura_humana" label="PSICOMETRIA DE FIGURA HUMANA" change="dataChange();"/>
+	<mx:CheckBox x="39" y="437" id="_reporte_entrevista_laboral" label="REPORTE DE ENTREVISTA LABORAL" change="dataChange();"/>
+	<mx:CheckBox x="39" y="451" id="_otras_psicometrias" label="OTRA PSICOMETRIAS" change="dataChange();"/>
+	<mx:CheckBox x="39" y="466" id="_induccion_al_puesto" label="INDUCCION AL PUESTO" change="dataChange();"/>
+	<mx:CheckBox x="305" y="422" id="_satisfaccion_contratacion" label="SATISFACION DE LA CONTRATACION" change="dataChange();"/>
+	<mx:CheckBox x="305" y="437" id="_propuesta_economica" label="PROPUESTA ECONOMICA" change="dataChange();"/>
+	<mx:CheckBox x="305" y="451" id="_estudio_socioeconomico" label="ESTUDIO SOCIOECONOMICO" change="dataChange();"/>
+	<mx:CheckBox x="305" y="113" id="_comprobante_valide_imss" label="COMPROBANTE QUE VALIDE # IMSS" change="dataChange();"/>
+	<mx:CheckBox x="305" y="128" id="_contrato_firmado" label="CONTRATO FIRMADO" change="dataChange();"/>
+	<mx:CheckBox x="305" y="143" id="_aviso_privacidad" label="AVISO DE PRIVACIDAD" change="dataChange();"/>
+	<mx:CheckBox x="305" y="158" id="_carta_imss" label="CARTA PARA IMSS" change="dataChange();"/>
+	<mx:CheckBox x="305" y="173" id="_comprobante_cuenta" label="COMPROBANTE # CUENTA" change="dataChange();"/>
+<mx:Label x="10" y="56" text="Su Expediente Contiene" textAlign="right"/>
+	<mx:Label x="6" y="200" text="Estudios" textAlign="right"/>
+	<mx:Label x="6" y="279" text="Cursos o Diplomas" textAlign="right"/>
+	<mx:Label x="10" y="351" text="Habilidades" textAlign="right"/>
+	<mx:CheckBox x="39" y="364" id="_carta_recomendacion" label="CARTA DE RECOMENDACIÓN" change="dataChange();"/>
+	<mx:CheckBox x="39" y="379" id="_examen_teorico" label="EXAMEN TEORICO PACTICO" change="dataChange();"/>
+	<mx:Label x="10" y="409" text="Reclutamiento" textAlign="right"/>
+	<mx:Label x="10" y="493" text="Otros" textAlign="right"/>
+
+	<mx:Button label="Cancelar" width="77" enabled="{_dataReady}" visible="{_newData||_updateData}" click="cancel();" x="93" y="570"/>
+	<mx:Button label="Actualizar" width="78" enabled="{_dataReady&amp;&amp;!_newData&amp;&amp;_updateData}" visible="{_updateData&amp;&amp;!_newData}" click="updateData();" x="10" y="570"/>
+	<mx:Button label="Regresar" click="closeWindow();" width="150"  enabled="{!_newData}" x="402" y="570"/>
+	<mx:Button label="Aceptar" width="78" enabled="{_dataReady}" visible="{_newData}" click="createData();" x="10" y="570"/>
+	<mx:CheckBox x="39" y="506" id="_carta_antiguedad" label="CARTA DE ANTIGÜEDAD" change="dataChange();"/>
+	<mx:CheckBox x="39" y="536" id="_antidoping" label="ANTIDOPING" change="dataChange();"/>
+	<mx:CheckBox x="39" y="521" id="_examen_medico" label="EXAMEN MEDICO" change="dataChange();"/>
+	<mx:HRule y="65" width="386" height="1" strokeColor="#38373E" right="10"/>
+	<mx:HRule y="210" width="490" height="1" strokeColor="#38373E" right="10"/>
+	<mx:HRule y="289" width="430" height="1" strokeColor="#38373E" right="10"/>
+	<mx:HRule y="360" width="470" height="1" strokeColor="#38373E" right="10"/>
+	<mx:HRule y="418" width="450" height="1" strokeColor="#38373E" right="10"/>
+	<mx:HRule y="502" width="500" height="1" strokeColor="#38373E" right="10"/>
+	
+</mx:TitleWindow>

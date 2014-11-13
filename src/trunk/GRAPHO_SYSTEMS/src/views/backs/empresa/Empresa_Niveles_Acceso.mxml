@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="936" height="544" title="Niveles Administrativos" showCloseButton="true">
+
+	<mx:Script>
+		<![CDATA[
+			import mx.random.constants.SystemGlobals;
+			import mx.random.web.WebApplication;
+			import mx.managers.PopUpManager;
+			import mx.events.CloseEvent;
+			
+			public function set workManager(value:Object):void{ _workManager = value;}
+			public function set webApplication(value:WebApplication):void{_webApplication = value;}
+			
+			
+			private var _webApplication:WebApplication;
+			private var _workManager:Object 		= new Object();					
+			
+			private function get viewContext():Object{
+				return {webApplication: _webApplication,
+						workManager: this
+						}					
+			}
+			
+			public function set context(contextObj:Object):void{
+				for( var p:String in contextObj){
+					if(this.hasOwnProperty(p)){
+						this[p] = contextObj[p];
+					}
+				}
+				
+				Empresa_Areas;
+				Empresa_Departamentos;
+				Empresa_Organigrama;
+				Empresa_Puestos;
+				Empresa_Cecos;
+				Empresa_Sucursales;
+				Empresa_Companias;
+				Empresa_Niveles_Acceso;
+			}
+			
+			
+			
+			private function updateSelection(selectionType:Number):void{
+				
+				clearBorders();
+				
+				switch(selectionType){					
+					case 1:
+						break;
+					case 2:
+						break;
+				}
+				
+				
+				
+			}
+			
+			private function clearBorders():void{
+				
+			}
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			//-------------------------------- POP UP WINDOW --------------------------------------	
+			public function openPopUp(popUpName:String,modal:Boolean = false):void{
+				var pop:TitleWindow = PopUpManager.createPopUp(_workManager as DisplayObject, getDefinitionByName("views."+popUpName) as Class, modal) as TitleWindow;
+				pop.name = popUpName;
+				pop.addEventListener(CloseEvent.CLOSE, closePopup);
+				if(pop.hasOwnProperty("context")){
+					Object(pop).context = viewContext;
+				}
+				PopUpManager.centerPopUp(pop);
+			}
+			
+			private function closePopup(e:CloseEvent):void{
+	            PopUpManager.removePopUp(e.target as TitleWindow);
+			}
+			//-------------------------------- POP UP WINDOW --------------------------------------
+		]]>
+	</mx:Script>
+	<mx:List x="10" y="27" height="271" id="_niveles" dataProvider="{SystemGlobals.NIVELES_ACCESO}" labelField="_nombre" width="220"></mx:List>
+	<mx:List x="238" y="27" height="271" id="_areas" dataProvider="{SystemGlobals.AREAS}" labelField="_nombre" width="220" change="updateSelection(1)"></mx:List>
+	<mx:Label x="10" y="10" text="Niveles del Sistema :"/>
+	<mx:Label x="238" y="10" text="Areas :"/>
+	<mx:List x="466" y="27" height="271" id="_departamentos" dataProvider="{SystemGlobals.DEPARTAMENTOS}" labelField="_nombre" width="220" change="updateSelection(2)"></mx:List>
+	<mx:Label x="466" y="10" text="Departamentos :"/>
+	<mx:List x="694" y="27" height="271" id="_puestos" dataProvider="{SystemGlobals.PUESTOS}" labelField="_nombre" width="220" change="updateSelection(3)"></mx:List>
+	<mx:Label x="694" y="10" text="Puestos :"/>
+	<mx:DataGrid x="10" y="306" width="904" height="157">
+		<mx:columns>
+			<mx:DataGridColumn headerText="Column 1" dataField="col1"/>
+			<mx:DataGridColumn headerText="Column 2" dataField="col2"/>
+			<mx:DataGridColumn headerText="Column 3" dataField="col3"/>
+		</mx:columns>
+	</mx:DataGrid>
+	
+</mx:TitleWindow>

@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CMS_Random>
+
+	<webApplication 	gateway		="http://192.168.1.26/random/___WebOrb___/weborb.php" 
+						channelId	="my-amf" 
+						destination	="GenericDestination" >
+		<services> 
+			<service name='userAuth' 				source='com.test.webTools.System_UserAccess'>				<method name=''/></service>	
+			<service name='Users' 					source='com.test.webTools.System_Users'>					<method name=''/></service>
+			<service name='UserAdmin' 				source='com.test.webTools.System_UserAdmin'>				<method name=''/></service>
+			<service name='AdminUsers' 				source='com.test.webTools.System_AdminUsers'>				<method name=''/></service>
+			<service name='Groups' 					source='com.test.webTools.System_Groups'>					<method name=''/></service>	
+			<service name='Catalogs' 				source='com.test.webTools.System_Catalogs'>					<method name=''/></service>
+			<service name='MailButler' 				source='com.test.webTools.MailButlerClass'>					<method name=''/></service>
+			
+			<service name='Clientes' 				source='com.test.webTools.Clientes'>				<method name=''/></service>
+			<service name='Bancos' 				    source='com.test.webTools.Bancos'>					<method name=''/></service>
+			<service name='Empleados' 				source='com.test.webTools.Empleados'>				<method name=''/></service>
+			<service name='ImageManager'			source='com.test.webTools.ImageManager'>			<method name=''/></service>
+			<service name='Inmuebles'				source='com.test.webTools.Inmuebles'>				<method name=''/></service>
+			<service name='Intereses'				source='com.test.webTools.Intereses'>				<method name=''/></service>
+			
+			
+			<service name='Companias'				source='com.test.webTools.Empresa_Companias'>				<method name=''/></service>
+			<service name='Ubicaciones'				source='com.test.webTools.Empresa_Ubicaciones'>				<method name=''/></service>
+			<service name='CECOS'					source='com.test.webTools.Empresa_Cecos'>					<method name=''/></service>
+			<service name='Categorias'				source='com.test.webTools.Empresa_Categorias'>				<method name=''/></service>
+			
+			<service name='Empleados_Accesos'		source='com.test.webTools.Empleados_Accesos'>		<method name=''/></service>
+			
+			
+			<service name='Areas' 					source='com.test.webTools.Empresa_Areas'>					<method name=''/></service>
+			<service name='Departamentos' 			source='com.test.webTools.Empresa_Departamentos'>			<method name=''/></service>
+			<service name='Puestos' 				source='com.test.webTools.Empresa_Puestos'>					<method name=''/></service>			
+			<service name='Organigrama' 			source='com.test.webTools.Empresa_Organigrama'>				<method name=''/></service>	
+			<service name='Groups' 					source='com.test.webTools.Empresa_Groups'>					<method name=''/></service>	
+			<service name='HistorialLaboral' 		source='com.test.webTools.HistorialLaboral'>		<method name=''/></service>
+			<service name='DependientesEconomicos' 	source='com.test.webTools.DependientesEconomicos'>	<method name=''/></service>	
+			<service name='PerfilCarrera' 			source='com.test.webTools.PerfilCarrera'>			<method name=''/></service>	
+			<service name='AreasInteres' 			source='com.test.webTools.AreasInteres'>			<method name=''/></service>	
+			<service name='Credenciales' 			source='com.test.webTools.Credenciales'>			<method name=''/></service>	
+			<service name='BarCode' 				source='com.test.webTools.BarCode'>					<method name=''/></service>	
+			<service name='BarCodeFunctions' 		source='com.test.webTools.BarCodeFunctions'>		<method name=''/></service>	
+			<service name='Validations' 			source='com.test.webTools.Validations'>				<method name=''/></service>
+			<service name='AltasBajas' 				source='com.test.webTools.AltasBajas'>				<method name=''/></service>
+			<service name='CambioUbicacion' 		source='com.test.webTools.CambioUbicacion'>			<method name=''/></service>
+			<service name='EmpleadosDocumentos' 	source='com.test.webTools.Empleados_Documentos'>	<method name=''/></service>
+			
+			
+			
+			<service name='Empresa_Competencias' 							source='com.test.webTools.Empresa_Competencias'>	<method name=''/></service>
+			<service name='Empresa_Competencias_Tipos' 						source='com.test.webTools.Empresa_Competencias_Tipos'>	<method name=''/></service>
+			<service name='Empresa_Competencias_Funciones_Especificas' 		source='com.test.webTools.Empresa_Competencias_Funciones_Especificas'>	<method name=''/></service>
+			<service name='Empresa_Competencias_Conocimientos' 				source='com.test.webTools.Empresa_Competencias_Conocimientos'>	<method name=''/></service>			
+			<service name='Empresa_Competencias_Niveles' 					source='com.test.webTools.Empresa_Competencias_Niveles'>	<method name=''/></service>
+			
+			<service name='Empresa_Competencias_Medios_Adquisicion' 		source='com.test.webTools.Empresa_Competencias_Medios_Adquisicion'>	<method name=''/></service>
+			<service name='Empresa_Competencias_Conocimientos_Tipo' 		source='com.test.webTools.Empresa_Competencias_Conocimientos_Tipo'>	<method name=''/></service>
+			<service name='Empresa_Competencias_Habilidades' 				source='com.test.webTools.Empresa_Competencias_Habilidades'>	<method name=''/></service>
+			<service name='Empresa_Competencias_Actitudes' 					source='com.test.webTools.Empresa_Competencias_Actitudes'>	<method name=''/></service>			
+			<service name='Empresa_Competencias_Escalas' 				    source='com.test.webTools.Empresa_Competencias_Escalas'>	<method name=''/></service>
+			<service name='Empresa_Competencias_Indicadores' 				source='com.test.webTools.Empresa_Competencias_Indicadores'>	<method name=''/></service>
+			<service name='Empresa_Competencias_Indicadores_Tipos' 			source='com.test.webTools.Empresa_Competencias_Indicadores_Tipos'>	<method name=''/></service>
+			<service name='Empresa_Competencias_Conocimientos_Niveles' 		source='com.test.webTools.Empresa_Competencias_Conocimientos_Niveles'>	<method name=''/></service>
+			<service name='Empresa_Competencias_Conocimientos_Catalogo' 	source='com.test.webTools.Empresa_Competencias_Conocimientos_Catalogo'>	<method name=''/></service>
+			<service name='Empresa_Competencias_Actitudes_Catalogo' 		source='com.test.webTools.Empresa_Competencias_Actitudes_Catalogo'>	<method name=''/></service>
+			<service name='Empresa_Competencias_Habilidades_Catalogo' 		source='com.test.webTools.Empresa_Competencias_Habilidades_Catalogo'>	<method name=''/></service>
+			<service name='Empresa_Competencias_HabilidadesActitudes_Niveles' 		source='com.test.webTools.Empresa_Competencias_HabilidadesActitudes_Niveles'>	<method name=''/></service>
+			<service name='Empresa_Competencias_Configuracion' 				source='com.test.webTools.Empresa_Competencias_Configuracion'>	<method name=''/></service>
+			
+			
+			<service name='Empresa_Puestos_Informacion_General' 			source='com.test.webTools.Empresa_Puestos_Informacion_General'>	<method name=''/></service>
+			<service name='Empresa_Puestos_Turnos' 							source='com.test.webTools.Empresa_Puestos_Turnos'>	<method name=''/></service>
+			<service name='Empresa_Puestos_Contratos_Tipos' 				source='com.test.webTools.Empresa_Puestos_Contratos_Tipos'>	<method name=''/></service>
+			<service name='Empresa_Puestos_Niveles' 						source='com.test.webTools.Empresa_Puestos_Niveles'>	<method name=''/></service>
+			<service name='Empresa_Puestos_Descripcion_Empleado' 			source='com.test.webTools.Empresa_Puestos_Descripcion_Empleado'>	<method name=''/></service>
+			<service name='Empresa_Puestos_Idiomas' 						source='com.test.webTools.Empresa_Puestos_Idiomas'>	<method name=''/></service>
+			<service name='Empresa_Puestos_Escolaridad' 					source='com.test.webTools.Empresa_Puestos_Escolaridad'>	<method name=''/></service>
+			<service name='Empresa_Puestos_Perfil_Carrera' 					source='com.test.webTools.Empresa_Puestos_Perfil_Carrera'>	<method name=''/></service>
+			<service name='Empresa_Puestos_Competencias' 					source='com.test.webTools.Empresa_Puestos_Competencias'>	<method name=''/></service>
+			<service name='Empresa_Puestos_Observaciones' 					source='com.test.webTools.Empresa_Puestos_Observaciones'>	<method name=''/></service>
+			<service name='Empleados_Competencias' 							source='com.test.webTools.Empleados_Competencias'>	<method name=''/></service>
+			
+			<service name='Empleados_Seleccion' 							source='com.test.webTools.Empleados_Seleccion'>	<method name=''/></service>
+			<service name='Evaluaciones' 									source='com.test.webTools.Evaluaciones'>			<method name=''/></service>
+			
+			
+			<service name='IdiomasService' 			source='com.test.webTools.IdiomasService'>			<method name=''/></service>
+			<service name='AcademicosService' 		source='com.test.webTools.AcademicosService'>		<method name=''/></service>
+			<service name='CursosServices' 			source='com.test.webTools.CursosServices'>			<method name=''/></service>
+			<service name='SignManager' 			source='com.test.webTools.SignManager'>				<method name=''/></service>
+			
+			<service name='Din' 								source='com.test.webTools.Din'>					<method name=''/></service>
+			<service name='Productos' 							source='com.test.webTools.Productos'>					<method name=''/></service>
+			<service name='Productos_Familias' 					source='com.test.webTools.Productos_Familias'>			<method name=''/></service>
+			<service name='Productos_SubFamilias' 				source='com.test.webTools.Productos_SubFamilias'>		<method name=''/></service>
+			<service name='Productos_Grupos_Cobro' 				source='com.test.webTools.Productos_Grupos_Cobro'>		<method name=''/></service>
+			<service name='Productos_Reglas_Negocio' 			source='com.test.webTools.Productos_Reglas_Negocio'>	<method name=''/></service>
+			
+			
+			<service name='Fiscales_Clientes' 			source='com.test.webTools.Fiscales_Clientes'>	<method name=''/></service>
+			<service name='Fiscales_Clientes_Contactos' 			source='com.test.webTools.Fiscales_Clientes_Contactos'>	<method name=''/></service>
+			<service name='Fiscales_Clientes_Representantes' 			source='com.test.webTools.Fiscales_Clientes_Representantes'>	<method name=''/></service>
+			
+			<service name='ODS' 						source='com.test.webTools.ODS'>	<method name=''/></service>
+			<service name='Ordenes' 						source='com.test.webTools.Ordenes'>	<method name=''/></service>
+			<service name='Codigo_Error'     source='com.test.webTools.Codigo_Error'>    <method name=''/></service> 
+   			<service name='Equipos'      source='com.test.webTools.Equipos'>    <method name=''/></service> 
+  	 		<service name='Marcas'      source='com.test.webTools.Marcas'>    <method name=''/></service> 
+   			<service name='Tipos_Equipos'    source='com.test.webTools.Tipos_Equipos'>    <method name=''/></service> 
+
+   
+
+   
+
+   <service name='Orden_Servicio'    source='com.perceptron.webTools.Orden_Servicio'>    <method name=''/></service>
+			
+		</services>	
+   	</webApplication>
+   	
+   	<navMenu>
+
+							
+		<menuitem label="Administración" roles="System" method="openPopup">
+		
+			<menuitem label="Catálogos" roles="System" method="openPopup">
+				<menuitem label="Administrativos" roles="System" method="openPopup">
+					<menuitem label="Usuarios" 			className="system.Users" 		roles="System" method="openPopup"/>
+					<menuitem label="Grupos de Trabajo" className="system.UsersGroups" 	roles="System" method="openPopup"/>
+				</menuitem>
+				<menuitem label="Refacciones" 	roles="*" method="openPopup">
+					<menuitem label="Familias" 	    		className="productos.Productos_Familias" 			roles="System" method="openPopup"/>
+					<menuitem label="Sub Familias" 	    	className="productos.Productos_SubFamilias" 		roles="System" method="openPopup"/>
+					<menuitem label="Grupos de Cobro" 	    className="productos.Productos_Grupos_Cobro" 		roles="System" method="openPopup"/>
+					<menuitem label="Reglas de Negocio" 	className="productos.Productos_Reglas_Negocio" 		roles="System" method="openPopup"/>				
+				</menuitem>
+			</menuitem>						
+			
+			<menuitem label="Empresa" 		roles="System" method="openPopup">
+				<menuitem label="Compañías" 	className="empresa.Empresa_Companias" 				roles="System" method="openPopup"/>
+				<menuitem label="Áreas" 		className="empresa.Empresa_Areas" 					roles="System" method="openPopup"/>
+				<menuitem label="Departamentos" className="empresa.Empresa_Departamentos" 			roles="System" method="openPopup"/>
+				<menuitem label="Puestos" 		className="empresa.Empresa_Puestos" 				roles="System" method="openPopup"/>
+				<menuitem label="CECOS" 		className="empresa.Empresa_CECOS" 					roles="System" method="openPopup"/>
+				<menuitem label="Categorías" 	className="empresa.Empresa_Categorias" 				roles="System" method="openPopup"/>
+				<menuitem label="Ubicaciones" 	className="empresa.Empresa_Ubicaciones" 			roles="System" method="openPopup"/>
+				<menuitem label="Competencias"  className="empresa.Empresa_Competencias"			roles="System" method="openPopup"/>
+				<menuitem label="Organigrama" 	className="empresa.Empresa_Organigrama" 			roles="System" method="openPopup"/>
+			</menuitem>
+			
+			<menuitem label="Bancos" 		roles="System" method="openPopup">										
+				<menuitem label="Bancos" 				className="bancos.Bancos" 					roles="System,Contador" method="openPopup"/>
+				<menuitem label="Cuentas Bancarias" 	className="bancos.Bancos_Cuentas_Empresa" 	roles="System,Contador" method="openPopup"/>
+				<menuitem label="Monedas y TcFix" 		className="bancos.Bancos_Tipo_Moneda" 		roles="System,Contador" method="openPopup"/>
+			</menuitem>	
+		
+			<!-- menuitem label="Credenciales" 	roles="System" method="openPopup">
+				<menuitem label="Codigo de Barras" className="components.BarCodeGen" roles="System" method="openPopup"/>
+			</menuitem -->
+			
+			<menuitem label="Menu Empresa"    className="empresa.Empresa_Menu" roles="System" method="openPopup"/>
+			<menuitem label="Test Empresa"    className="empresa.Empresa_Test" roles="System" method="openPopup"/>
+		
+		</menuitem>
+		
+		
+		<menuitem label="ODS´s" 				roles="*" method="openPopup">
+			<menuitem label="Seguimiento" 		className="ods.Seguimiento" 			        roles="*" method="openPopup"/>
+			<menuitem label="Busqueda" 	    	className="din.Din_Busqueda"  	roles="System" method="openPopup"/>
+		</menuitem>	
+		
+		<menuitem label="Equipos" 				roles="*" method="openPopup">
+	    	<menuitem label="Codigos de Error"     className="equipos.Codigo_Error"     roles="System" method="openPopup"/>
+	    	<menuitem label="Equipos"      className="equipos.Equipos"      roles="System" method="openPopup"/>
+	    	<menuitem label="Marcas"      className="equipos.Marcas"      roles="System" method="openPopup"/>
+	    	<menuitem label="Tipos de Equipos"    className="equipos.Tipos_Equipos"    roles="System" method="openPopup"/>
+  		</menuitem>
+			
+		<menuitem label="Clientes" 				roles="*" method="openPopup">
+			<menuitem label="Administración de Clientes" 	className="clientes.Clientes" 	roles="System" method="openPopup"/>
+			<menuitem label="Busqueda" 	    				className="din.Din_Busqueda"  	roles="System" method="openPopup"/>
+		</menuitem>	
+		
+			
+						
+	   	<menuitem label="Ayuda" roles="*">	    		
+	    		<menuitem label="Soporte"  					className="system.Support"	roles="*" method="openPopup"/>
+	  	 </menuitem>
+	  	 
+	  	 <menuitem label="Idioma" roles="*">	    		
+	    		<menuitem label="Español"  					value="_MX"	roles="*" method="changeLanguage"/>
+	    		<menuitem label="Ingles"  					value="_EN"	roles="*" method="changeLanguage"/>
+	    		<menuitem label="Frances"  					value="_FR"	roles="*" method="changeLanguage"/>
+	  	 </menuitem>
+	    
+	   	<menuitem label="Salir" roles="*">
+	    		<menuitem label="Logout"  						roles="*" method="logout"/>
+	   	</menuitem>
+	   		   		  
+   	</navMenu>  
+
+</CMS_Random>

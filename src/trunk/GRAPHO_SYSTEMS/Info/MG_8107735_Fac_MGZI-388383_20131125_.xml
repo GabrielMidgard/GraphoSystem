@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Comprobante xmlns="http://www.sat.gob.mx/cfd/2" xmlns:sgdata="http://www.seguridata.com/mi/schema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+  version="2.2" 
+  serie="MGZI" 
+  folio="388383" 
+  fecha="2013-11-25T05:29:38" 
+  sello="ZnArRDbbqjB+dXoe+Syi42DRJiSPe1NFatiuII2cMwioFpdpGAjpZDFsnKIR/deEjoEBuDuxjg2jNEC/Fgrp4BLVe3kp7uKjMr0wy21RK7Tcf9RJGUPzHBihgJmrHBqAuuQvSufOZrgIfcqLHZEWAhl2D7ppRya+5wyxuww+blM=" 
+  noAprobacion="165427" 
+  anoAprobacion="2013" 
+  formaDePago="Pago en una sola exhibicion" 
+  condicionesDePago="CONTADO" 
+  noCertificado="00001000000202258432" 
+  subTotal="351.72"
+  total="408.00"
+  tipoDeComprobante="ingreso" 
+  metodoDePago="No identificado"
+  LugarExpedicion="GUADALAJARA JALISCO"
+  NumCtaPago="No identificado" 
+  certificado="MIIEazCCA1OgAwIBAgIUMDAwMDEwMDAwMDAyMDIyNTg0MzIwDQYJKoZIhvcNAQEF
+BQAwggGVMTgwNgYDVQQDDC9BLkMuIGRlbCBTZXJ2aWNpbyBkZSBBZG1pbmlzdHJh
+Y2nDs24gVHJpYnV0YXJpYTEvMC0GA1UECgwmU2VydmljaW8gZGUgQWRtaW5pc3Ry
+YWNpw7NuIFRyaWJ1dGFyaWExODA2BgNVBAsML0FkbWluaXN0cmFjacOzbiBkZSBT
+ZWd1cmlkYWQgZGUgbGEgSW5mb3JtYWNpw7NuMSEwHwYJKoZIhvcNAQkBFhJhc2lz
+bmV0QHNhdC5nb2IubXgxJjAkBgNVBAkMHUF2LiBIaWRhbGdvIDc3LCBDb2wuIEd1
+ZXJyZXJvMQ4wDAYDVQQRDAUwNjMwMDELMAkGA1UEBhMCTVgxGTAXBgNVBAgMEERp
+c3RyaXRvIEZlZGVyYWwxFDASBgNVBAcMC0N1YXVodMOpbW9jMRUwEwYDVQQtEwxT
+QVQ5NzA3MDFOTjMxPjA8BgkqhkiG9w0BCQIML1Jlc3BvbnNhYmxlOiBDZWNpbGlh
+IEd1aWxsZXJtaW5hIEdhcmPDrWEgR3VlcnJhMB4XDTEyMTEwMTAwMjkxNFoXDTE2
+MTEwMTAwMjkxNFowgawxGjAYBgNVBAMTEU1VTFRJR0FTIFNBIERFIENWMRowGAYD
+VQQpExFNVUxUSUdBUyBTQSBERSBDVjEaMBgGA1UEChMRTVVMVElHQVMgU0EgREUg
+Q1YxJTAjBgNVBC0THE1VTDc4MTAyME1KNyAvIFZFVE03MTA3MTM2WkExHjAcBgNV
+BAUTFSAvIFZFVE03MTA3MTNIWlNMSkcwMDEPMA0GA1UECxMGTWF0cml6MIGfMA0G
+CSqGSIb3DQEBAQUAA4GNADCBiQKBgQDl8u8FEP0HccyQvOXwp1b6alUfX7zGdJP8
+P4IjnedlD0wcf6trRRPJtd64jaCwxei5RSp797a98GcPdfrIt9G7Vnj70pK5AThC
+U5OKh5g5noBD2cKtKq257Sj2H9Mfi8eGOxb2iVz0uVA0ZtIGDbqluD6Ihnfghtor
+vnG3sgox+QIDAQABox0wGzAMBgNVHRMBAf8EAjAAMAsGA1UdDwQEAwIGwDANBgkq
+hkiG9w0BAQUFAAOCAQEAPFxEOxVCBzUyzaBS5XDYLGbLX6jPlBnujAmSTDS6qp1V
+PrnyBz2FHu3uA4HlzR0liZoykaJ4G4cZCDZLxgVGUwMwpiBrxKPqorn4yW+TBGD2
+wVIW0lIWhdw2y6efeTStde9Dnl+WcM9kA9oCGytHUS0vbbzYv7UGMfcxnjQvJqYZ
+5oCcaGlSvi6m9AaQKNMAfLsJDVcCCizODWbrKKpa56Qzz0OATDskAU6a0MwObMqp
+F1uwQ8F0bRukY/klEkP5++iwRB+ynBRvuE64saFC556Ai9+QjTTDk1jUQih1mBJf
+UkPUYMZgX/WDzu6WBEF44UMLcj3yNIq3p5uAQHuz1A==
+" 
+  xsi:schemaLocation="http://www.sat.gob.mx/cfd/2 http://www.sat.gob.mx/sitio_internet/cfd/2/cfdv22.xsd">
+<Emisor 
+ rfc="MUL781020MJ7" nombre="MULTIGAS, S.A. DE C.V."> 
+<DomicilioFiscal calle="CALLE 18" 
+ noExterior="2316" 
+ colonia="ZONA INDUSTRIAL" 
+ municipio="GUADALAJARA"
+ estado="JALISCO"
+ pais="MEXICO"
+ codigoPostal="44940"
+/>
+<RegimenFiscal Regimen="Regimen General de Ley Persona Moral" 
+/>
+</Emisor>
+<Receptor rfc="MAMC7707182K0" 
+  nombre="CARLOS ARTURO MARQUEZ MONTEJANO" 
+>
+<Domicilio 
+ calle="LIBERTAD" 
+ noExterior="977" 
+ colonia="TEPEYAC CASINO" 
+ municipio="ZAPOPAN"
+ estado="JALISCO"
+ pais="MEXICO"
+ codigoPostal="45047"
+/>
+</Receptor>
+<Conceptos>
+<Concepto
+ cantidad="60" 
+ unidad="LITRO" 
+ descripcion="GAS L.P base calculo[5.862069] Remision(es):ZIM2037733050" 
+ valorUnitario="5.862069" 
+ importe="351.72" 
+>
+</Concepto>
+</Conceptos>
+<Impuestos  
+  totalImpuestosTrasladados="56.28" >
+
+  <Traslados>
+    <Traslado impuesto="IVA" tasa="16.00" importe="56.28"/>
+  </Traslados>
+</Impuestos>
+</Comprobante>

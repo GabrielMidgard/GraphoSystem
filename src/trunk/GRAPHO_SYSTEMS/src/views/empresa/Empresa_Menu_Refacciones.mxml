@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow 
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:mx="library://ns.adobe.com/flex/mx"
+	title="Menú de Refacciones"
+	width="190" 
+	height="308" 
+	>
+	
+	<s:Button x="10" y="100" width="170" label="Familias"
+			  click="openPopUp('productos.Productos_Familias')"
+			  skinClass="skins.Custom_Button_Light_Skin"/>
+	<s:Button x="10" y="131" width="170" label="Sub Familias" 
+			  click="openPopUp('productos.Productos_SubFamilias')" 
+			  skinClass="skins.Custom_Button_Light_Skin"/>
+	<s:Button x="10" y="162" width="170" label="Grupos de Cobro"
+			  click="openPopUp('productos.Productos_Grupos_Cobro')" 
+			  skinClass="skins.Custom_Button_Light_Skin"/>
+	<s:Button x="10" y="193" width="170" label="Reglas de Negocios" 
+			  click="openPopUp('productos.Productos_Reglas_Negocio')" 
+			  skinClass="skins.Custom_Button_Light_Skin"/>
+	<s:Button x="10" y="224" width="170" label="Inventario"
+			  click="openPopUp('productos.Productos')" 
+			  skinClass="skins.Custom_Button_Light_Skin"/>
+	<s:Image x="17" y="16" source="assets/Custom/logo.png"/>
+	
+	
+	
+
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.events.CloseEvent;
+			import mx.managers.PopUpManager;
+			import mx.random.constants.SystemGlobals;
+			import mx.random.web.WebApplication;
+			
+			import views.productos.Productos;
+			import views.productos.Productos_Familias;
+			import views.productos.Productos_Grupos_Cobro;
+			import views.productos.Productos_Reglas_Negocio;
+			import views.productos.Productos_SubFamilias;
+			
+			private var _webApplication:WebApplication;
+			private var _workManager:Object 		= new Object();
+			
+			private function get viewContext():Object{
+				return {webApplication: _webApplication,
+						workManager: this
+						}					
+			}
+			
+			public function set context(contextObj:Object):void{
+				for( var p:String in contextObj){
+					if(this.hasOwnProperty(p)){
+						this[p] = contextObj[p];
+					}
+				}
+				
+				init();
+			}
+			
+			private function init():void{
+				
+				Productos;
+				Productos_Familias;
+				Productos_Grupos_Cobro;
+				Productos_Reglas_Negocio;
+				Productos_SubFamilias;
+			}
+
+			public function set workManager(value:Object):void{ _workManager = value;}
+			public function set webApplication(value:WebApplication):void{_webApplication = value;}
+			
+//-------------------------------- POP UP WINDOW --------------------------------------	
+			public function openPopUp(popUpName:String,modal:Boolean = false):void{
+				_workManager.iniPopUp(popUpName,modal);
+				/*
+				var pop:TitleWindow = PopUpManager.createPopUp(_workManager as DisplayObject, getDefinitionByName("views."+popUpName) as Class, modal) as TitleWindow;
+				pop.name = popUpName;
+				pop.addEventListener(CloseEvent.CLOSE, closePopup);
+				if(pop.hasOwnProperty("context")){
+					Object(pop).context = viewContext;
+				}
+				PopUpManager.centerPopUp(pop);*/
+			}
+			
+			private function closePopup(e:CloseEvent):void{
+	            //PopUpManager.removePopUp(e.target as TitleWindow);
+			}
+//-------------------------------- POP UP WINDOW --------------------------------------
+		]]>
+	</fx:Script>
+	
+</s:TitleWindow>

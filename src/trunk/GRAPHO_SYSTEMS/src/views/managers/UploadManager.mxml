@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="vertical" creationComplete="init()" width="514" title="Upload Manager" showCloseButton="true" close="closeWindow();" height="350">
+<mx:Script>
+	<![CDATA[
+		import mx.random.users.UserData;
+		import mx.random.files.FileData;
+		import mx.controls.Alert;
+		import mx.managers.PopUpManager;
+		import mx.utils.ArrayUtil;
+		import mx.collections.ArrayCollection;
+		
+		
+			private var fileReferenceList:FileReferenceList;
+[Bindable]	private var uploadFileList:ArrayCollection
+			private var _url:String = "";
+			private var _urlRequest:URLRequest;
+			private var _currentFile:Number = 0;
+			private var _invalidChars:Array = ["á","é","í","ó","ú","ñ","Á","É","Í","Ó","Ú","Ñ"];
+			
+			
+//---------------------------- Context ---------------------------------------------            
+
+   			public function set context(contextObj:Object):void{
+				for( var p:String in contextObj){
+					if(this.hasOwnProperty(p)){
+						this[p] = contextObj[p];
+					}
+				}
+			}
+						
+			public function set url(value:String):void{
+				_url = value;
+				_urlRequest = new URLRequest(UserData.HOST_PATH+UserData.UP_PATH+"UploadScript.php?up="+_url);
+			}
+		
+//---------------------------- Context --------------------------------------------- 
+		
+		private function init():void{
+			fileReferenceList = new FileReferenceList();
+			uploadFileList = new ArrayCollection();
+			fileReferenceList.addEventListener(Event.SELECT, selectHandler);
+			cancelBt.visible = false;
+			browse();
+		}
+		
+		
+		private function browse():void{
+			uploadFileList.removeAll();
+			uploadFileList.refresh();
+			fileReferenceList.browse(getTypes());
+			uploadBt.enabled = false;
+		}
+		
+		private function selectHandler(event:Event):void{
+			var fileList:Array = fileReferenceList.fileList;
+			var error:Array = new Array();
+			for (var i:Number=0; i<fileList.length; i++)
+			{
+				var file:FileReference = FileReference(fileList[i]);
+				file.addEventListener(Event.COMPLETE,completeHandler);
+				file.addEventListener(ProgressEvent.PROGRESS,progressEvent);
+				
+				//uploadFileList.addItem({name:file.name, size:Math.round((file.size)/1024)+" KB", object:file, estatus:"En espera", ind:false , modo:"event", en:true})
+				if(checkName(file.name)){
+					uploadFileList.addItem(new FileData(file.name,Math.round((file.size)/1024)+" Kb",file,"Waiting",false,"event",true,true));
+				}else{
+					error.push(file.name);
+				}
+			}
+			if(error.length!=0){
+				Alert.show(makeAlert(error),"Warning");
+			}
+			uploadBt.enabled = true;
+		}
+		
+		private function makeAlert(errors:Array):String{
+			var res:String = "Some files has invalid chars: \n";
+			for(var n:Number = 0;n<errors.length;n++){
+				res += " - "+errors[n]+"\n";
+			}
+			return res;
+		}
+		
+		private function checkName(file:String):Boolean{			
+			for(var n:Number = 0;n<_invalidChars.length;n++){
+				if(file.indexOf(_invalidChars[n])!=-1 ) return false;
+			}
+			return true;
+		}
+		
+		
+		private function completeHandler(e:Event):void{
+			var file:FileReference = FileReference(e.target);
+			for(var n:Number = 0;n<uploadFileList.length;n++){
+				if(uploadFileList[n].name == file.name){
+					uploadFileList[n].estatus = "Complete";
+					uploadFileList[n].ind = false;
+					uploadFileList[n].en = false;
+					uploadFileList[n].modo = "manual";
+					uploadFileList[n].vis = false;
+					uploadFileList.refresh();
+					dispatchEvent(new Event(Event.COMPLETE));
+				}
+			}
+			if(_currentFile<(uploadFileList.length-1)){
+				_currentFile++;
+				dataGrid.selectable = true;
+				dataGrid.selectedIndex = _currentFile;
+				dataGrid.selectable = false;
+				startUpload()
+			}else{
+				doComplete();
+			}
+		}
+		
+		private function cancel():void{
+			var file:FileReference;
+			for(var n:Number = _currentFile;n<uploadFileList.length;n++){
+				file = FileReference(uploadFileList[n].object);
+				file.removeEventListener(Event.COMPLETE,completeHandler);
+				file.removeEventListener(ProgressEvent.PROGRESS,progressEvent);
+				uploadFileList[n].modo 		= "manual";
+				uploadFileList[n].estatus 	= "Canceled";
+				uploadFileList[n].en 		= false;
+			}
+			uploadBt.enabled = false;
+			selectBt.enabled = true;
+			cancelBt.visible = false;
+		}
+		
+		private function progressEvent(e:ProgressEvent):void{			
+			var file:FileReference = FileReference(e.target);
+			for(var n:Number = 0;n<uploadFileList.length;n++){
+				if(uploadFileList[n].name == file.name){
+					//if(e.bytesLoaded == e.bytesTotal){
+						//uploadFileList[n].estatus 	= "Moving File";
+					//}else{
+						uploadFileList[n].estatus = Math.floor(e.bytesLoaded/1024)+" Kb / "+Math.floor(e.bytesTotal/1024)+" Kb";	
+					//}
+					
+					uploadFileList[n].ind = false;
+					uploadFileList[n].en = true;
+					uploadFileList[n].modo = "event";
+					uploadFileList.refresh();
+					dispatchEvent(new Event(Event.COMPLETE));
+				}
+			}
+		}
+		
+		private function doComplete():void{
+			dataGrid.selectedIndex = -1;
+			dataGrid.selectable = true;
+			Alert.show("Upload Complete","Upload Manager");
+			uploadBt.enabled = false;
+			selectBt.enabled = true;
+			cancelBt.visible = false;
+		}
+		
+		
+		private function upload():void{
+			cancelBt.visible = true;
+			uploadBt.enabled = false;
+			selectBt.enabled = false;
+			_currentFile = 0;
+			dataGrid.selectedIndex = 0;
+			dataGrid.selectable = false;
+			startUpload();
+		}
+		
+		private function startUpload():void{
+			uploadFileList[_currentFile].estatus = "Uploading";
+			uploadFileList[_currentFile].ind = true;
+			uploadFileList.refresh();			
+			var file:FileReference = FileReference(uploadFileList[_currentFile].object);
+			file.upload(_urlRequest);
+		}
+
+		public function getTypes():Array {
+	        var allTypes:Array = new Array();
+	        allTypes.push(getImageTypeFilter());
+	        allTypes.push(getTextTypeFilter());
+	        allTypes.push(getVideoTypeFilter());
+	        allTypes.push(getMediaTypeFilter());
+	        return allTypes;
+	    }
+	 
+	    private function getImageTypeFilter():FileFilter {
+	        return new FileFilter("Imagenes (*.jpg, *.gif, *.png, *.bmp)", "*.jpg;*.gif;*.png;*.bmp;");
+	    }
+	 
+	    private function getTextTypeFilter():FileFilter {
+	        return new FileFilter("Archivos (*.txt, *.doc, *.pdf,*.docx, *.xls, *.xlsx, *.zip, *.rar)", "*.txt;*.doc;*.pdf;*.docx;*.xls;*.xlsx;*.zip;*.rar;");
+	    }
+	    
+	    private function getVideoTypeFilter():FileFilter {
+	        return new FileFilter("Videos (*.fvl,*.wmv,*.mov)", "*.flv;*.wmv;*.mov;*f4v");
+	    }
+	    
+	    private function getMediaTypeFilter():FileFilter {
+	        return new FileFilter("Media (*.swf)", "*.swf");
+	    }
+	    
+	    private function closeWindow():void{
+	    	PopUpManager.removePopUp(this);
+	    }
+	]]>
+</mx:Script>
+	<mx:VBox>
+		<mx:DataGrid id="dataGrid" width="500" dataProvider="{uploadFileList}"  height="278">
+			<mx:columns>
+				<mx:DataGridColumn headerText="File Name" 	dataField="name" width="120"/>
+				<mx:DataGridColumn headerText="Size" 		dataField="size" width="60" textAlign="right"/>
+				<mx:DataGridColumn headerText="Progress" 	dataField="object" width="150">
+					<mx:itemRenderer>
+						<mx:Component>
+							<mx:HBox verticalAlign="middle">
+								<mx:ProgressBar label="" height="6" 
+									indeterminate="{data.ind}" 
+									mode="{data.modo}"  
+									progress="{data.prog}"
+									enabled="true" 
+									width="90%"
+								 	source="{data.object}"
+									visible="{data.vis}"/>	
+							</mx:HBox>
+						</mx:Component>
+					</mx:itemRenderer>
+				</mx:DataGridColumn>
+				<mx:DataGridColumn headerText="Status" 	dataField="estatus" width="150" textAlign="right"/>
+			</mx:columns>
+		</mx:DataGrid>
+		<mx:HBox width="100%">
+			<mx:Button label="Select Files" click="browse()" id="selectBt"/>
+			<mx:Button label="Cancel" click="cancel()" id="cancelBt" width="101"/>
+			<mx:Spacer width="100%"/>
+			<mx:Button label="Upload" click="upload()" id="uploadBt"/>
+		</mx:HBox>
+	</mx:VBox>
+
+</mx:TitleWindow>

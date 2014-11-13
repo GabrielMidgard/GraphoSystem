@@ -1,0 +1,353 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:ns1="views.components.*" width="100%" height="100%" backgroundAlpha="0.0" y="-8">
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.random.events.SelectionEvent;
+			import mx.random.events.StaticEvent;
+			import mx.random.drawing.DrawingObjects;
+			import views.components.ODT_Item;
+			import mx.random.constants.Catalogs;			
+			import mx.random.windowManagers.PopManager;
+			import mx.random.constants.Languages;
+			import mx.random.forms.Validator;
+			import mx.random.dataManagers.EventManager;
+			import mx.random.converters.Converter;
+			import mx.random.dataManagers.DataManager;
+			import mx.random.web.WebApplication;
+			import mx.managers.PopUpManager;
+			import mx.collections.ArrayCollection;
+			import mx.events.CloseEvent;
+			import mx.controls.Alert;
+			import mx.rpc.remoting.RemoteObject;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+
+			private var _webApplication:WebApplication;
+			private var Valid:Validator 			= new Validator();
+			private var _workManager:Object 		= new Object();
+			private var _MainService:RemoteObject 		= new RemoteObject();
+[Bindable]	private var _Data:DataManager 				= new DataManager(this);
+[Bindable]	private var _DataResult:ArrayCollection 		= new ArrayCollection();			
+			private var _eventManager:EventManager 		= new EventManager(this);
+			private var _dataIndex:Number 			= 0;
+			
+			//-----------Event Manager -----------
+
+[Bindable]	public var _dataReady:Boolean 			= false;
+[Bindable]	public var _newData:Boolean 			= false;
+[Bindable]	public var _updateData:Boolean 			= false;
+
+			//-----------Event Manager -----------
+			
+			
+			//-----------Local Vars -----------
+			
+			private var _selectedId:Number 			= 0;
+			private var _selectedName:String 		= "";
+			private var _serviceName  				= "Proceso_ODT";
+			private var _mainId  					= "_idODT";
+			private var _mainFocusField:String      = "_nombre";
+			private var _connector:DrawingObjects;
+			private var _connectorB:DrawingObjects;
+			
+			//-----------Local Vars -----------
+			
+//---------------------------- Context ---------------------------------------------            
+
+   			public function set context(contextObj:Object):void{
+				for( var p:String in contextObj){
+					if(this.hasOwnProperty(p)){
+						this[p] = contextObj[p];
+					}
+				}
+			}
+
+			public function set workManager(value:Object):void{
+				_workManager = value;
+			}
+
+			public function set webApplication(value:WebApplication):void{
+				_webApplication = value;
+				this.addEventListener(Event.ADDED_TO_STAGE,initView);				
+			}
+			public function get webApplication():WebApplication{ return _webApplication; } 
+						
+//---------------------------- Context ---------------------------------------------  
+
+//-------------------------------- MainInit --------------------------------------
+			// ------------------- View Extra Data -------------------------------
+			
+			private function get viewContext():Object{ 
+				return {webApplication: _webApplication,
+						workManager: this,						
+						odtData:currentODT
+						}					
+			}
+
+			private function addValidations():void{
+				Valid.changeLanguage(Languages.SPANISH);
+				Valid.setErrorKnot(Validator.CIRCLE_KNOT,0xFF0000);
+				Valid.validateOnChange = true;
+				//----------- Validaciones ---------------------------
+				//Valid.addStringVal(_nombre,2,100,"Nombre");
+				//Valid.addStringVal(_codigo,4,4,"Código");
+				
+				//----------- Validaciones ---------------------------
+			}
+			
+			private function extraCreateData(params:Object):Object{				
+				//params["_newsImage"] = _image;
+				return params;
+			}
+			
+			private function createRecordExtras():void{
+				//_image = "defaultNew.jpg";
+			}
+			
+			private function extraUpdateData(params:Object):Object{	
+				//params['_color'] = areaColor.selectedColor;			
+				return params;
+			}
+			
+			private function loadExtraFields(params:Object):void{				
+				//_image = params["_newsImage"];
+			}
+			
+			private function forceImports():void{
+				
+			}
+			
+			public function initView(e:Event):void{
+				forceImports();
+				_MainService = _webApplication.getService(_serviceName);
+				_Data.exceptions = [""];
+				_MainService.addEventListener(FaultEvent.FAULT,onFault);
+				initData();
+				addValidations();
+				loadScroll();
+				_connector = new DrawingObjects();
+				_connectorB = new DrawingObjects()
+				DrawingObjects.currentConnectorType = DrawingObjects.SQRT_LINE;				
+				this.addChild(_connector);
+				this.addChild(_connectorB);
+				//_searchType.selectedIndex = 1;
+				addEventListener(Event.ENTER_FRAME,updateConnector);
+				StaticEvent.addEventListener(SelectionEvent.SELECTION_COMPLETE,updateSelection);				
+			}
+			
+			
+			private var currenSelecction:Object = null;
+			private var currentODT:Object = new Object();
+			
+			
+			private function updateSelection(e:SelectionEvent):void{
+				_extrasCanvas.removeAllChildren();
+            	_extrasCanvas.visible = false;
+            	_connectorB.visible = false;
+				currenSelecction = e.itemData;
+				currentODT = currenSelecction.getODT();
+				loadODTInfo();
+			}
+			
+			
+			private function loadODTInfo():void{
+				_infoCanvas.removeAllChildren();
+				var info:ODT_Ejecutivo = new ODT_Ejecutivo();
+				info.context = viewContext;
+				_infoCanvas.addChild(info);
+			}
+			
+			public function imageUploadReady(data:Object):void{
+				
+			}
+
+			// ------------------- View Extra Data -------------------------------
+
+			private function loadScroll():void{
+				
+			}
+
+			private function initData():void{
+				_MainService.getFields();
+				_MainService.getFields.addEventListener(ResultEvent.RESULT,onGetFieldsResult);
+				_dataReady = false;
+			}
+			
+			public function closeWindow():void{
+            		dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
+            		PopUpManager.removePopUp(this);
+            }
+            
+            
+            public function updateConnector(e:Event):void{            	
+            	if(currenSelecction!=null){
+            		_connector.visible = true;
+            		_infoCanvas.visible = true;
+            		var pt:Point = currenSelecction.getCoors();           		        		            		
+            		var coorX:Number = (pt.x+currenSelecction.width+3);
+            		var coorY:Number = (pt.y+(currenSelecction.height/2)+10);            		
+            		_connector.connectLine(coorX,coorY,_infoCanvas.x-1,_infoCanvas.y+38);
+            	}else{
+            		_connector.visible = false;
+            		_infoCanvas.visible = false;
+            	}
+            }
+            
+//-------------------------------- MainInit --------------------------------------
+			
+			private function newData():void{
+				
+			}
+			
+			private function createData():void{
+				
+			}
+
+			private function updateData():void{
+				
+			}
+			
+			private function deleteDataAlert():void{
+				
+			}
+			
+			private function deleteData(e:CloseEvent):void{
+				if(e.detail==Alert.YES){
+					
+				}
+			}
+			
+			private function cancel():void{
+				onDataSelect();
+				resetBooleans();
+				Valid.validateAll();
+			}
+			
+			private function resetBooleans():void{
+				_newData = false;
+				_updateData = false;
+			}
+
+			private function dataChange():void{
+				_updateData = true;
+			}
+			
+			
+			public function loadExtraCanvas(ycoor:Number,component:String):void{
+					_extrasCanvas.visible = true;							
+            		_connectorB.visible = true;            		            		         		        		            	
+            		var coorX:Number = (_infoCanvas.x+_infoCanvas.width);
+            		var coorY:Number = ycoor;            		
+            		_connectorB.connectLine(coorX,coorY+_infoCanvas.y,_extrasCanvas.x-1,_extrasCanvas.y+38);  
+            		_extrasCanvas.removeAllChildren();
+            		switch(component){
+            			case "ODT_Notificaciones":
+		            		var odt_notificaciones:ODT_Notificaciones = new ODT_Notificaciones(); 
+		            		odt_notificaciones.context = viewContext;
+		            		_extrasCanvas.addChild(odt_notificaciones); 
+		            		break;
+		            }      	
+			}
+			
+			public function closeExtraCanvas():void{
+				_extrasCanvas.removeAllChildren();
+				_connectorB.visible = false;
+				_extrasCanvas.visible = false;	
+			}
+//-------------------------------- ResultsEvents --------------------------------------		
+			
+			private function onGetFieldsResult(e:ResultEvent):void{
+				_MainService.getFields.removeEventListener(ResultEvent.RESULT,onGetFieldsResult);
+				if(e){
+					if(e.result) {
+						_Data.createFields(Converter.arrayConverter(e.result));
+						getData();
+					}
+				}else{
+					Alert.show("Error al cargar los datos","Error");
+					_dataReady = false;
+				}
+				_DataResult= new ArrayCollection();
+			}
+			
+			private function getData():void{
+				var params:Object = {	_userLevel:_webApplication.user.accessType,
+										_userId:_webApplication.user.userId,
+										_idPuesto:_webApplication.user.idPuesto};
+										
+				_MainService.getUserRecords(params);
+				_MainService.getUserRecords.addEventListener(ResultEvent.RESULT,onGetDataResult);
+			}
+			
+			private function onGetDataResult(e:ResultEvent):void{
+				_canvas.removeAllChildren();
+				_MainService.getUserRecords.removeEventListener(ResultEvent.RESULT,onGetDataResult);
+				_DataResult = Converter.arrayConverter(e.result);
+				if(_DataResult.length==0) {
+					Alert.show("No hay registros en la base de datos","Atención")
+				}else{
+					
+					for(var n:Number =0; n< _DataResult.length; n++ ){
+						var item:ODT_Item = new ODT_Item();
+						item.context = _DataResult[n];
+						_canvas.addChild(item);
+					}
+				}
+				_dataReady = true;
+				resetBooleans();
+			}
+			
+			private function onFault(e:FaultEvent):void{
+				Alert.show(e.fault.faultString,"Error");
+			}
+
+			private function onDataSelect():void{
+				
+			}
+			
+			private function onCreateComplete(e:ResultEvent):void{				
+				_MainService.createRecord.removeEventListener(ResultEvent.RESULT,onCreateComplete);
+				_dataIndex = _DataResult.length;
+				Catalogs.reload();
+				getData();
+			}
+			
+			private function onUpdateComplete(e:ResultEvent):void{
+				_MainService.updateRecord.removeEventListener(ResultEvent.RESULT,onUpdateComplete);
+				Catalogs.reload();
+				getData();
+			}
+			
+			private function onDeleteComplete(e:ResultEvent):void{
+				_MainService.deleteRecord.removeEventListener(ResultEvent.RESULT,onDeleteComplete);
+				_dataIndex = _DataResult.length-2;
+				Catalogs.reload();
+				getData();
+			}
+			
+//-------------------------------- ResultsEvents --------------------------------------	
+
+//-------------------------------- POP UP WINDOW --------------------------------------	
+		    private function colesApp():void{
+		    	dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
+		    }	
+//-------------------------------- POP UP WINDOW --------------------------------------
+
+//-------------------------------- Search Engine --------------------------------------
+
+//-------------------------------- Search Engine --------------------------------------					
+			
+		]]>
+	</mx:Script>
+	<ns1:LeftScrollCanvas width="400" backgroundColor="#000000" top="50" bottom="150" left="10" backgroundAlpha="0.1" horizontalScrollPolicy="off" >
+		<mx:VBox x="16" y="0" width="100%" height="100%" id="_canvas">
+		</mx:VBox>
+	</ns1:LeftScrollCanvas>
+	<mx:Button label="Cerrar ODTS" click="colesApp();" x="10" bottom="112" width="344"/>
+	<ns1:ClearPanel top="50" bottom="150" left="457" id="_infoCanvas" width="437">		
+	</ns1:ClearPanel>
+	<ns1:ClearPanel top="50" bottom="150" left="947" id="_extrasCanvas" width="500" visible="false">
+	</ns1:ClearPanel>
+	
+</mx:Canvas>

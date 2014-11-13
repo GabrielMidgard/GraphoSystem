@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   xmlns:managers="views.managers.*"
+			   minWidth="955" minHeight="600" 
+			   currentState="StartUpManagerState"
+			   skinClass="skins.MainApplicationSkin"
+			   applicationComplete="init();" xmlns:style="com.as3xls.xls.style.*">
+	
+	
+	<!--fx:Style source="style/random/fbStyle.css" /-->
+	<s:states>
+		<s:State name="StartUpManagerState"/>
+		<s:State name="AccesManagerState"  	enterState="{accessManager.enterState()}" 					exitState="{accessManager.exitState()}"/>
+		<s:State name="WorkManagerState" 	enterState="{enterWork(event);workManager.enterState()}" 	exitState="{exitWork(event);workManager.exitState()}"/>
+	</s:states>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<managers:StartUpManager id="startUpManager" includeIn="StartUpManagerState" x="0" y="0"
+							 complete="startUpComplete(event)" 
+							 failure="startUpFailure(event)" />
+	<managers:AccessManager id="accessManager" includeIn="AccesManagerState" x="0" y="0" 
+							webApplication="{_webApplication}" 
+							loginComplete="loginComplete(event)" 
+							loginFailure="loginFailure(event)" />
+	<managers:WorkManager id="workManager" includeIn="WorkManagerState" x="0" y="0" 
+						  webApplication="{_webApplication}" />
+	<fx:Style source="style/random/mainStyle.css" />
+	<fx:Script>
+		<![CDATA[
+			import com.as3xls.cdf.CDFReader;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			import mx.events.StateChangeEvent;
+			import mx.random.constant.ODT;
+			import mx.random.constants.Catalogs;
+			import mx.random.constants.ConstantData;
+			import mx.random.constants.GlobalData;
+			import mx.random.constants.SystemGlobals;
+			import mx.random.converters.Converter;
+			import mx.random.events.CatalogEvent;
+			import mx.random.events.LoginEvent;
+			import mx.random.events.LogoutEvent;
+			import mx.random.events.NotificationEvent;
+			import mx.random.events.StartUpEvent;
+			import mx.random.events.StaticEvent;
+			import mx.random.files.PathData;
+			import mx.random.managers.IconManager;
+			import mx.random.notifications.Notifications;
+			import mx.random.sockets.SocketManager;
+			import mx.random.ventas.Vendedores;
+			import mx.random.web.WebApplication;
+			
+			import views.*;
+			import views.bancos.*;
+			import views.butlers.MailButler;
+			import views.captura.Captura_Factura_Web;
+			import views.cfd.CFDViewer;
+			import views.cfd.MailReader;
+			import views.clientes.*;
+			import views.comunicaciones.Comunicaciones_Blog;
+			import views.comunicaciones.Comunicaciones_Blog_NuevoComentario;
+			import views.comunicaciones.Comunicaciones_Blog_Temas;
+			import views.comunicaciones.Comunicaciones_Interna;
+			import views.comunicaciones.ConnectedUsers;
+			import views.contabilidad.Conciliaciones;
+			import views.contabilidad.Conciliaciones_Referencia;
+			import views.din.Din;
+			import views.din.Din_Busqueda;
+			import views.empleados.*;
+			import views.empresa.*;
+			import views.fiscales.*;
+			import views.fiscales.Fiscales_Contactos;
+			import views.fiscales.Fiscales_Representantes;
+			import views.managers.DownloadManager;
+			import views.managers.FileManager;
+			import views.managers.UploadManager;
+			import views.nominas.Nominas;
+			import views.ods.Administracion_Ordenes;
+			import views.ods.Apertura;
+			import views.ods.Prediagnostico;
+			import views.ods.Prediagnostico_Cotizacion;
+			import views.ods.Prediagnostico_Venta;
+			import views.ods.Seguimiento;
+			import views.odtProcess.ODTManager;
+			import views.odtProcess.ODTManagerClear;
+			import views.odtProcess.ODTS;
+			import views.pagos.Pagos_CH;
+			import views.pagos.Pagos_Condiciones;
+			import views.pagos.Pagos_DE;
+			import views.pagos.Pagos_Seleccion_Tipo;
+			import views.pagos.Pagos_TC;
+			import views.pagos.Pagos_TE;
+			import views.pagos.Pagos_Vista_General;
+			import views.pos.Caja;
+			import views.productos.*;
+			import views.productos.Productos;
+			import views.productos.Productos_Programas;
+			import views.system.*;
+			import views.ventas.*;
+			import views.equipos.*;
+			
+			
+			[Bindable]	private var _configXML:XML;			
+			[Bindable]	private var _webApplication:WebApplication;
+			private var _cd:ConstantData = new ConstantData();
+			private var _catalogArray:Array;
+			
+			[Bindable]	private var _odts:Number = 0;
+			
+			private var _IconManager:IconManager;
+			private var _iconArray:ArrayCollection = new ArrayCollection([	{iconImage:"assets/Custom/processIcon64x64.png",iconName:"ODT",iconClass:"odtProcess.ODTManagerClear",bindNotification:_odts,windowMode:false},
+				{iconImage:"assets/Custom/windowProcessIcon64x64.png",iconName:"ODT Admin",iconClass:"odtProcess.ODTS",bindNotification:_odts,windowMode:true},																			
+				{iconImage:"assets/Custom/usersIcon64x64.png",iconName:"Usuarios",iconClass:"comunicaciones.ConnectedUsers",bindNotification:null,windowMode:false}]);
+			
+			private function init():void{
+				
+				/*StaticEvent.debug = true;
+				StaticEvent.useSingelton = true;
+				
+				SystemGlobals.SOCKET_SERVER_IP 		= "192.168.1.232";
+				SystemGlobals.SOCKET_SERVER_PORT 	= 5555;
+				SystemGlobals.USE_SOCKET_SYNK 		= true;
+				*/
+				
+				//SystemGlobals.USE_SOCKET_SYNK = true;
+				
+				// -------------------- SYSTEM ---------------------------
+				startUpManager.homePath = "";
+				Users;				
+				UC;				
+				MessageBox;				
+				Support;																
+				// -------------------- SYSTEM ---------------------------
+				
+				//----------NICE-----------------------
+				Caja;
+				Din_Busqueda;
+				Din;
+			
+				//----------NICE-----------------------
+				
+				
+				
+				//----------CRM-----------------------
+				Empresa_Areas;
+				Empresa_Cecos;
+				Empresa_Comisiones_Semanales;
+				//Empresa_Comisiones;
+				Empresa_Companias;
+				Empresa_Departamentos;
+				Empresa_Grupos_Sucursales;
+				Empresa_Menu;
+				Empresa_Menu_Refacciones;
+				Empresa_Niveles_Acceso;
+				Empresa_Organigrama;
+				Empresa_Puestos;
+				Empresa_Sucursales;
+				Empresa_Tipos_Comisiones;
+				Empresa_Ubicaciones;
+				Empresa_Categorias;
+				
+				Empleados;
+				
+				//----------CRM-----------------------
+				
+				Productos;
+				Productos_Familias;
+				Productos_Reglas_Negocio;
+				Productos_SubFamilias;
+				Productos_Grupos_Cobro;
+				
+				
+				//----------PRM-----------------------
+				
+				
+				
+				
+				//----------PRM-----------------------
+				
+				
+				//----------GRAPHO-----------------------
+				
+				Seguimiento;
+				
+				Apertura;
+				Administracion_Ordenes;
+				Prediagnostico;
+				Prediagnostico_Cotizacion;
+				Prediagnostico_Venta;
+				
+				Clientes;
+				
+				Fiscales_Contactos;
+				Equipos;
+				Marcas;
+				Tipos_Equipos;
+				Codigo_Error;
+				
+				//----------GRAPHO-----------------------
+				
+			}
+			
+			
+			
+			public function loadCatalogs():void{	
+				//--------- Load Catalogs ----------
+				_catalogArray =['System_Labels','empresa_companias','empresa_areas','empresa_departamentos','empresa_ceco','empresa_categorias',
+					'Productos_Familias','Productos_SubFamilias','Productos_Reglas_Negocio','Productos_Grupos_Cobro','tipos_servicio',
+					'gs_areasSoporteTecnico','estatus','empleados','equipos','marcas','tipos_equipo'];				
+				//--------- Load Catalogs ----------
+				SystemGlobals.LANGUAGE = '_MX';
+				Catalogs.config(_webApplication,_catalogArray);	
+				//StaticEvent.addEventListener(CatalogEvent.CATALOG_COMPLETE,updateCatalogInfo);			
+			}
+			
+			protected function startUpComplete(event:StartUpEvent):void{
+				_configXML = event.configXML;
+				_webApplication = new WebApplication(_configXML.webApplication);
+				_webApplication.addEventListener(LogoutEvent.LOGOUT_COMPLETE, logoutComplete);
+				loadCatalogs()
+				currentState = "AccesManagerState";
+			}
+			
+			protected function startUpFailure(event:StartUpEvent):void{
+				Alert.show(event.info, "Error");
+			}
+			
+			protected function loginComplete(event:LoginEvent):void{
+				currentState = event.state;
+			}
+			
+			protected function logoutComplete(event:LogoutEvent):void{
+				currentState = "AccesManagerState";
+			}
+			
+			protected function loginFailure(event:LoginEvent):void{
+				
+			}
+			
+			
+			private function not(val:Number){
+				_odts += val;
+				StaticEvent.dispatchEvent(new NotificationEvent(NotificationEvent.NEW_NOTIFICATION,_odts,Notifications.NORMAL));
+			}
+			
+			protected function enterWork(event:FlexEvent):void{
+				var workManagerContext:Object = {
+					webApplication: _webApplication,
+					configXML: _configXML
+				}
+				workManager.context = workManagerContext;
+				
+				SystemGlobals.userName 		= _webApplication.user.fullName;
+				SystemGlobals.userLevel 	= _webApplication.user.role;
+				SystemGlobals.userLevelId 	= _webApplication.user.roleId;
+				SystemGlobals.userGroup 	= _webApplication.user.groupName
+				SystemGlobals.userGroupId 	= _webApplication.user.groupId;	
+				SystemGlobals.userId		= _webApplication.user.userId.toString();	
+				//_IconManager = new IconManager(0,0,8,10,_iconArray,workManager,true,"iconCanvas");	
+				
+				/*
+				if(_webApplication.socketServer.SOCKET_SERVER_ACTIVE){
+				SystemGlobals.USE_SOCKET_SYNK 		= _webApplication.socketServer.SOCKET_SERVER_ACTIVE;
+				SystemGlobals.SOCKET_SERVER_IP 		= _webApplication.socketServer.SOCKET_SERVER_HOST;
+				SystemGlobals.SOCKET_SERVER_PORT 	= _webApplication.socketServer.SOCKET_SERVER_PORT;
+				}*/											
+				if(SystemGlobals.USE_SOCKET_SYNK){	
+					SystemGlobals.serverStatus 		= "Connecting...";				
+					SystemGlobals.SOCKET_MANAGER 	= new SocketManager();
+					SystemGlobals.SOCKET_MANAGER.connect();
+				}else{
+					SystemGlobals.serverStatus = "No Sync Server...";
+				}
+				
+				
+				if(_webApplication.user.roleId==-1){
+					SystemGlobals.sucursal		= "Sucursal : "+Converter.findLabel(SystemGlobals.SUCURSALES,'_idSucursal','_nombre',_webApplication.user.idSucursal);
+				}else{
+					SystemGlobals.sucursal		= "Administrador";					
+				}	
+				SystemGlobals.mainStage = this;
+				Vendedores.config(_webApplication,15,"Empleados_Vendedores");
+			}
+			
+			protected function exitWork(event:FlexEvent):void{
+				if(SystemGlobals.USE_SOCKET_SYNK&&SystemGlobals.SOCKET_MANAGER.connected){
+					SystemGlobals.SOCKET_MANAGER.disconnect();
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	
+</s:Application>

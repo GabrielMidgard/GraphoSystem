@@ -1,0 +1,54 @@
+/* CSS file */
+
+.MyDataGrid
+{
+	headerSeparatorSkin: Embed(source="style.swf", symbol="DataGrid_headerWhiteSeparatorSkin"); 
+	rollOverColor: #F3F3F3;
+	selectionColor: #F3F3F3;
+	textRollOverColor:#000000;
+	textSelectedColor:#000000;
+	selectiondDisabledColor: #1e1e1e;
+	borderStyle: solid;
+	borderThickness:1;
+	borderColor: #FFFFFF;
+	alternatingItemColors: #F3F3F3, #F3F3F3;
+	disabledColor: #000000;
+	verticalGridLineColor: #FFFFFF;
+	headerColors: #c1d82f,#c1d82f;
+	verticalGridLines: true;
+	selectionDisabledColor: #F3F3F3;
+	horizontalGridLineColor: #FFFFFF;
+	horizontalGridLines: true;
+	headerStyleName: dataGridHeader;
+	paddingRight: 2;
+	backgroundDisabledColor: #FFFFFF;
+	fontFamily: Arial;
+	fontSize: 9;
+	color: #000000;
+	
+}
+.dataGridHeader
+{
+	
+	fontFamily: Arial;
+	fontWeight: bold;
+	fontSize: 9;
+	color: #FFFFFF;
+	paddingRight: 5;
+	paddingLeft: 5;
+}
+
+@font-face
+{
+	fontFamily: Arial;
+	fontWeight: bold;
+	fontStyle: normal;
+	src: local("Arial");
+}
+@font-face
+{
+	fontFamily: Arial;
+	fontWeight: normal;
+	fontStyle: normal;
+	src: local("Arial");
+}

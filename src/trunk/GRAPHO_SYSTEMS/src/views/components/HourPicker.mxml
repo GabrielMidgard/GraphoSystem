@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" width="146" height="136" 
+	creationComplete="initComp()"
+	layout="absolute" title="Hora : {_currentHour}"
+	mouseDownOutside="outClick(event)">
+	
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.managers.PopUpManager;
+			import mx.random.windowManagers.PopManager;
+			import mx.events.FlexMouseEvent;
+			import mx.random.events.HourPickerEvent;
+			
+			
+			private var _stratHour:String;
+			
+[Bindable] 	private var _currentHour:String = new String();
+			
+			private function initComp():void{
+				loadPicker();
+				checkHour();						
+			}
+			
+			public function set startHour(start:String):void{ 
+				_stratHour = start;				
+			}
+			
+			private function outClick(e:Event):void{				
+				getHour();				
+			}
+			
+			public function getHour():void{						
+				dispatchEvent(new HourPickerEvent(HourPickerEvent.HOUR_SELECTION_COMPLETE,_currentHour));
+				PopUpManager.removePopUp(this);
+			}
+			
+			private function fill(value:Number):String{
+				var res:String = value.toString();
+				if(value<10) res = "0"+value;
+				return res;
+			}
+			
+			private function loadPicker():void{
+				var hour:Array = _stratHour.split(":");
+				var newHour:Number = Number(hour[0]);
+				if(newHour>12) {newHour-=12; meridiano.selectedValue = true};
+				_hour.value = newHour;
+				_minute.value = hour[1];
+			}
+			
+			
+			private function checkHour():void{
+				if(_minute.value>59){_minute.value = 0;}
+				if(_minute.value<0){_minute.value = 59;}
+				if(_hour.value>12){_hour.value = 1;}
+				if(_hour.value<1){_hour.value = 12;}
+				var hour:String 	= "00";
+				var minute:String 	= "00";
+				if(meridiano.selectedValue){
+					hour			= fill(_hour.value+12);
+				}else{
+					hour			= fill(_hour.value);
+				}	
+				minute = fill(_minute.value);					
+				_currentHour = hour+":"+minute+":00";
+			}
+			
+			
+		]]>
+	</mx:Script>
+	<mx:NumericStepper x="10" y="13" id="_hour" minimum="1" maximum="13" stepSize="1" change="checkHour()" maxChars="2" textAlign="right"/>
+	<mx:NumericStepper x="78" y="13" id="_minute" minimum="-1" maximum="60" stepSize="1" change="checkHour()" maxChars="2" textAlign="right" value="0"/>
+	<mx:Label x="67" y="10" text=":" fontSize="15" width="8"/>
+	<mx:RadioButtonGroup id="meridiano" change="checkHour()"/>
+	<mx:RadioButton x="10" y="43" label="am" groupName="meridiano" selected="true" value="false"/>
+	<mx:RadioButton x="78" y="43" label="pm" groupName="meridiano" value="true"/>
+	<mx:Button label="OK" click="getHour();" width="125" x="10" y="73"/>
+	
+</mx:Panel>

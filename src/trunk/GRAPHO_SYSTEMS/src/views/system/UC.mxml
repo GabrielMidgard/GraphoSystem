@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="236" height="148" title="System" showCloseButton="true">
+	<mx:Button x="96" y="84" label="Regresar" width="110" click="closeWindow()"/>
+	<mx:SWFLoader x="10" y="10" source="style/random/Logo.swf" scaleContent="true" width="55" height="107.85"/>
+	<mx:Label x="83" y="43" text="Módulo en construcción."/>
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.events.CloseEvent;
+			private function closeWindow():void{
+				dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
+			}
+		]]>
+	</mx:Script>
+	
+</mx:TitleWindow>

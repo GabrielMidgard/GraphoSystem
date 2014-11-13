@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="327" height="77"  backgroundAlpha="0.0" verticalScrollPolicy="off" horizontalScrollPolicy="off" clipContent="true">
+	<mx:Canvas x="7" y="7" width="23" height="63" backgroundColor="#FF0000" backgroundAlpha="0.5"></mx:Canvas>
+	<mx:Image source="assets/Custom/Ballon.png" left="5" top="5" height="67" width="317"/>
+	<mx:Text x="31" y="21" text="RANDOM ESTUDIO GRAFICO S.A. DE C.V." width="171" height="45" fontFamily="Arial" fontSize="12" textAlign="center" fontWeight="bold" selectable="false"/>		
+	<mx:Text x="205" y="26" text="00525" width="83" height="30" fontFamily="Arial" fontSize="20" textAlign="center" fontWeight="bold" selectable="false"/>
+	<mx:Image x="296" y="30" source="assets/Custom/Edit.png" width="19" height="19"/>
+</mx:Canvas>

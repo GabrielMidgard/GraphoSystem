@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark" 
+			   xmlns:mx="library://ns.adobe.com/flex/mx" 
+			   width="272" height="318" title="Tipo de Pago">
+
+	
+	
+	<s:Button x="10" y="183" width="247" height="50" icon="@Embed(source='../../assets/CRM/Money.png')"  label="Depósito en Efectivo"  enabled="{_dataReady}" click="openPopUp('pagos.Pagos_DE','true')"/>
+	<s:Button x="10" y="127" width="247" height="50" icon="@Embed(source='../../assets/CRM/Transfer_Icon.png')"   label="Transferecnia Electrónica" enabled="{_dataReady}" click="openPopUp('pagos.Pagos_TE','true')"/>
+	<s:Button x="10" y="69" width="247" height="50" icon="@Embed(source='../../assets/CRM/Check_Icon.png')"  label="Cheques" enabled="{_dataReady}" click="openPopUp('pagos.Pagos_CH','true')"/>
+	<s:Button x="10" y="10" width="247" height="50" icon="@Embed(source='../../assets/CRM/CC_Icon.png')"  label="Tarjeta de Crédito" enabled="{_dataReady}" click="openPopUp('pagos.Pagos_TC','true')"/>
+	<s:Button label="Cancelar" width="145" y="250" x="59.5" click="closeWindow();"/>
+	
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.random.events.PaymentEvent;
+			import mx.random.events.StaticEvent;
+			import mx.random.constants.SystemGlobals;
+			import mx.random.clientes.ClientData;
+			import mx.random.web.WebApplication;
+			import mx.managers.PopUpManager;
+			import mx.events.CloseEvent;
+			
+			private var _webApplication:WebApplication;
+			private var _workManager:Object 		= new Object();
+
+
+			//-----------Event Manager -----------
+[Bindable]	private var _cliente:ClientData = new ClientData();
+[Bindable]	private var _dataReady:Boolean = false;
+
+			//-----------Event Manager -----------
+			
+			
+			//-----------Local Vars -----------
+			
+
+			
+			//-----------Local Vars -----------
+			
+//---------------------------- Context ---------------------------------------------            
+
+   			public function set context(contextObj:Object):void{
+				for( var p:String in contextObj){
+					if(this.hasOwnProperty(p)){
+						this[p] = contextObj[p];
+					}
+				}
+				_dataReady = true;
+				StaticEvent.removeAllListenersByCaller("PaymentSelector");
+				StaticEvent.addEventListener(PaymentEvent.PAYMETN_COMPLETE,onPaymentComplete,"PaymentSelector");				
+			}
+
+			public function set workManager(value:Object):void{
+				_workManager = value;
+			}
+			
+			public function set cliente(value:ClientData):void{
+				_cliente = value;
+			}
+
+			public function set webApplication(value:WebApplication):void{
+				_webApplication = value;				
+			}
+			
+			public function get webApplication():WebApplication{ return _webApplication; } 
+						
+//---------------------------- Context ---------------------------------------------  
+
+//-------------------------------- MainInit --------------------------------------
+			// ------------------- View Extra Data -------------------------------
+			
+			private function get viewContext():Object{
+				return {webApplication: _webApplication,
+						cliente:_cliente,
+						workManager: _workManager
+						}					
+			}
+			
+			
+			
+			public function openPopUp(popUpName:String,modal:Boolean=false):void{				
+				var pop:TitleWindow = PopUpManager.createPopUp(SystemGlobals.mainStage as DisplayObject, getDefinitionByName("views."+popUpName) as Class, modal) as TitleWindow;
+				pop.name = popUpName;
+				pop.addEventListener(CloseEvent.CLOSE, closePopup);
+				if(pop.hasOwnProperty("context")){
+					Object(pop).context = viewContext;
+				}
+				PopUpManager.centerPopUp(pop);	
+				 			
+			}
+			
+			private function closePopup(e:CloseEvent):void{			
+	            		PopUpManager.removePopUp(e.target as TitleWindow);
+			}
+			
+			public function closeWindow():void{					
+            		dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
+            		PopUpManager.removePopUp(this);
+            }
+            
+            private function onPaymentComplete(e:PaymentEvent):void{
+            	trace("SE PaymentSelector");
+            	closeWindow();
+            }
+		]]>
+	</fx:Script>
+	
+</s:TitleWindow>

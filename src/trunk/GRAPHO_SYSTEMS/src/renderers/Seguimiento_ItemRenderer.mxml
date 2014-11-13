@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:GridItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					xmlns:s="library://ns.adobe.com/flex/spark" 
+					xmlns:mx="library://ns.adobe.com/flex/mx" clipAndEnableScrolling="true">
+	<s:layout>
+		<s:VerticalLayout gap="5" horizontalAlign="left" paddingBottom="5" paddingLeft="5"
+						  paddingRight="5" paddingTop="5"/>
+	</s:layout>
+	<fx:Script>
+		<![CDATA[
+			override public function prepare(hasBeenRecycled:Boolean):void {
+				responsable.text 	= "RESPONSABLE	: "+data['responsable'];
+				habloCon.text 		= "	HOBLO CON	: "+data['habloCon'];
+				fecha.text 			= "	FECHA		: "+data['fecha'];
+				hora.text 			= "	HORA		: "+data['hora'];
+				comentario.text 	= "	COMENTARIO	: "+data['comentario'];
+				accion.text 		= "	ACCION		: "+data['accion'];
+			}
+		]]>
+	</fx:Script>
+	
+	<s:Label id="responsable" color="#000000" fontWeight="bold"/>
+	<s:Label id="habloCon" color="#525252" fontSize="10"/>
+	<s:Label id="fecha" color="#525252" fontSize="10"/>
+	<s:Label id="hora" color="#525252" fontSize="10"/>
+	<s:Label id="comentario" color="#525252" fontSize="10"/>
+	<s:Label id="accion" color="#525252" fontSize="10"/>
+	
+</s:GridItemRenderer>

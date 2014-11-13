@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100" height="104" verticalScrollPolicy="off" horizontalScrollPolicy="off">
+	
+	<mx:VBox x="0" y="0" width="100%" height="100%" horizontalAlign="center">
+		<mx:Image source="{_iconImage}" width="64" height="64"/>
+		<mx:Label text="{_iconName}" width="100%" height="35" textAlign="center" fontWeight="bold"/>
+	</mx:VBox>
+	<mx:Image visible="{_NotificationMark}" source="assets/Custom/Notification.png" width="36" height="36" right="8" top="4" />
+	<mx:Label visible="{_NotificationText}" text="{_bindNotification}" width="36" height="36" textAlign="center" right="9" top="10" fontWeight="bold"  fontFamily="Arial" fontSize="15"/>
+	<mx:Script>
+		<![CDATA[
+			import mx.random.events.NotificationEvent;
+			import mx.random.events.StaticEvent;
+			import mx.random.events.IconEvent;
+			import mx.formatters.SwitchSymbolFormatter;
+			
+[Bindable]	private var _iconImage:String = "";
+[Bindable]	private var _iconName:String = "";
+			private var _iconClass:String = "";
+			private var _windowMode:Boolean = true;
+[Bindable]	private var _bindNotification:Object;
+[Bindable]	private var _NotificationMark:Boolean = false;
+[Bindable]	private var _NotificationText:Boolean = false;
+			
+			public function set iconImage(value:String):void{ _iconImage = value}
+			public function set iconName(value:String):void{ _iconName = value}
+			public function set iconClass(value:String):void{ _iconClass = value}
+			public function set windowMode(value:Boolean):void{_windowMode = value}
+			public function set bindNotification(value:Object):void{_bindNotification = value}
+			
+			public function set context(contextObj:Object):void{
+				for( var p:String in contextObj){
+					if(this.hasOwnProperty(p)){
+						this[p] = contextObj[p];
+					}
+				}
+				init();
+			}
+			
+			private function init():void{
+				this.doubleClickEnabled = true;
+				this.buttonMode = true;
+				this.addEventListener(MouseEvent.DOUBLE_CLICK,mouseControl);
+				this.addEventListener(MouseEvent.MOUSE_DOWN,mouseControl);
+				this.addEventListener(MouseEvent.MOUSE_UP,mouseControl);
+				this.addEventListener(MouseEvent.MOUSE_OUT,mouseControl);
+				StaticEvent.addEventListener(NotificationEvent.NEW_NOTIFICATION,updateNotification);
+				if(_bindNotification){
+					if(_bindNotification>0){
+						_NotificationMark = true;
+						_NotificationText = true;
+					}
+				}
+			}
+			
+			
+			private function updateNotification(e:NotificationEvent):void{
+				bindNotification = e._notificationData;				
+				_NotificationMark = false;
+				_NotificationText = false;
+				if(_bindNotification){
+					if(_bindNotification>0){
+						_NotificationMark = true;
+						_NotificationText = true;
+					}
+				}
+			}
+			
+			private function mouseControl(e:MouseEvent):void{
+				switch(e.type){
+					case MouseEvent.DOUBLE_CLICK:
+						dispatchEvent(new IconEvent(IconEvent.ICON_DOUBLECLICK,_iconClass,_windowMode));
+						break;
+					case MouseEvent.MOUSE_DOWN:
+						this.startDrag(false);
+						dispatchEvent(new IconEvent(IconEvent.ICON_PRESSED,_iconClass,_windowMode));
+						break;
+					case MouseEvent.MOUSE_UP:
+						this.stopDrag();
+						dispatchEvent(new IconEvent(IconEvent.ICON_RELEASED,_iconClass,_windowMode));
+						break;
+					case MouseEvent.MOUSE_OUT:
+						this.stopDrag();
+						dispatchEvent(new IconEvent(IconEvent.ICON_RELEASED,_iconClass,_windowMode));
+						break;
+				}
+			}
+				
+		]]>
+	</mx:Script>
+</mx:Canvas>
