@@ -4,7 +4,7 @@
 			   xmlns:mx="library://ns.adobe.com/flex/mx"
 			   width="1110" height="678" contentBackgroundColor="#D5FBDB"
 			   title="Administración de Clientes">
-
+	
 	
 	
 	<fx:Script>
@@ -101,7 +101,7 @@
 				return {webApplication: _webApplication,
 					workManager: this,
 					selectedItem: _dataList.selectedItem,
-						dataObject: _dataList.selectedItem
+					dataObject: _dataList.selectedItem
 				}					
 			}
 			
@@ -543,7 +543,7 @@
 	<s:ComboBox  x="440" y="314" id="_estado" change="dataChange();" width="156" dataProvider="{ConstantData.NationalStates}" labelField="label" tabIndex="13"/>
 	<s:ComboBox  x="312" y="115" id="_idTipoCliente" change="dataChange();" width="119" dataProvider="{_tipoCliente}" labelField="label" tabIndex="13"/>
 	<s:ComboBox  x="439" y="115" id="_idEstatus" change="dataChange();" width="157" dataProvider="{_estatusCliente}" labelField="label" tabIndex="13"/>
-
+	
 	<s:Label x="273" y="304" text="colonia"  fontSize="9" color="#797979" fontStyle="italic"/>
 	<s:TextInput x="272" y="314" id="_colonia" change="dataChange();" width="159" tabIndex="11"/>
 	<s:Label x="441.5" y="446" text="oficina"  fontSize="9" color="#797979" fontStyle="italic"/>
@@ -570,7 +570,11 @@
 	<s:Button x="446" y="353" width="150" height="23" label="Recolección"
 			  click="openPopUp('fiscales.Fiscales_Recoleccion',true)"
 			  enabled="{_dataReady&amp;&amp;!_newData&amp;&amp;!_updateData}" />
-	<s:Button x="113" y="524" label="Equipos" width="150" click="openPopUp('fiscales.Fiscales_Cliente_Servicios',true)" enabled="{_dataReady&amp;&amp;!_newData&amp;&amp;!_updateData}" />
+	
+	<s:Button x="113" y="524" label="Equipos" width="150"
+			  click="openPopUp(&quot;equipos.Equipos&quot;,true);"
+			  enabled="{_dataReady&amp;&amp;!_newData&amp;&amp;!_updateData}" />
+	
 	<s:CheckBox x="119" y="530" enabled="false" id="_tieneServicios"/>
 	<s:CheckBox x="452" y="355" enabled="false" id="_tieneRecoleccion"/>
 	<s:CheckBox x="484" y="234" enabled="false" id="_tieneContacto"/>

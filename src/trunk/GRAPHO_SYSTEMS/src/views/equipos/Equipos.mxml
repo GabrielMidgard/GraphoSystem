@@ -8,8 +8,9 @@
 
 	<s:TextInput x="118" y="10" id="_nombreEquipo" change="dataChange();" width="151" tabIndex="1"/>
 	<s:TextInput x="399" y="9" id="_modelo" change="dataChange();" width="175" tabIndex="2"/>
-	<s:TextInput x="399" y="39" id="_anioFabricacion" change="dataChange();" width="175" tabIndex="2"/>
 	<s:TextInput x="118" y="40" id="_serie" change="dataChange();" width="150" tabIndex="3"/>
+	<s:TextInput x="399" y="39" id="_anioFabricacion" change="dataChange();" width="175" maxChars="4" restrict="0-9"  tabIndex="4"/>
+
 	<s:ComboBox 	x="119" id="_idMarca" 	labelField="_nombreMarca" dataProvider="{SystemGlobals.MARCAS}" change="dataChange();"	width="148" y="70" tabIndex="5"/>
 	<s:ComboBox 	x="403" id="_idTipoEquipo" labelField="_nombreTipo" dataProvider="{SystemGlobals.TIPOS_EQUIPOS}" change="dataChange();"	width="133" y="69" tabIndex="6"/>
 	<s:ComboBox 	x="120" id="_searchType" 	dataProvider="{_searchTypes}" 	width="148" y="113" tabIndex="7"/>
@@ -121,7 +122,7 @@
 			private var _mainFocusField:String 	= "_nombreEquipo";
 			
 			
-			[Bindable]	private var _idCliente:Number 		= 0;
+			[Bindable]	private var _idCliente:Number 		= -1;
 			[Bindable]	private var _nombreEmpresa:String 	= "";
 			private var _dataObject:Object  	= new Object();
 			
@@ -183,7 +184,8 @@
 			}
 			
 			private function extraCreateData(params:Object):Object{	
-
+				params["_idCliente"] = _idCliente;
+				
 				//params["_newsImage"] = _image;
 				return params;
 			}
@@ -208,7 +210,7 @@
 			public function initView():void{
 				forceImports();
 				_MainService = _webApplication.getService(_serviceName);
-				_Data.exceptions = ["_idEquipo"];
+				_Data.exceptions = ["_idEquipo", "_idCliente"];
 				_MainService.addEventListener(FaultEvent.FAULT,onFault);
 				initData();
 				addValidations();
@@ -329,12 +331,23 @@
 			}
 			
 			private function getData():void{
-				_MainService.getRecords();
-				_MainService.getRecords.addEventListener(ResultEvent.RESULT,onGetDataResult);
+				if(_idCliente==-1){
+					_MainService.getRecords();
+					_MainService.getRecords.addEventListener(ResultEvent.RESULT,onGetDataResult);
+				}
+				else{
+					_MainService.getRecordById(_idCliente);
+					_MainService.getRecordById.addEventListener(ResultEvent.RESULT,onGetDataResult);
+				}
 			}
 			
 			private function onGetDataResult(e:ResultEvent):void{
-				_MainService.getRecords.removeEventListener(ResultEvent.RESULT,onGetDataResult);
+				if(_idCliente==-1){
+					_MainService.getRecords.removeEventListener(ResultEvent.RESULT,onGetDataResult);
+				}else{
+					_MainService.getRecordById.removeEventListener(ResultEvent.RESULT,onGetDataResult);
+				}
+				
 				_DataResult = Converter.arrayConverter(e.result);
 				if(_DataResult.length==0) {
 					Alert.show("No hay registros en la base de datos","Atención")

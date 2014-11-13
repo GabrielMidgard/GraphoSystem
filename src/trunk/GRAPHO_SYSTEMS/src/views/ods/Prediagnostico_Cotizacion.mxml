@@ -68,6 +68,7 @@
 	<s:Label x="30" y="479" text="Comidas :"/>
 	<s:Label x="94" y="461" color="#767474" fontSize="10" fontStyle="italic" text="costo"/>
 	<s:Label x="312" y="386" color="#767474" fontSize="10" fontStyle="italic" text="transporte"/>
+
 	<s:ComboBox id="_tipoTransporte" x="310" y="397" width="132" change="dataChange();"
 				contentBackgroundColor="#D5FBDB" dataProvider="{ConstantData.TipoTransporte}" labelField="label"
 				fontWeight="bold"></s:ComboBox>
