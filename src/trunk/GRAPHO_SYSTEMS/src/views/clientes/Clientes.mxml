@@ -101,7 +101,7 @@
 				return {webApplication: _webApplication,
 					workManager: this,
 					selectedItem: _dataList.selectedItem,
-					dataObject: _dataList.selectedItem
+					Cliente: _dataList.selectedItem
 				}					
 			}
 			

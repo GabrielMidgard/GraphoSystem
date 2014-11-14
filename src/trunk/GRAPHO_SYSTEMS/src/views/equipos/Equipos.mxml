@@ -126,7 +126,7 @@
 			[Bindable]	private var _nombreEmpresa:String 	= "";
 			private var _dataObject:Object  	= new Object();
 			
-			public function set dataObject(value:Object):void	{
+			public function set Cliente(value:Object):void	{
 				_nombreEmpresa = value._nombreEmpresa;	
 				_dataObject = value;	
 				_idCliente = 	value._idCliente;
@@ -184,7 +184,9 @@
 			}
 			
 			private function extraCreateData(params:Object):Object{	
-				params["_idCliente"] = _idCliente;
+				if(_idCliente!=-1){
+					params["_idCliente"] = _idCliente;
+				}
 				
 				//params["_newsImage"] = _image;
 				return params;
@@ -331,22 +333,12 @@
 			}
 			
 			private function getData():void{
-				if(_idCliente==-1){
-					_MainService.getRecords();
-					_MainService.getRecords.addEventListener(ResultEvent.RESULT,onGetDataResult);
-				}
-				else{
 					_MainService.getRecordById(_idCliente);
 					_MainService.getRecordById.addEventListener(ResultEvent.RESULT,onGetDataResult);
-				}
 			}
 			
 			private function onGetDataResult(e:ResultEvent):void{
-				if(_idCliente==-1){
-					_MainService.getRecords.removeEventListener(ResultEvent.RESULT,onGetDataResult);
-				}else{
-					_MainService.getRecordById.removeEventListener(ResultEvent.RESULT,onGetDataResult);
-				}
+				_MainService.getRecordById.removeEventListener(ResultEvent.RESULT,onGetDataResult);
 				
 				_DataResult = Converter.arrayConverter(e.result);
 				if(_DataResult.length==0) {
