@@ -7,99 +7,41 @@
 	<fx:Declarations>
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
 	</fx:Declarations>
-	<s:ComboBox id="_nombreEmpresa12" x="89" y="257" width="310" fontStyle="italic"> </s:ComboBox>
+
+	
+	<s:ComboBox x="92" y="258" width="310" id="_idEmpleado" labelField="_nombre"  dataProvider="{SystemGlobals.EMPLEADOS}" change="dataChange();" tabIndex="1"/>
+											    
 	<s:Label x="7" y="263" text="Responsable :"/>
-	<s:TextInput id="_nombreEmpresa20" x="89" y="291" width="310" fontStyle="normal"
-				 text="Rubén González Pérez"/>
 	<s:Label x="23" y="298" text="Hablo con :"/>
 	<s:Label x="15" y="328" text="Comentario :"/>
-	<s:Label x="33" y="411" text="Acción a &#xd;Seguir :" textAlign="right"/>
-	<s:TextArea x="89" y="411" width="625" height="78"/>
-	<s:TextInput id="_nombreEmpresa18" x="408" y="291" width="70" fontWeight="normal" text="12/12/2014"
-				 textAlign="center"/>
+	<s:Label x="10" y="414" width="70" text="Acción a &#xd;Seguir :" textAlign="right"/>
+	<s:TextArea id="_accionSeguir" x="89" y="411" width="625" height="78" change="dataChange();"/>
 	<s:Label x="409" y="280" color="#767474" fontSize="10" fontStyle="italic" text="fecha"/>
-	<s:TextInput id="_nombreEmpresa19" x="487" y="291" width="70" fontWeight="normal" text="14:25:36"
-				 textAlign="center"/>
 	<s:Label x="488" y="280" color="#767474" fontSize="10" fontStyle="italic" text="hora"/>
-	<s:TextArea x="89" y="321" width="625" height="78"/>
+	<s:TextArea id="_comentario" x="89" y="321" width="625" height="78" change="dataChange();"/>
 	<s:Button label="Regresar" click="closeWindow();" width="145"  enabled="{!_newData}" y="499" x="1073"/>
-	<s:Button x="563" y="290" width="51" height="23" label="Ahora" click="closeWindow();"
-			  enabled="{!_newData}"/>
-	<s:Button label="Nuevo" width="80" enabled="{_dataReady}" visible="{!_newData&amp;&amp;!_updateData}" click="newData();" x="89" y="499"/>
-	<s:Button label="Cancelar" width="80" enabled="{_dataReady}" visible="{_newData||_updateData}" click="cancel();" x="177" y="499"/>
-	<s:Button label="Aceptar" width="80" enabled="{_dataReady}" visible="{_newData}" click="createData();" x="89" y="499"/>
-	<s:Button label="Eliminar" width="80" enabled="{_dataReady&amp;&amp;!_newData}" visible="{!_newData&amp;&amp;!_updateData}" click="deleteDataAlert();" x="177" y="499"/>
-	<s:Button label="Actualizar" width="80" enabled="{_dataReady&amp;&amp;!_newData&amp;&amp;_updateData}" visible="{_updateData&amp;&amp;!_newData}" click="updateData();" x="89" y="499"/>
+	<s:Button x="568" y="290" width="70" height="23" label="Ahora" click="getCurrentTime();"
+			  enabled="{_newData||_updateData}"/>
 	
-<!--	<s:ComboBox 	x="821" id="_searchType" 	dataProvider="{_searchTypes}" 	width="92" y="19" />
-	<s:TextInput 	x="921" id="_searchField" 	change="search();" 		width="296" enabled="{!_newData}" y="19"/>-->
+	<s:ComboBox 	x="821" id="_searchType" 	dataProvider="{_searchTypes}" 	width="92" y="19" />
+	<s:TextInput 	x="921" id="_searchField" 	change="search();" 		width="296" enabled="{!_newData}" y="19"/>
 	<s:Label x="754" text="Filtrar por :" textAlign="right" y="26"/>
-	<s:DataGrid x="736" y="49" width="482" height="440" requestedRowCount="4" id="_dataList">
-		<s:columns>
+
+	
+	<s:DataGrid id="_dataList" x="736" y="49" width="482" height="440"
+				dataProvider="{_ventaPrediagnosticos}" selectionChange="onDataPreDiagnosticSellResponsibleSelect();"
+				enabled="{_dataReady&amp;&amp;!_newData&amp;&amp;!_updateData}"
+				 selectionMode="singleRow">
+		<s:columns>	
 			<s:ArrayList>
-				<s:GridColumn dataField="responsable" headerText="Contactos"  itemRenderer="renderers.Seguimiento_ItemRenderer"></s:GridColumn>
+				<s:GridColumn headerText="Hablo con" dataField="_habloCon" ></s:GridColumn>		
+				<s:GridColumn headerText="Comentario" dataField="_comentario"></s:GridColumn>
+				<s:GridColumn headerText="Accion aSeguir" dataField="_accionSeguir" ></s:GridColumn>	
 			</s:ArrayList>
 		</s:columns>
-		
-		<s:ArrayList>
-			<fx:Object responsable="Carlos Gonzáles Robles" 	
-					   habloCon="Fernando Gómez Uribe" 
-					   fecha="10/10/2014"
-					   hora="12:45:56"
-					   comentario="Primer comentario"
-					   accion="Accion del Primer comentario" 
-					   ></fx:Object>
-			<fx:Object responsable="Rubén Martínez López" 	
-					   habloCon="Fernando Gómez Uribe" 
-					   fecha="15/10/2014"
-					   hora="2:05:55"
-					   comentario="Segundo comentario"
-					   accion="Accion del Segundo comentario" 
-					   ></fx:Object>
-			<fx:Object responsable="Juan José Herrera Gómez" 	
-					   habloCon="Fernando Gómez Uribe" 
-					   fecha="22/10/2014"
-					   hora="10:45:30"
-					   comentario="Tercer comentario"
-					   accion="Accion del Tercer comentario"  
-					   ></fx:Object>
-			<fx:Object responsable="Manule Espinoza Ramírez" 	
-					   habloCon="Fernando Gómez Uribe" 
-					   fecha="24/10/2014"
-					   hora="14:40:25"
-					   comentario="Cuarto comentario"
-					   accion="Accion del Cuarto comentario" 
-					   ></fx:Object>
-			<fx:Object responsable="Carlos Gonzáles Robles" 	
-					   habloCon="Fernando Gómez Uribe" 
-					   fecha="10/10/2014"
-					   hora="12:45:56"
-					   comentario="Primer comentario"
-					   accion="Accion del Primer comentario" 
-					   ></fx:Object>
-			<fx:Object responsable="Rubén Martínez López" 	
-					   habloCon="Fernando Gómez Uribe" 
-					   fecha="15/10/2014"
-					   hora="2:05:55"
-					   comentario="Segundo comentario"
-					   accion="Accion del Segundo comentario" 
-					   ></fx:Object>
-			<fx:Object responsable="Juan José Herrera Gómez" 	
-					   habloCon="Fernando Gómez Uribe" 
-					   fecha="22/10/2014"
-					   hora="10:45:30"
-					   comentario="Tercer comentario"
-					   accion="Accion del Tercer comentario"  
-					   ></fx:Object>
-			<fx:Object responsable="Manule Espinoza Ramírez" 	
-					   habloCon="Fernando Gómez Uribe" 
-					   fecha="24/10/2014"
-					   hora="14:40:25"
-					   comentario="Cuarto comentario"
-					   accion="Accion del Cuarto comentario" 
-					   ></fx:Object>
-		</s:ArrayList>
 	</s:DataGrid>
+	
+	
 	<s:TextInput id="_nombreEmpresa" x="92" y="61" width="310" contentBackgroundColor="#e7e7e7"
 				 enabled="false" fontStyle="italic" text="{_cliente._nombreEmpresa}"/>
 	<s:TextInput id="_ciudad" x="92" y="99" width="150" contentBackgroundColor="#e7e7e7"
@@ -164,8 +106,20 @@
 				 enabled="false" fontWeight="bold" textAlign="center"/>
 	<s:TextInput id="_nombreTipoServicio" x="568" y="21" width="150" contentBackgroundColor="#E7E7E7"
 				 enabled="false" fontWeight="bold" textAlign="center"/>
+	<s:TextInput id="_habloCon" x="92" y="291" width="310" change="dataChange();" fontStyle="normal"
+				 text="{_datosVentaPrediagnostico._habloCon}"/>
+	<s:TextInput id="_fechaHablo" x="411" y="291" width="70" change="dataChange();"
+				 fontWeight="normal" text="{_datosVentaPrediagnostico._fechaHablo}" textAlign="center"/>
+	<s:TextInput id="_horaHablo" x="490" y="291" width="70" change="dataChange();"
+				 fontWeight="normal" text="{_datosVentaPrediagnostico._horaHablo}" textAlign="center"/>
 	
-	
+		
+	<s:Button label="Nuevo" width="80" enabled="{_dataReady}" visible="{!_newData&amp;&amp;!_updateData}" click="newVentaPreDiagnosticData();" y="497" x="89"/>
+	<s:Button label="Aceptar" width="80" enabled="{_dataReady}" visible="{_newData}" click="createPreDiagnosticSellResponsibleData();" y="497" x="89"/>
+
+	<s:Button label="Actualizar" width="80" enabled="{_dataReady&amp;&amp;!_newData&amp;&amp;_updateData}"  visible="{_updateData&amp;&amp;!_newData}" click="updateData();" y="497" x="89"/>
+	<s:Button label="Cancelar" width="80" enabled="{_dataReady}" visible="{_newData||_updateData}" click="cancelPreDiagnosticSellResponsible();" y="497" x="177"/>
+	<s:Button label="Eliminar" width="80" enabled="{_dataReady&amp;&amp;!_newData}" visible="{!_newData&amp;&amp;!_updateData}" click="deleteDataAlert();" y="497" x="177"/>
 	
 	
 	<fx:Script>
@@ -193,8 +147,9 @@
 			private var _workManager:Object 		= new Object();
 			private var _MainService:RemoteObject 		= new RemoteObject();
 			[Bindable]	private var _Data:DataManager 				= new DataManager(this);
-			[Bindable]	private var _DataDiagnostico:DataManager 				= new DataManager(this);
-			[Bindable]	private var _DataResult:ArrayCollection 		= new ArrayCollection();			
+			[Bindable]	private var _DataPreDiagnosticoRes:DataManager 				= new DataManager(this);
+			[Bindable]	private var _DataResult:ArrayCollection 		= new ArrayCollection();	
+			[Bindable]  private var _ventaPrediagnosticos:ArrayCollection = new ArrayCollection();
 			private var _eventManager:EventManager 		= new EventManager(this);
 			private var _dataIndex:Number 			= 0;
 			
@@ -218,7 +173,7 @@
 			[Bindable] private var _cliente:Object = {};
 			[Bindable] private var _equipo:Object = {};
 			[Bindable] private var _cotizacion:Object = {};
-			[Bindable] private var _datosPrediagnostico:Object = {};
+			[Bindable] private var _datosVentaPrediagnostico:Object = {};
 			[Bindable] private var _prediagnosticos:ArrayCollection = new ArrayCollection();
 			
 			//-----------Local Vars -----------
@@ -262,6 +217,11 @@
 			private function addValidations():void{
 				Valid.changeLanguage(Languages.SPANISH);
 				
+				Valid.addStringVal(_habloCon,1,50,"Hablo Con");
+				Valid.addStringVal(_fechaHablo,4,30,"Fecha");
+				Valid.addStringVal(_horaHablo,4,30,"Hora");
+			
+				
 				//----------- Validaciones ---------------------------
 				//Valid.addStringVal(_nombre,2,100,"Nombre");
 				//Valid.addStringVal(_codigo,1,2,"Código");
@@ -302,9 +262,7 @@
 					"_modificadoPor","_descripcionClienteFalla","_idCodigoError","_idCliente","_idContacto",
 					"_idTipoServicio","_idAreaSoporteTecnico","_idEstatus","_idEmpleado","_idCliente","_idContacto","_idEquipo","_fechaHabloCon",
 					"_idEquipo","_nota"];
-				_DataDiagnostico.exceptions = ["_idDiagnostico","_descripcionFalla","_descripcionSolucion","_esPrediagnostico",
-					"_fechaCreacion","_tiempoNumero","_tiempoUnidad","_porcentajeDificultad","_falla"
-				];
+				_DataPreDiagnosticoRes.exceptions = ["_idVentaPrediagnosticoResponsable","_creado","_fechaHabloCon","_idOrden"];
 				_MainService.addEventListener(FaultEvent.FAULT,onFault);
 				initData();
 				addValidations();
@@ -321,8 +279,8 @@
 			
 			private function initData():void{
 				_MainService.getFields();
-				_MainService.getDiagnosticFields();
-				_MainService.getDiagnosticFields.addEventListener(ResultEvent.RESULT,onGetDiagnosticFieldsResult);
+				_MainService.getPreDiagnosticSellResponsibleFields();
+				_MainService.getPreDiagnosticSellResponsibleFields.addEventListener(ResultEvent.RESULT,onGetPreDiagnosticSellResponsibleFieldsResult);
 				_MainService.getFields.addEventListener(ResultEvent.RESULT,onGetFieldsResult);
 				_dataReady = false;
 			}
@@ -343,50 +301,19 @@
 				createRecordExtras();
 			}
 			
-			private function createData():void{
-				if(Valid.validateAll()){
-					_dataReady = false;
-					var params:Object = extraCreateData(_Data.makeData());
-					_MainService.createRecord(params);
-					_MainService.createRecord.addEventListener(ResultEvent.RESULT,onCreateComplete);
-				}else{
-					Alert.show(Valid.errors,"Error");
-				}
-			}
-			
-			private function updateData():void{
-				if(Valid.validateAll()){
-					_dataReady = false;
-					var params:Object = extraUpdateData(_DataDiagnostico.makeData());
-					params[_mainId] = _dataList.selectedItem[_mainId];
-					_MainService.updateDiagnosticRecord(params);
-					_MainService.updateDiagnosticRecord.addEventListener(ResultEvent.RESULT,onUpdateComplete);
-					_dataIndex =_dataList.selectedIndex;
-				}else{
-					Alert.show(Valid.errors,"Error");
-				}
-			}
+		
 			
 			private function deleteDataAlert():void{
 				if(_dataList.selectedIndex!=-1){
-					Alert.show("Desea borrar el registro seleccionado?","Atención",Alert.YES|Alert.CANCEL,this,deleteData);
+					Alert.show("Desea borrar el registro seleccionado?","Atención",Alert.YES|Alert.CANCEL,this,deletePreDiagnosticSellResponsibleData);
 				}else{
 					Alert.show("No hay registro selecionado","Error");
 				}
 			}
 			
-			private function deleteData(e:CloseEvent):void{
-				if(e.detail==Alert.YES){
-					var params:Object = new Object();
-					params[_mainId] = _dataList.selectedItem[_mainId];
-					_MainService.deleteRecord(params);
-					_MainService.deleteRecord.addEventListener(ResultEvent.RESULT,onDeleteComplete);
-					_dataReady = false;
-				}
-			}
 			
 			private function cancel():void{
-				onDataSelect();
+				onDataPreDiagnosticSellResponsibleSelect();
 				resetBooleans();
 				Valid.validateAll();
 			}
@@ -395,11 +322,14 @@
 				_MainService.getClientFromOrder(_idOrdenSelected);
 				_MainService.getSpecificOrder(_idOrdenSelected);
 				_MainService.getEquipmentFromOrder(_idOrdenSelected);
-				_MainService.getPreDiagnosticRecordsFromOrder(_idOrdenSelected);
+				
+				_MainService.getPreDiagnosticSellResponsibleData(_idOrdenSelected);
+				
 				_MainService.getSpecificOrder.addEventListener(ResultEvent.RESULT,onGetOrderResult);
 				_MainService.getClientFromOrder.addEventListener(ResultEvent.RESULT,onGetDataClientResult);
 				_MainService.getEquipmentFromOrder.addEventListener(ResultEvent.RESULT,onGetDataSystemResult);
-				_MainService.getPreDiagnosticRecordsFromOrder.addEventListener(ResultEvent.RESULT,onGetPreDiagnosticResult);
+				
+				_MainService.getPreDiagnosticSellResponsibleData.addEventListener(ResultEvent.RESULT,onGetPreDiagnosticSellResponsibleResult);
 				resetBooleans();
 			}
 			
@@ -436,11 +366,11 @@
 				_DataResult= new ArrayCollection();
 			}
 			
-			private function onGetDiagnosticFieldsResult(e:ResultEvent):void{
-				_MainService.getDiagnosticFields.removeEventListener(ResultEvent.RESULT,onGetDiagnosticFieldsResult);
+			private function onGetPreDiagnosticSellResponsibleFieldsResult(e:ResultEvent):void{
+				_MainService.getPreDiagnosticSellResponsibleFields.removeEventListener(ResultEvent.RESULT,onGetPreDiagnosticSellResponsibleFieldsResult);
 				if(e){
 					if(e.result) {
-						_DataDiagnostico.createFields(Converter.arrayConverter(e.result));
+						_DataPreDiagnosticoRes.createFields(Converter.arrayConverter(e.result));
 					}
 				}else{
 					Alert.show("Error al cargar los datos","Error");
@@ -460,14 +390,6 @@
 				}
 			}
 			
-			private function onGetPreDiagnosticResult(e:ResultEvent):void{
-				_MainService.getPreDiagnosticRecordsFromOrder.removeEventListener(ResultEvent.RESULT,onGetPreDiagnosticResult);
-				_prediagnosticos = Converter.arrayConverter(e.result);
-				/*_dataList.selectedIndex = _dataIndex;
-				_dataList.setSelectedIndex(_dataList.selectedIndex);*/
-				onDataPreDiagnosticSelect();
-				_dataReady = true;
-			}
 			
 			private function onGetOrderResult(e:ResultEvent):void{
 				_MainService.getSpecificOrder.removeEventListener(ResultEvent.RESULT,onGetOrderResult);
@@ -512,19 +434,6 @@
 				Alert.show(e.fault.faultString,"Error");
 			}
 			
-			private function onDataPreDiagnosticSelect():void{
-				/*if(_dataList.selectedIndex == -1) return;
-				_DataDiagnostico.loadData(_dataList.selectedItem);*/
-			}
-			
-			private function onDataSelect():void{
-				/*if(_dataList.selectedIndex!=-1) {
-					_DataDiagnostico.loadData(_dataList.selectedItem);
-					_dataIndex =_dataList.selectedIndex;
-					loadExtraFields(_dataList.selectedItem);
-					_selectedId = _dataList.selectedItem[_mainId];
-				}*/
-			}
 			
 			private function onCreateComplete(e:ResultEvent):void{				
 				_MainService.createRecord.removeEventListener(ResultEvent.RESULT,onCreateComplete);
@@ -534,7 +443,7 @@
 			}
 			
 			private function onUpdateComplete(e:ResultEvent):void{
-				_MainService.updateDiagnosticRecord.removeEventListener(ResultEvent.RESULT,onUpdateComplete);
+				_MainService.updatePreDiagnosticSellResponsibleRecord.removeEventListener(ResultEvent.RESULT,onUpdateComplete);
 				//Catalogs.reload(); No es necesario recargar todosss los catalogos
 				getData();
 			}
@@ -565,10 +474,10 @@
 			//-------------------------------- POP UP WINDOW --------------------------------------
 			
 			//-------------------------------- Search Engine --------------------------------------
-			/*
+			
 			private function searchFilter():void{
-			_DataResult.filterFunction = vlidateSearch;
-			_DataResult.refresh();
+				_ventaPrediagnosticos.filterFunction = vlidateSearch;
+				_ventaPrediagnosticos.refresh();
 			}
 			
 			private function vlidateSearch(item:Object):Boolean{
@@ -580,14 +489,118 @@
 			}
 			
 			private function search():void{
-			_searchFilter = _searchField.text;
-			searchFilter();
+				_searchFilter = _searchField.text;
+				searchFilter();
 			}
 			private var _searchFilter:String 			= new String();
-			[Bindable]	private var _searchTypes:ArrayCollection 	= new ArrayCollection([{label:"Id",     	value:"_idArea"},{label:"Nombre",     	value:"_nombre"}]);
-			*/
+			[Bindable]	private var _searchTypes:ArrayCollection 	= new ArrayCollection([{label:"Hablo Con",     	value:"_habloCon"},{label:"Encargado",     	value:"_idEmpleado"},{label:"fecha",     	value:"_fechaHabloCon"}]);
+			
 			//-------------------------------- Search Engine --------------------------------------					
 			
+			private function getCurrentTime():void{
+				var currentDateTime:Date = new Date();
+				_fechaHablo.text = currentDateTime.fullYear + "-" + currentDateTime.month + "-" + currentDateTime.date;
+				_horaHablo.text = currentDateTime.hours + ":" + currentDateTime.minutes + ":" + currentDateTime.seconds;
+				dataChange();
+			}
+			
+			private function createPreDiagnosticSellResponsibleData():void{
+				if(Valid.validateAll()){
+					_dataReady = false;
+					var params:Object = extraCreateData(_DataPreDiagnosticoRes.makeData());
+					var dDate:String = _fechaHablo.text + " " + _horaHablo.text;
+					params._fechaHabloCon = dDate;
+					
+					params["_idOrden"] = _idOrdenSelected;
+					_MainService.createPreDiagnosticSellResponsibleRecord(params);
+					_MainService.createPreDiagnosticSellResponsibleRecord.addEventListener(ResultEvent.RESULT,onCreatePreDiagnosticSellResponsibleComplete);
+				}else{
+					Alert.show(Valid.errors,"Error");
+				}
+			}
+			
+			
+			private function onCreatePreDiagnosticSellResponsibleComplete(e:ResultEvent):void{				
+				_MainService.recordPreDiagnostic.removeEventListener(ResultEvent.RESULT,onCreatePreDiagnosticSellResponsibleComplete);
+				resetVentaPreDiagnosticBooleans();
+				_dataReady = true;
+				//Catalogs.reload();
+				getData();
+			}
+			
+			private function cancelPreDiagnosticSellResponsible():void{
+				resetVentaPreDiagnosticBooleans();
+				onDataPreDiagnosticSellResponsibleSelect();
+				Valid.validateAll();
+			}
+			
+			private function resetVentaPreDiagnosticBooleans():void{
+				_newData = false;
+				_updateData = false;
+			}
+			
+			
+			private function updateData():void{
+				if(Valid.validateAll()){
+					var params:Object = extraUpdateData(_DataPreDiagnosticoRes.makeData());
+					var dDate:String = _fechaHablo.text + " " + _horaHablo.text;
+					params["_idVentaPrediagnosticoResponsable"] = _dataList.selectedItem["_idVentaPrediagnosticoResponsable"];
+					params._fechaHabloCon = dDate;
+					_MainService.updatePreDiagnosticSellResponsibleRecord(params);
+					_MainService.updatePreDiagnosticSellResponsibleRecord.addEventListener(ResultEvent.RESULT,onUpdateComplete);
+				}else{
+					Alert.show(Valid.errors,"Error");
+				}
+			}
+			
+		
+			
+			private function newVentaPreDiagnosticData():void{
+				_DataPreDiagnosticoRes.clear();
+				_newData = true;
+				_updateData = false;
+				Valid.validateAll();
+				this["_habloCon"].setFocus();
+				createRecordExtras();
+			}
+			
+			public function onGetPreDiagnosticSellResponsibleResult(e:ResultEvent):void{
+				_MainService.getPreDiagnosticSellResponsibleData.removeEventListener(ResultEvent.RESULT,onGetPreDiagnosticSellResponsibleResult);
+				_ventaPrediagnosticos = Converter.arrayConverter(e.result);
+				var resArr:ArrayCollection;
+				resArr = Converter.arrayConverter(e.result);
+				if(resArr.length > 0){
+					_datosVentaPrediagnostico = resArr[0]; //Sólo debe de haber un registro o ninguno
+				}else{
+					_datosVentaPrediagnostico = {};
+				}
+				
+				if(_ventaPrediagnosticos.length > 0){
+					if(_dataIndex<0) _dataIndex = 0;
+					_dataList.selectedIndex = _dataIndex;	
+					_DataPreDiagnosticoRes.loadData(_dataList.selectedItem);
+					
+				}
+			}
+			
+			private function onDataPreDiagnosticSellResponsibleSelect():void{
+				if(_dataList.selectedIndex!=-1) {
+					_DataPreDiagnosticoRes.loadData(_dataList.selectedItem);
+					_dataIndex =_dataList.selectedIndex;
+					loadExtraFields(_dataList.selectedItem);
+					_selectedId = _dataList.selectedItem["_idVentaPrediagnosticoResponsable"];
+				}
+			}
+			
+			private function deletePreDiagnosticSellResponsibleData(e:CloseEvent):void{
+				if(e.detail==Alert.YES){
+					var params:Object = new Object();
+					params["_idVentaPrediagnosticoResponsable"] = _dataList.selectedItem["_idVentaPrediagnosticoResponsable"];
+					_MainService.deletePreDiagnosticSellResponsibleRecord(params);
+					_MainService.deletePreDiagnosticSellResponsibleRecord.addEventListener(ResultEvent.RESULT,onDeleteComplete);
+					_dataReady = false;
+				}
+			}
 		]]>
 	</fx:Script>
 	
