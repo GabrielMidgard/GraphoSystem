@@ -86,6 +86,7 @@
 			import views.ods.Prediagnostico_Cotizacion;
 			import views.ods.Prediagnostico_Venta;
 			import views.ods.Seguimiento;
+			import views.ods.Confirmacion;
 			import views.odtProcess.ODTManager;
 			import views.odtProcess.ODTManagerClear;
 			import views.odtProcess.ODTS;
@@ -200,7 +201,7 @@
 				Marcas;
 				Tipos_Equipos;
 				Codigo_Error;
-				
+				Confirmacion;
 				//----------GRAPHO-----------------------
 				
 			}

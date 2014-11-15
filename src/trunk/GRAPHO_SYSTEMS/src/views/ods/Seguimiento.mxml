@@ -92,7 +92,7 @@
 			  skinClass="skins.Custom_Button_Light_Skin"/>
 	<s:CheckBox x="16" y="135" enabled="false" id="_tieneServicios2"/>
 	<s:Button x="10" y="161" width="192" label="   Confirmación"
-			  click="openPopUp('fiscales.Fiscales_Cliente_Servicios',true)"
+			  click="openPopUp('ods.Confirmacion',true)"
 			  skinClass="skins.Custom_Button_Light_Skin"/>
 	<s:CheckBox x="16" y="167" enabled="false" id="_tieneServicios3"/>
 	<s:Button x="10" y="193" width="192" label="   Diagnóstico"
