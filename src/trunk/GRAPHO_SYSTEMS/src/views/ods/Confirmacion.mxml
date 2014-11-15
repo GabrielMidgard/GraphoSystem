@@ -128,19 +128,16 @@
 	<s:TextInput id="_fechaHablo0" x="316" y="258" width="96" change="dataChange();"
 				 fontWeight="normal" textAlign="center"/>
 	<s:Button x="189" y="259" width="63" height="23" label="Hoy" enabled="{!_newData}"/>
-	<s:Button x="422" y="418" width="70" height="23" label="Adjuntos" click="getCurrentTime();"
+	<s:Button x="422" y="418" width="70" height="23" label="Adjuntos" 
 			  enabled="{!_newData}"/>
 	<s:ComboBox id="_idTecnico" x="521" y="257" width="127" change="dataChange();"
-				dataProvider="{SystemGlobals.EMPLEADOS}" fontStyle="italic" labelField="_nombre"
-				selectedIndex="{_datosPrediagnostico._idTecnico}"> </s:ComboBox>
+				dataProvider="{SystemGlobals.EMPLEADOS}" fontStyle="italic" labelField="_nombre"> </s:ComboBox>
 	<s:Label x="16" y="552" text="Responsable :"/>
 	<s:ComboBox id="_idTecnico0" x="103" y="545" width="307" change="dataChange();"
-				dataProvider="{SystemGlobals.EMPLEADOS}" fontStyle="italic" labelField="_nombre"
-				selectedIndex="{_datosPrediagnostico._idTecnico}"> </s:ComboBox>
+				dataProvider="{SystemGlobals.EMPLEADOS}" fontStyle="italic" labelField="_nombre"> </s:ComboBox>
 	<s:Label x="309" y="593" text="Técnico Asignado :"/>
 	<s:ComboBox id="_idTecnico1" x="422" y="587" width="307" change="dataChange();"
-				dataProvider="{SystemGlobals.EMPLEADOS}" fontStyle="italic" labelField="_nombre"
-				selectedIndex="{_datosPrediagnostico._idTecnico}"> </s:ComboBox>
+				dataProvider="{SystemGlobals.EMPLEADOS}" fontStyle="italic" labelField="_nombre"> </s:ComboBox>
 	<s:Label x="58" y="592" text="Fecha :"/>
 	<s:TextInput id="_fechaHablo9" x="104" y="585" width="78" change="dataChange();"
 				 fontWeight="normal" textAlign="center"/>
@@ -343,14 +340,6 @@
 				}
 			}
 			
-			private function recordIssue():void{
-				var codigo:String = _codigoFalla.text;
-				var descripcion:String = _descripcionFalla.text;
-				_fallasReportadas.addItem({_codigo:codigo,_falla:descripcion});
-				_MainService.recordFailure({_idOrden:_idOrdenSelected,_falla:descripcion,_codigo:codigo});
-				_codigoFalla.text = "";
-				_descripcionFalla.text = "";
-			}
 			
 			private function deleteDataAlert():void{
 				/*if(_dataList.selectedIndex!=-1){
@@ -421,8 +410,6 @@
 			}
 			
 			public function reloadCurrentCatalogs(clearComboBoxes:Boolean):void{
-				_idEquipo.selectedIndex = -1;
-				_idContacto.selectedIndex = -1;
 				_MainService.getListOfContacts(_cliente._idCliente);
 				_MainService.getListOfEquipments(_cliente._idCliente);
 				_MainService.getListOfContacts.addEventListener(ResultEvent.RESULT,onGetContactsResult);
