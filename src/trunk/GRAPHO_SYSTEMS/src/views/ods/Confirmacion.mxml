@@ -21,15 +21,15 @@
 				 enabled="false" fontStyle="italic" text="{_cliente._nombreEstado}"/>
 	<s:Label x="263" y="89" color="#767474" fontSize="10" fontStyle="italic" text="estado"/>
 	<s:TextInput id="_ciudad0" x="102" y="378" width="150" contentBackgroundColor="#D5FBDB"
-				 enabled="true" fontStyle="italic" text="{_cliente._ciudad}"/>
+				 enabled="true" fontStyle="italic"/>
 	<s:TextInput id="_ciudad1" x="262" y="378" width="150" contentBackgroundColor="#D5FBDB"
-				 enabled="true" fontStyle="italic" text="{_cliente._ciudad}"/>
+				 enabled="true" fontStyle="italic"/>
 	<s:TextInput id="_ciudad2" x="420" y="378" width="150" contentBackgroundColor="#D5FBDB"
-				 enabled="true" fontStyle="italic" text="{_cliente._ciudad}"/>
+				 enabled="true" fontStyle="italic"/>
 	<s:TextInput id="_ciudad3" x="102" y="419" width="150" contentBackgroundColor="#D5FBDB"
-				 enabled="true" fontStyle="italic" text="{_cliente._ciudad}"/>
+				 enabled="true" fontStyle="italic"/>
 	<s:TextInput id="_ciudad4" x="262" y="419" width="150" contentBackgroundColor="#D5FBDB"
-				 enabled="true" fontStyle="italic" text="{_cliente._ciudad}"/>
+				 enabled="true" fontStyle="italic"/>
 	<s:Label x="263" y="408" color="#767474" fontSize="10" fontStyle="italic" text="CURP"/>
 	<s:Label x="657" y="443" color="#767474" fontSize="10" fontStyle="italic" text="No de Remisión"/>
 	<s:Label x="103" y="408" color="#767474" fontSize="10" fontStyle="italic" text="RFC"/>
@@ -99,19 +99,19 @@
 	<s:TextInput id="_nombreTipoServicio" x="578" y="22" width="150" contentBackgroundColor="#E7E7E7"
 				 enabled="false" fontWeight="bold" textAlign="center"/>
 	<s:TextInput id="_fechaHablo" x="103" y="259" width="78" change="dataChange();"
-				 fontWeight="normal" text="{_datosPrediagnostico._fechaHablo}" textAlign="center"/>
+				 fontWeight="normal" textAlign="center"/>
 	<s:Label x="10" y="309" text="Nombre Fiscal :"/>
 	<s:TextInput id="_fechaHablo1" x="103" y="302" width="545" change="dataChange();"
-				 fontWeight="normal" text="{_datosPrediagnostico._fechaHablo}" textAlign="center"/>
+				 fontWeight="normal" textAlign="center"/>
 	<s:Label x="3" y="344" text="Domicilio Fiscal :"/>
 	<s:Label x="40" y="510" text="Domicilio :"/>
 	<s:TextInput id="_fechaHablo2" x="102" y="337" width="546" change="dataChange();"
-				 fontWeight="normal" text="{_datosPrediagnostico._fechaHablo}" textAlign="center"/>
+				 fontWeight="normal" textAlign="center"/>
 	<s:TextInput id="_fechaHablo7" x="103" y="504" width="625" change="dataChange();"
-				 fontWeight="normal" text="{_datosPrediagnostico._fechaHablo}" textAlign="center"/>
+				 fontWeight="normal" textAlign="center"/>
 	<s:Label x="8" y="465" text="Total a Facturar :"/>
 	<s:TextInput id="_fechaHablo3" x="102" y="458" width="150" change="dataChange();"
-				 fontWeight="normal" text="{_datosPrediagnostico._fechaHablo}" textAlign="center"/>
+				 fontWeight="normal" textAlign="center"/>
 	<s:Label x="263" y="465" text="No de Factura :"/>
 	<s:TextInput id="_fechaHablo4" x="357" y="458" width="55" change="dataChange();"
 				 fontWeight="normal" textAlign="center"/>
@@ -126,9 +126,8 @@
 	<s:Label x="262" y="265" text="Importe :"/>
 	<s:Label x="421" y="265" text="Forma de Pago :"/>
 	<s:TextInput id="_fechaHablo0" x="316" y="258" width="96" change="dataChange();"
-				 fontWeight="normal" text="{_datosPrediagnostico._fechaHablo}" textAlign="center"/>
-	<s:Button x="189" y="259" width="63" height="23" label="Hoy" click="getCurrentTime();"
-			  enabled="{!_newData}"/>
+				 fontWeight="normal" textAlign="center"/>
+	<s:Button x="189" y="259" width="63" height="23" label="Hoy" enabled="{!_newData}"/>
 	<s:Button x="422" y="418" width="70" height="23" label="Adjuntos" click="getCurrentTime();"
 			  enabled="{!_newData}"/>
 	<s:ComboBox id="_idTecnico" x="521" y="257" width="127" change="dataChange();"
@@ -144,9 +143,8 @@
 				selectedIndex="{_datosPrediagnostico._idTecnico}"> </s:ComboBox>
 	<s:Label x="58" y="592" text="Fecha :"/>
 	<s:TextInput id="_fechaHablo9" x="104" y="585" width="78" change="dataChange();"
-				 fontWeight="normal" text="{_datosPrediagnostico._fechaHablo}" textAlign="center"/>
-	<s:Button x="194" y="585" width="63" height="23" label="Hoy" click="getCurrentTime();"
-			  enabled="{!_newData}"/>
+				 fontWeight="normal" textAlign="center"/>
+	<s:Button x="194" y="585" width="63" height="23" label="Hoy" enabled="{!_newData}"/>
 	
 	<fx:Script>
 		<![CDATA[
@@ -194,6 +192,7 @@
 			private var _mainFocusField:String      = "_operador";
 			private var _idOrdenSelected:Number		= -1;
 			[Bindable] private var _cliente:Object = {};
+			[Bindable] private var _equipo:Object = {};
 			[Bindable] private var _contactos:ArrayCollection = new ArrayCollection();
 			[Bindable] private var _equipos:ArrayCollection = new ArrayCollection();
 			[Bindable] private var _fallasReportadas:ArrayCollection = new ArrayCollection();
