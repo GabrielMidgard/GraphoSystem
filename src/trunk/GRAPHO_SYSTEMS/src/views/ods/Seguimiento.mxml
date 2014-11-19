@@ -96,23 +96,23 @@
 			  skinClass="skins.Custom_Button_Light_Skin"/>
 	<s:CheckBox x="16" y="167" enabled="false" id="_tieneServicios3"/>
 	<s:Button x="10" y="193" width="192" label="   Diagnóstico"
-			  click="openPopUp('fiscales.Fiscales_Cliente_Servicios',true)"
+			  click="openPopUp('ods.Diagnostico',true)"
 			  skinClass="skins.Custom_Button_Light_Skin"/>
 	<s:CheckBox x="16" y="199" enabled="false" id="_tieneServicios4"/>
 	<s:Button x="10" y="226" width="192" label="   Cotización Diagnóstico"
-			  click="openPopUp('fiscales.Fiscales_Cliente_Servicios',true)"
+			  click="openPopUp('ods.Diagnostico_Cotizacion',true)"
 			  skinClass="skins.Custom_Button_Light_Skin"/>
 	<s:CheckBox x="16" y="232" enabled="false" id="_tieneServicios5"/>
 	<s:Button x="10" y="258" width="192" label="   Venta y Facturación"
-			  click="openPopUp('fiscales.Fiscales_Cliente_Servicios',true)"
+			  click="openPopUp('ods.Venta_Facturacion',true)"
 			  skinClass="skins.Custom_Button_Light_Skin"/>
 	<s:CheckBox x="16" y="264" enabled="false" id="_tieneServicios6"/>
 	<s:Button x="10" y="290" width="192" label="   Ejecución de Servicio"
-			  click="openPopUp('fiscales.Fiscales_Cliente_Servicios',true)"
+			  click="openPopUp('ods.Ejecucion_Servicio',true)"
 			  skinClass="skins.Custom_Button_Light_Skin"/>
 	<s:CheckBox x="16" y="296" enabled="false" id="_tieneServicios7"/>
 	<s:Button x="10" y="322" width="192" label="   Cierre de Orden"
-			  click="openPopUp('fiscales.Fiscales_Cliente_Servicios',true)"
+			  click="openPopUp('ods.Cierre_Orden',true)"
 			  skinClass="skins.Custom_Button_Light_Skin"/>
 	<s:CheckBox x="16" y="328" enabled="false" id="_tieneServicios8"/>
 	<s:Label x="293" y="252" color="#767474" fontSize="10" fontStyle="italic" text="observaciones"/>
@@ -207,7 +207,19 @@
 			public function initView():void{
 				//forceImports();
 				_MainService = _webApplication.getService(_serviceName);
-				_Data.exceptions = ["_idTipoServicio","_idAreaSoporteTecnico","_idEstatus","_idEmpleado","_idCliente","_idContacto","_idEquipo"];
+				_Data.exceptions = ["_creado","_modificado","_creadoPor","_creado",	"_modificado","_creadoPor",
+					"_modificadoPor","_descripcionClienteFalla","_idCodigoError","_idCliente","_idContacto",
+					"_idTipoServicio","_idAreaSoporteTecnico","_idEstatus","_idEmpleado","_idCliente","_idContacto",
+					"_idEquipo","_fechaHabloCon","_idEquipo","_nombreTecnico","_idRefaccion","_prediagnosticoNumeroTiempo",
+					"_prediagnosticoUnidadTiempo","_servicioNumeroTiempo","_servicioUnidadTiempo","_idTecnico","_habloCon",
+					"_fechaPagoInicial","_formaPago","_tecnicoAsignado","_seInformoVisitaA","_fechaPromesaVisita",
+					"_responsableAsignacionDeFecha","_domicilioServicio","_fechaServicioInicial","_horaServInicial",
+					"_tiempoNumeroDiagnostico","_tiempoUnidadDiagnostico","_fechaServInicial","_diasReparacion",
+					"_diasReparacion","_horaServInicial","_nombreTecnicoAsignado","_totalFacturar","_noFactura","_importe",
+					"_totalRemisionar","_noRemision","_responsableAsignacionDeFecha",
+					"_domicilioServicio","_fechaServicioInicial","_formaPago","_fechaPagoInicial",
+					"_tecnicoAsignado","_seInformoVisitaA","_fechaPromesaVisita","_tiempoUnidadDiagnostico","_tiempoNumeroDiagnostico"
+					];
 				_MainService.addEventListener(FaultEvent.FAULT,onFault);
 				initData();
 			}
@@ -267,7 +279,14 @@
 				_MainService.getSpecificOrder.removeEventListener(ResultEvent.RESULT,onGetDataResult);
 				_DataResult = Converter.arrayConverter(e.result);
 				if(_DataResult.length==0) {
-					Alert.show("No existe orden con el id especificado","Atención")
+					Alert.show("No existe orden con el id " + _idOrden.text,"Atención");
+					_Data.clear();
+					_fechaCreacion.text = "";
+					_horaCreacion.text = "";
+					_nombreEstatus.text = "";
+					_nombreAreaSoporte.text = "";
+					_nombreEmpleado.text = "";
+					_nombreContacto.text = "";
 				}else{
 					_Data.loadData(_DataResult[0]); //Sólo debe de haber un registro o ninguno
 				}

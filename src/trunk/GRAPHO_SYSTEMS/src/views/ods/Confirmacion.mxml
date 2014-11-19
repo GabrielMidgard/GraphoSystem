@@ -20,16 +20,18 @@
 	<s:TextInput id="_nombreEstado" x="262" y="100" width="150" contentBackgroundColor="#e7e7e7"
 				 enabled="false" fontStyle="italic" text="{_cliente._nombreEstado}"/>
 	<s:Label x="263" y="89" color="#767474" fontSize="10" fontStyle="italic" text="estado"/>
-	<s:TextInput id="_ciudad0" x="102" y="378" width="150" contentBackgroundColor="#D5FBDB"
-				 enabled="true" fontStyle="italic"/>
-	<s:TextInput id="_ciudad1" x="262" y="378" width="150" contentBackgroundColor="#D5FBDB"
-				 enabled="true" fontStyle="italic"/>
-	<s:TextInput id="_ciudad2" x="420" y="378" width="150" contentBackgroundColor="#D5FBDB"
-				 enabled="true" fontStyle="italic"/>
-	<s:TextInput id="_ciudad3" x="102" y="419" width="150" contentBackgroundColor="#D5FBDB"
-				 enabled="true" fontStyle="italic"/>
-	<s:TextInput id="_ciudad4" x="262" y="419" width="150" contentBackgroundColor="#D5FBDB"
-				 enabled="true" fontStyle="italic"/>
+	<s:TextInput id="_ciudadFiscal" x="102" y="378" width="150" contentBackgroundColor="#E7E7E7"
+				 enabled="false" fontStyle="italic" text="{_datosFiscales._ciudadFiscal}"/>
+	<s:TextInput id="_domicilioFiscal" x="102" y="338" width="626" contentBackgroundColor="#E7E7E7"
+				 enabled="false" fontStyle="italic" text="{_datosFiscales._domicilioFiscal}"/>
+	<s:TextInput id="_nombreEstadoFiscal" x="262" y="378" width="150" contentBackgroundColor="#E7E7E7"
+				 enabled="false" fontStyle="italic" text="{_datosFiscales._nombreEstadoFiscal}"/>
+	<s:TextInput id="_cpFiscal" x="420" y="378" width="150" contentBackgroundColor="#E7E7E7"
+				 enabled="false" fontStyle="italic" text="{_datosFiscales._cpFiscal}"/>
+	<s:TextInput id="_rfc" x="102" y="419" width="150" contentBackgroundColor="#E7E7E7"
+				 enabled="false" fontStyle="italic" text="{_datosFiscales._rfc}"/>
+	<s:TextInput id="_curp" x="262" y="419" width="150" contentBackgroundColor="#E7E7E7"
+				 enabled="false" fontStyle="italic" text="{_datosFiscales._curp}"/>
 	<s:Label x="263" y="408" color="#767474" fontSize="10" fontStyle="italic" text="CURP"/>
 	<s:Label x="657" y="443" color="#767474" fontSize="10" fontStyle="italic" text="No de Remisión"/>
 	<s:Label x="103" y="408" color="#767474" fontSize="10" fontStyle="italic" text="RFC"/>
@@ -54,14 +56,14 @@
 	<s:Label x="51" y="68" text="Cliente :"/>
 	<s:Label x="102" y="51" color="#767474" fontSize="10" fontStyle="italic" text="nombre"/>
 	<s:TextInput id="_idOrden" x="101" y="22" width="70" contentBackgroundColor="#E7E7E7"
-				 enabled="false" fontWeight="bold" textAlign="center"/>
+				 enabled="false" fontWeight="bold" />
 	<s:TextInput id="_fechaCreacion" x="177" y="22" width="70" contentBackgroundColor="#E7E7E7"
-				 enabled="false" fontWeight="bold" textAlign="center"/>
+				 enabled="false" fontWeight="bold" />
 	<s:Label x="179" y="11" color="#767474" fontSize="10" fontStyle="italic" text="fecha"/>
 	<s:TextInput id="_horaCreacion" x="253" y="22" width="70" contentBackgroundColor="#E7E7E7"
-				 enabled="false" fontWeight="bold" textAlign="center"/>
+				 enabled="false" fontWeight="bold" />
 	<s:TextInput id="_nombreEstatus" x="331" y="22" width="79" contentBackgroundColor="#E7E7E7"
-				 enabled="false" fontWeight="bold" textAlign="center"/>
+				 enabled="false" fontWeight="bold" />
 	<s:Label x="255" y="11" color="#767474" fontSize="10" fontStyle="italic" text="hora"/>
 	<s:Label x="331" y="10" color="#767474" fontSize="10" fontStyle="italic" text="estatus"/>
 	<s:Label x="102" y="11" color="#767474" fontSize="10" fontStyle="italic" text="número"/>
@@ -95,53 +97,54 @@
 	<s:TextInput id="_anioFabricacion" x="658" y="213" width="70" contentBackgroundColor="#e7e7e7"
 				 enabled="false" fontStyle="italic" text="{_equipo._anioFabricacion}"/>
 	<s:TextInput id="_nombreAreaSoporte" x="419" y="22" width="151" contentBackgroundColor="#E7E7E7"
-				 enabled="false" fontWeight="bold" textAlign="center"/>
+				 enabled="false" fontWeight="bold"/>
 	<s:TextInput id="_nombreTipoServicio" x="578" y="22" width="150" contentBackgroundColor="#E7E7E7"
-				 enabled="false" fontWeight="bold" textAlign="center"/>
-	<s:TextInput id="_fechaHablo" x="103" y="259" width="78" change="dataChange();"
-				 fontWeight="normal" textAlign="center"/>
+				 enabled="false" fontWeight="bold"/>
+	<s:TextInput id="_fechaPagoInicial" x="103" y="259" width="78" change="dataChange();"
+				 fontWeight="normal"/>
 	<s:Label x="10" y="309" text="Nombre Fiscal :"/>
-	<s:TextInput id="_fechaHablo1" x="103" y="302" width="545" change="dataChange();"
-				 fontWeight="normal" textAlign="center"/>
+	<s:TextInput id="_nombreFiscal" x="103" y="302" width="625" change="dataChange();"
+				 contentBackgroundColor="#E7E7E7" enabled="false" fontWeight="normal"
+				 text="{_datosFiscales._nombreFiscal}"/>
 	<s:Label x="3" y="344" text="Domicilio Fiscal :"/>
 	<s:Label x="40" y="510" text="Domicilio :"/>
-	<s:TextInput id="_fechaHablo2" x="102" y="337" width="546" change="dataChange();"
-				 fontWeight="normal" textAlign="center"/>
-	<s:TextInput id="_fechaHablo7" x="103" y="504" width="625" change="dataChange();"
-				 fontWeight="normal" textAlign="center"/>
+	<s:TextInput id="_domicilioServicio" x="103" y="504" width="625" change="dataChange();"
+				 contentBackgroundColor="#D5FBDB" enabled="true" fontWeight="normal"/>
 	<s:Label x="8" y="465" text="Total a Facturar :"/>
-	<s:TextInput id="_fechaHablo3" x="102" y="458" width="150" change="dataChange();"
-				 fontWeight="normal" textAlign="center"/>
+	<s:TextInput id="_totalFacturar" x="102" y="458" width="150" change="dataChange();"
+				 fontWeight="normal"/>
 	<s:Label x="263" y="465" text="No de Factura :"/>
-	<s:TextInput id="_fechaHablo4" x="357" y="458" width="55" change="dataChange();"
-				 fontWeight="normal" textAlign="center"/>
-	<s:TextInput id="_fechaHablo6" x="658" y="456" width="70" change="dataChange();"
-				 fontWeight="normal" textAlign="center"/>
+	<s:TextInput id="_noFactura" x="357" y="458" width="55" change="dataChange();"
+				 fontWeight="normal"/>
+	<s:TextInput id="_noRemision" x="658" y="456" width="70" change="dataChange();"
+				 fontWeight="normal"/>
 	<s:Label x="421" y="464" text="Total a Remisionar :"/>
-	<s:TextInput id="_fechaHablo5" x="539" y="456" width="109" change="dataChange();"
-				 fontWeight="normal" textAlign="center"/>
+	<s:TextInput id="_totalRemisionar" x="539" y="456" width="109" change="dataChange();"
+				 fontWeight="normal"/>
 	<s:Label x="418" y="553" text="Se informó visita a:"/>
-	<s:TextInput id="_fechaHablo8" x="536" y="545" width="192" change="dataChange();"
-				 fontWeight="normal" textAlign="center"/>
+	<s:TextInput id="_seInformoVisitaA" x="536" y="545" width="192" change="dataChange();"
+				 fontWeight="normal"/>
 	<s:Label x="262" y="265" text="Importe :"/>
 	<s:Label x="421" y="265" text="Forma de Pago :"/>
-	<s:TextInput id="_fechaHablo0" x="316" y="258" width="96" change="dataChange();"
-				 fontWeight="normal" textAlign="center"/>
-	<s:Button x="189" y="259" width="63" height="23" label="Hoy" enabled="{!_newData}"/>
+	<s:TextInput id="_importe" x="316" y="258" width="96" change="dataChange();"
+				 fontWeight="normal"/>
+	<s:Button x="189" y="259" width="63" height="23" label="Hoy" click="getCurrentTime();"
+			  enabled="{!_newData}"/>
 	<s:Button x="422" y="418" width="70" height="23" label="Adjuntos" 
 			  enabled="{!_newData}"/>
-	<s:ComboBox id="_idTecnico" x="521" y="257" width="127" change="dataChange();"
-				dataProvider="{SystemGlobals.EMPLEADOS}" fontStyle="italic" labelField="_nombre"> </s:ComboBox>
+	<s:ComboBox id="_formaPago" x="521" y="257" width="207" change="dataChange();"
+				dataProvider="{ConstantData.PaymentTypes}" fontStyle="italic" labelField="label"> </s:ComboBox>
 	<s:Label x="16" y="552" text="Responsable :"/>
-	<s:ComboBox id="_idTecnico0" x="103" y="545" width="307" change="dataChange();"
+	<s:ComboBox id="_responsableAsignacionDeFecha" x="103" y="545" width="307" change="dataChange();"
 				dataProvider="{SystemGlobals.EMPLEADOS}" fontStyle="italic" labelField="_nombre"> </s:ComboBox>
 	<s:Label x="309" y="593" text="Técnico Asignado :"/>
-	<s:ComboBox id="_idTecnico1" x="422" y="587" width="307" change="dataChange();"
+	<s:ComboBox id="_tecnicoAsignado" x="422" y="587" width="307" change="dataChange();"
 				dataProvider="{SystemGlobals.EMPLEADOS}" fontStyle="italic" labelField="_nombre"> </s:ComboBox>
 	<s:Label x="58" y="592" text="Fecha :"/>
-	<s:TextInput id="_fechaHablo9" x="104" y="585" width="78" change="dataChange();"
-				 fontWeight="normal" textAlign="center"/>
-	<s:Button x="194" y="585" width="63" height="23" label="Hoy" enabled="{!_newData}"/>
+	<s:TextInput id="_fechaPromesaVisita" x="104" y="585" width="78" change="dataChange();"
+				 fontWeight="normal"/>
+	<s:Button x="194" y="585" width="63" height="23" label="Hoy" click="getCurrentTime2();"
+			  enabled="{!_newData}"/>
 	
 	<fx:Script>
 		<![CDATA[
@@ -161,6 +164,7 @@
 			import mx.rpc.events.FaultEvent;
 			import mx.rpc.events.ResultEvent;
 			import mx.rpc.remoting.RemoteObject;
+			import mx.random.constants.ConstantData;
 			
 			private var _webApplication:WebApplication;
 			private var Valid:Validator 			= new Validator();
@@ -190,6 +194,7 @@
 			private var _idOrdenSelected:Number		= -1;
 			[Bindable] private var _cliente:Object = {};
 			[Bindable] private var _equipo:Object = {};
+			[Bindable] private var _datosFiscales:Object = {};
 			[Bindable] private var _contactos:ArrayCollection = new ArrayCollection();
 			[Bindable] private var _equipos:ArrayCollection = new ArrayCollection();
 			[Bindable] private var _fallasReportadas:ArrayCollection = new ArrayCollection();
@@ -210,11 +215,7 @@
 			public function set workManager(value:Object):void{
 				_workManager = value;
 			}
-			
-			public function set cliente(value:Object):void{
-				_cliente = value;
-			}
-			
+
 			public function set idOrden(value:Number):void{
 				_idOrdenSelected = value;
 			}
@@ -275,11 +276,12 @@
 			public function initView():void{
 				forceImports();
 				_MainService = _webApplication.getService(_serviceName);
-				_Data.exceptions = ["_nombreTipoServicio","_nombreContacto","_nombreEmpleado","_nombreAreaSoporte",
-					"_creado","_modificado","_creadoPor","_creado",	"_modificado","_creadoPor",
-					"_modificadoPor","_descripcionClienteFalla","_idCodigoError","_nombreEstatus","_idCliente",
+				_Data.exceptions = ["_creado","_modificado","_creadoPor","_creado",	
+					"_modificado","_creadoPor","_modificadoPor","_descripcionClienteFalla","_idCodigoError","_idCliente",
 					"_idEquipo","_idTecnico","_fechaHabloCon","_prediagnosticoNumeroTiempo","_prediagnosticoUnidadTiempo",
-					"_servicioNumeroTiempo","_servicioUnidadTiempo","_habloCon"
+					"_servicioNumeroTiempo","_servicioUnidadTiempo","_habloCon","_nota","_idEmpleado","_idEstatus","_idContacto",
+					"_idTipoServicio","_idAreaSoporteTecnico","_estadoFiscal","_fechaServicioInicial","_fechaServicioInicial","_tiempoNumeroDiagnostico",
+					"_tiempoUnidadDiagnostico","_diasReparacion"
 					
 				];
 				_MainService.addEventListener(FaultEvent.FAULT,onFault);
@@ -327,10 +329,6 @@
 				if(Valid.validateAll()){
 					_dataReady = false;
 					var params:Object = extraUpdateData(_Data.makeData());
-					if(_clientSelected == true){
-						params["_idCliente"] = _cliente._idCliente;
-						_clientSelected = false;
-					}
 					//params[_idOrdenSelected] = _dataList.selectedItem[_mainId]; PREGUNTAR A CARLOS!
 					_MainService.updateRecord(params);
 					_MainService.updateRecord.addEventListener(ResultEvent.RESULT,onUpdateComplete);
@@ -375,6 +373,18 @@
 				_updateData = true;
 			}
 			
+			private function getCurrentTime():void{
+				var currentDateTime:Date = new Date();
+				_fechaPagoInicial.text = currentDateTime.fullYear + "-" + currentDateTime.month + "-" + currentDateTime.date;
+				dataChange();
+			}
+			
+			private function getCurrentTime2():void{
+				var currentDateTime:Date = new Date();
+				_fechaPromesaVisita.text = currentDateTime.fullYear + "-" + currentDateTime.month + "-" + currentDateTime.date;
+				dataChange();
+			}
+			
 			private function openImageEditor():void{
 				/*if(_dataList.selectedIndex!=-1){
 				//_newsIdNumber 	= new Number(_dataList.selectedItem._blogId);
@@ -402,20 +412,15 @@
 			}
 			
 			private function getData():void{
-				_MainService.getSpecificOrder(_idOrdenSelected);
-				_MainService.getFailuresFromOrder(_idOrdenSelected);
-				_MainService.getSpecificOrder.addEventListener(ResultEvent.RESULT,onGetSpecificOrderResult);
-				_MainService.getFailuresFromOrder.addEventListener(ResultEvent.RESULT,onGetFailuresOrderResult);
-				reloadCurrentCatalogs(false);
+				_MainService.getConfirmationSpecificOrder(_idOrdenSelected);
+				_MainService.getClientFromOrder(_idOrdenSelected);
+				_MainService.getEquipmentFromOrder(_idOrdenSelected);
+				_MainService.getClientFromOrder.addEventListener(ResultEvent.RESULT,onGetDataClientResult);
+				_MainService.getConfirmationSpecificOrder.addEventListener(ResultEvent.RESULT,onGetSpecificOrderResult);
+				_MainService.getEquipmentFromOrder.addEventListener(ResultEvent.RESULT,onGetDataSystemResult);
+				resetBooleans();
 			}
-			
-			public function reloadCurrentCatalogs(clearComboBoxes:Boolean):void{
-				_MainService.getListOfContacts(_cliente._idCliente);
-				_MainService.getListOfEquipments(_cliente._idCliente);
-				_MainService.getListOfContacts.addEventListener(ResultEvent.RESULT,onGetContactsResult);
-				_MainService.getListOfEquipments.addEventListener(ResultEvent.RESULT,onGetEquipmentsResult);
-			}
-			
+
 			private function onFault(e:FaultEvent):void{
 				Alert.show(e.fault.faultString,"Error");
 			}
@@ -448,15 +453,28 @@
 			
 			//-------------------------------- ResultsEvents --------------------------------------	
 			private function onGetSpecificOrderResult(e:ResultEvent):void{
-				_MainService.getSpecificOrder.removeEventListener(ResultEvent.RESULT,onGetSpecificOrderResult);
+				_MainService.getConfirmationSpecificOrder.removeEventListener(ResultEvent.RESULT,onGetSpecificOrderResult);
 				_DataResult = Converter.arrayConverter(e.result);
-				_dataReady = true;
-				resetBooleans();
+				if(_DataResult.length==0) {
+					Alert.show("No existe orden con el id especificado","Atención")
+				}else{
+					_Data.loadData(_DataResult[0]); //Sólo debe de haber un registro o ninguno
+				}
+				_dataReady = true;	
 			}
 			
-			public function onGetFailuresOrderResult(e:ResultEvent):void{
-				_MainService.getFailuresFromOrder.removeEventListener(ResultEvent.RESULT,onGetFailuresOrderResult);
-				_fallasReportadas = Converter.arrayConverter(e.result);
+			private function onGetDataClientResult(e:ResultEvent):void{
+				_MainService.getClientFromOrder.removeEventListener(ResultEvent.RESULT,onGetDataClientResult);
+				var resArr:ArrayCollection;
+				resArr = Converter.arrayConverter(e.result);
+				if(resArr.length > 0){
+					resArr[0]._nombreEstado = ConstantData.NationalStates[Number(resArr[0]._estado)].label;
+					_cliente = resArr[0]; //Sólo debe de haber un registro o ninguno
+					_MainService.getFiscalData(_cliente._idCliente);
+					_MainService.getFiscalData.addEventListener(ResultEvent.RESULT,onGetFiscalDataResult);
+				}else{
+					_cliente = {};
+				}
 			}
 			
 			public function onGetContactsResult(e:ResultEvent):void{
@@ -467,11 +485,26 @@
 				}
 			}
 			
-			public function onGetEquipmentsResult(e:ResultEvent):void{
-				_MainService.getListOfEquipments.removeEventListener(ResultEvent.RESULT,onGetEquipmentsResult);
-				_equipos = Converter.arrayConverter(e.result);
-				if(_DataResult.length > 0 && _clientSelected == false) { //Actualizar sólo si no hemos sido invocados por cclientSelected
-					_Data.loadData(_DataResult[0]);//Sólamente tiene que haber una sóla orden
+			private function onGetDataSystemResult(e:ResultEvent):void{
+				_MainService.getSystemFromOrder.removeEventListener(ResultEvent.RESULT,onGetDataSystemResult);
+				var resArr:ArrayCollection;
+				resArr = Converter.arrayConverter(e.result);
+				if(resArr.length > 0){
+					_equipo = resArr[0]; //Sólo debe de haber un registro o ninguno
+				}else{
+					_equipo = {};
+				}
+			}
+			
+			private function onGetFiscalDataResult(e:ResultEvent):void{
+				_MainService.getFiscalData.removeEventListener(ResultEvent.RESULT,onGetFiscalDataResult);
+				var resArr:ArrayCollection;
+				resArr = Converter.arrayConverter(e.result);
+				if(resArr.length > 0){
+					resArr[0]._nombreEstadoFiscal = ConstantData.NationalStates[Number(resArr[0]._estadoFiscal)].label;
+					_datosFiscales = resArr[0]; //Sólo debe de haber un registro o ninguno
+				}else{
+					_datosFiscales = {};
 				}
 			}
 			
@@ -516,14 +549,6 @@
 			
 			//-------------------------------- Search Engine --------------------------------------	
 			
-			
-			public function selectClient(client:Object){
-				_cliente = client;
-				_clientSelected = true;
-				_updateData = true;
-				reloadCurrentCatalogs(true);
-				//focusManager.setFocus(_codigo);
-			}
 			
 			
 		]]>

@@ -3,69 +3,36 @@
 			   xmlns:s="library://ns.adobe.com/flex/spark"
 			   xmlns:mx="library://ns.adobe.com/flex/mx"
 			   width="1228" height="684" backgroundAlpha="1.0" contentBackgroundColor="#D5E7FB"
-			   title="Prediagnostico">
+			   title="Diagnóstico">
 	<fx:Declarations>
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
 	</fx:Declarations>
-	<s:ComboBox id="_idTecnico" x="91" y="490" width="310" change="dataChange();"
-				dataProvider="{SystemGlobals.EMPLEADOS}" fontStyle="italic" labelField="_nombre"
-				selectedIndex="{_datosPrediagnostico._idTecnico}"> </s:ComboBox>
-	<s:ComboBox id="_tiempoUnidad" x="855" y="175" width="93" change="dataPreDiagnosticChange();"
+	<s:ComboBox id="_tiempoUnidad" x="872" y="175" width="93" change="dataPreDiagnosticChange();"
 				dataProvider="{ConstantData.TiempoEstimado}" fontStyle="italic"> </s:ComboBox>
 	<s:ComboBox id="_idRefaccion" x="814" y="138" width="404" change="dataPreDiagnosticChange();"
 				dataProvider="{_refacciones}" fontStyle="italic" labelField="_nombre"> </s:ComboBox>
-	<s:ComboBox id="_prediagnosticoUnidadTiempo" x="130" y="562" width="93" change="dataChange();"
-				dataProvider="{ConstantData.TiempoEstimado}" fontStyle="italic"
-				selectedIndex="{_datosPrediagnostico._prediagnosticoUnidadTiempo}"> </s:ComboBox>
-	<s:ComboBox id="_servicioUnidadTiempo" x="449" y="562" width="93" change="dataChange();"
-				dataProvider="{ConstantData.TiempoEstimado}" fontStyle="italic"
-				selectedIndex="{_datosPrediagnostico._servicioUnidadTiempo}"> </s:ComboBox>
-	<s:TextInput id="_servicioNumeroTiempo" x="410" y="563" width="31" change="dataChange();"
-				 fontStyle="normal" text="{_datosPrediagnostico._servicioNumeroTiempo}"
-				 textAlign="center"/>
-	<s:Label x="410" y="552" color="#767474" fontSize="10" fontStyle="italic" text="tiempo"/>
-	<s:TextInput id="_prediagnosticoNumeroTiempo" x="91" y="563" width="31" change="dataChange();"
-				 fontStyle="normal" text="{_datosPrediagnostico._prediagnosticoNumeroTiempo}"
-				 textAlign="center"/>
-	<s:Label x="91" y="552" color="#767474" fontSize="10" fontStyle="italic" text="tiempo"/>
-	<s:Label x="36" y="496" text="Técnico :"/>
-	<s:TextInput id="_descripcionFalla" x="816" y="64" width="402"
+	<s:TextInput id="_descripcionAccion" x="816" y="64" width="402"
 				 change="dataPreDiagnosticChange();" fontStyle="normal"/>
 	<s:TextInput id="_descripcionFallaReportada" x="816" y="23" width="314" contentBackgroundColor="#e7e7e7"
 				 fontStyle="normal"/>
 	<s:TextInput id="_codigoFalla" x="1138" y="23" width="79" contentBackgroundColor="#E7E7E7"
 				 fontStyle="normal"/>
 	<s:Label x="777" y="30" text="Falla :"/>
-	<s:Label x="816" y="12" color="#767474" fontSize="10" fontStyle="italic" text="reportada"/>
+	<s:Label x="816" y="12" color="#767474" fontSize="10" fontStyle="italic" text="confirmada"/>
 	<s:Label x="1138" y="12" color="#767474" fontSize="10" fontStyle="italic" text="código"/>
-	<s:TextInput id="_habloCon" x="91" y="524" width="310" change="dataChange();" fontStyle="normal"
-				 text="{_datosPrediagnostico._habloCon}"/>
-	<s:Label x="25" y="531" text="Hablo con :"/>
 	<s:TextInput id="_descripcionSolucion" x="816" y="100" width="402"
 				 change="dataPreDiagnosticChange();" fontStyle="normal"/>
-	<s:TextInput id="_tiempoNumero" x="816" y="176" width="31" change="dataPreDiagnosticChange();"
+	<s:TextInput id="_tiempoNumero" x="816" y="176" width="48" change="dataPreDiagnosticChange();"
 				 fontStyle="normal" textAlign="center"/>
-	<s:TextInput id="_porcentajeDificultad" x="956" y="176" width="60"
-				 change="dataPreDiagnosticChange();" fontStyle="normal" textAlign="center"/>
-	<s:Label x="956" y="165" color="#767474" fontSize="10" fontStyle="italic" text="porcentaje"/>
-	<s:Label x="747" y="183" text="Estimados :"/>
-	<s:Label x="1020" y="185" text="%"/>
+	<s:Label x="747" y="183" text="Tiempo :"/>
 	<s:Label x="750" y="145" text="Refacción :"/>
 	<s:Label x="758" y="107" text="Solución :"/>
-	<s:Label x="769" y="71" text="Causa :"/>
-	<s:TextInput id="_fechaHablo" x="410" y="524" width="70" change="dataChange();"
-				 fontWeight="normal" text="{_datosPrediagnostico._fechaHablo}" textAlign="center"/>
-	<s:Label x="411" y="513" color="#767474" fontSize="10" fontStyle="italic" text="fecha"/>
-	<s:TextInput id="_horaHablo" x="489" y="524" width="70" change="dataChange();"
-				 fontWeight="normal" text="{_datosPrediagnostico._horaHablo}" textAlign="center"/>
-	<s:Label x="490" y="513" color="#767474" fontSize="10" fontStyle="italic" text="hora"/>
-	<s:Label x="816" y="165" color="#767474" fontSize="10" fontStyle="italic" text="tiempo"/>
-	<s:Label x="816" y="127" color="#767474" fontSize="10" fontStyle="italic" text="posible"/>
-	<s:Label x="816" y="89" color="#767474" fontSize="10" fontStyle="italic" text="posible"/>
-	<s:Label x="816" y="53" color="#767474" fontSize="10" fontStyle="italic" text="posible"/>
+	<s:Label x="755" y="71" text="Acciones :"/>
+	<s:Label x="816" y="165" color="#767474" fontSize="10" fontStyle="italic" text="necesario"/>
+	<s:Label x="816" y="127" color="#767474" fontSize="10" fontStyle="italic" text="necesaria"/>
+	<s:Label x="816" y="89" color="#767474" fontSize="10" fontStyle="italic" text="de falla"/>
+	<s:Label x="816" y="53" color="#767474" fontSize="10" fontStyle="italic" text="de diagnostico"/>
 	<s:Label x="93" y="238" color="#767474" fontSize="10" fontStyle="italic" text="observaciones"/>
-	<s:Label x="7" y="568" text="Predignóstico :"/>
-	<s:Label x="240" y="568" text="Tiempo estimado del servicio :"/>
 	
 	
 	
@@ -74,7 +41,7 @@
 				requestedRowCount="4" selectionChange="onDataPreDiagnosticSelect();">
 		<s:columns>
 			<s:ArrayList>
-				<s:GridColumn dataField="falla" headerText="Pre-Diagnóstico"
+				<s:GridColumn dataField="falla" headerText="Diagnóstico"
 							  itemRenderer="renderers.Seguimiento_ItemRenderer2"></s:GridColumn>
 			</s:ArrayList>
 		</s:columns>	
@@ -89,8 +56,6 @@
 	<s:Button label="Eliminar" width="80" enabled="{_dataReady&amp;&amp;!_newData}" visible="{!_newData&amp;&amp;!_updateData}" click="deleteDataAlert();" y="168" x="1138"/>
 	<s:Button label="Actualizar" width="80" enabled="{_dataReady&amp;&amp;!_newData&amp;&amp;_updateData}" visible="{_updateData&amp;&amp;!_newData}" click="updateDiagnosticData();" y="168" x="1050"/>
 	<s:Button label="Regresar" click="closeWindow();" width="145"  enabled="{!_newData}" y="602" x="1073"/>
-	<s:Button x="565" y="523" width="72" height="23" label="Ahora" click="getCurrentTime();"
-			  enabled="{!_newData}"/>
 	<s:Label x="45" text="Fallas :" textAlign="right" y="345"/>
 	<s:TextInput id="_nombreEmpresa" x="91" y="61" width="310" contentBackgroundColor="#e7e7e7"
 				 enabled="false" fontStyle="italic" text="{_cliente._nombreEmpresa}"/>
@@ -168,6 +133,26 @@
 	</s:DataGrid>
 	<s:Button label="Actualizar" width="80" enabled="{_dataOrdenReady&amp;&amp;!_newOrdenData&amp;&amp;_updateOrdenData}" visible="{_updateOrdenData&amp;&amp;!_newOrdenData}" click="updateData();" y="604" x="91"/>
 	<s:Button label="Cancelar" width="80" enabled="{_dataOrdenReady}" visible="{_newOrdenData||_updateOrdenData}" click="cancel();" y="604" x="179"/>
+	<s:Label x="37" y="494" text="Técnico :"/>
+	<s:Label x="10" y="535" text="Serv. Inicial :"/>
+	<s:TextInput id="_nombreTecnicoAsignado" x="92" y="488" width="506" contentBackgroundColor="#e7e7e7"
+				 enabled="false" fontStyle="italic"/>
+	<s:Label x="92" y="517" color="#767474" fontSize="10" fontStyle="italic" text="fecha"/>
+	<s:Label x="92" y="478" color="#767474" fontSize="10" fontStyle="italic" text="asignado"/>
+	<s:Label x="170" y="517" color="#767474" fontSize="10" fontStyle="italic" text="hora"/>
+	<s:Button x="247" y="528" width="70" height="23" label="Ahora" click="getCurrentTime();"/>
+	<s:TextInput id="_fechaServInicial" x="92" y="528" width="70" change="dataChange();"
+				 fontWeight="normal" textAlign="center"/>
+	<s:TextInput id="_horaServInicial" x="169" y="528" width="70" change="dataChange();"
+				 fontWeight="normal" textAlign="center"/>
+	<s:ComboBox id="_tiempoUnidadDiagnostico" x="505" y="528" width="93" change="dataChange();"
+				dataProvider="{ConstantData.TiempoEstimado}" fontStyle="italic"> </s:ComboBox>
+	<s:TextInput id="_tiempoNumeroDiagnostico" x="466" y="529" width="31" change="dataChange();"
+				 fontStyle="normal" textAlign="center"/>
+	<s:TextInput id="_diasReparacion" x="284" y="563" width="31" change="dataChange();"
+				 fontStyle="normal" textAlign="center"/>
+	<s:Label x="92" y="570" text="Días necesarios para reparación :"/>
+	<s:Label x="330" y="536" text="Tiempo de diagnóstico :"/>
 	
 	<fx:Script>
 		<![CDATA[
@@ -306,10 +291,14 @@
 				_Data.exceptions = ["_creado","_modificado","_creadoPor","_creado",	"_modificado","_creadoPor",
 					"_modificadoPor","_descripcionClienteFalla","_idCodigoError","_idCliente","_idContacto",
 					"_idTipoServicio","_idAreaSoporteTecnico","_idEstatus","_idEmpleado","_idCliente","_idContacto",
-					"_idEquipo","_fechaHabloCon","_idEquipo","_nombreTecnico","_idRefaccion"
+					"_idEquipo","_fechaHabloCon","_idEquipo","_nombreTecnico","_idRefaccion","_prediagnosticoNumeroTiempo",
+					"_prediagnosticoUnidadTiempo","_servicioNumeroTiempo","_servicioUnidadTiempo","_idTecnico","_habloCon",
+					"_fechaPagoInicial","_formaPago","_tecnicoAsignado","_seInformoVisitaA","_totalFacturar","_noFactura","_importe",
+					"_totalRemisionar","_noRemision","_fechaPromesaVisita","_responsableAsignacionDeFecha","_domicilioServicio","_fechaServicioInicial"
 				];
 				_DataDiagnostico.exceptions = ["_idDiagnostico","_esPrediagnostico","_falla","_nombreRefaccion","_nombreTecnico","_costoManoObra",
-					"_costoTransporte","_costoHotel","_costoComidas","_costoFleteSobreEquipaje","_costoGastosDiversos","_costoRefaccion","_tipoTransporte"];
+					"_costoTransporte","_costoHotel","_costoComidas","_costoFleteSobreEquipaje","_costoGastosDiversos","_costoRefaccion",
+					"_tipoTransporte","_descripcionFalla","_porcentajeDificultad"];
 				_MainService.addEventListener(FaultEvent.FAULT,onFault);
 				initData();
 				addValidations();
@@ -366,8 +355,8 @@
 				if(Valid.validateAll()){
 					_dataOrdenReady = false;
 					var params:Object = extraUpdateData(_Data.makeData());
-					var dDate:String = _fechaHablo.text + " " + _horaHablo.text;
-					params._fechaHabloCon = dDate;
+					var dDate:String = _fechaServInicial.text + " " + _horaServInicial.text;
+					params._fechaServicioInicial = dDate;
 					_MainService.updateRecord(params);
 					_MainService.updateRecord.addEventListener(ResultEvent.RESULT,onUpdateComplete);
 				}else{
@@ -445,17 +434,17 @@
 			
 			private function getCurrentTime():void{
 				var currentDateTime:Date = new Date();
-				_fechaHablo.text = currentDateTime.fullYear + "-" + currentDateTime.month + "-" + currentDateTime.date;
-				_horaHablo.text = currentDateTime.hours + ":" + currentDateTime.minutes + ":" + currentDateTime.seconds;
+				_fechaServInicial.text = currentDateTime.fullYear + "-" + currentDateTime.month + "-" + currentDateTime.date;
+				_horaServInicial.text = currentDateTime.hours + ":" + currentDateTime.minutes + ":" + currentDateTime.seconds;
 				dataChange();
 			}
 			
 			private function openImageEditor():void{
 				/*if(_dataList.selectedIndex!=-1){
-					//_newsIdNumber 	= new Number(_dataList.selectedItem._blogId);
-					openPopUp("managers.ImageManager")
+				//_newsIdNumber 	= new Number(_dataList.selectedItem._blogId);
+				openPopUp("managers.ImageManager")
 				}else{
-					Alert.show("No hay registro selecionado","Error");
+				Alert.show("No hay registro selecionado","Error");
 				}*/
 			}
 			//-------------------------------- ResultsEvents --------------------------------------		
@@ -567,7 +556,7 @@
 				}
 				_dataOrdenReady = true;				
 			}
-
+			
 			private function onGetSparePartsResult(e:ResultEvent):void{
 				_MainService.getSpareParts.removeEventListener(ResultEvent.RESULT,onGetSparePartsResult);
 				_refacciones = Converter.arrayConverter(e.result);
@@ -611,7 +600,7 @@
 				}
 				PopUpManager.centerPopUp(pop);
 			}
-
+			
 			private function onGetDataClientResult(e:ResultEvent):void{
 				_MainService.getClientFromOrder.removeEventListener(ResultEvent.RESULT,onGetDataClientResult);
 				var resArr:ArrayCollection;
@@ -632,21 +621,21 @@
 			//-------------------------------- Search Engine --------------------------------------
 			/*
 			private function searchFilter():void{
-				_DataResult.filterFunction = vlidateSearch;
-				_DataResult.refresh();
+			_DataResult.filterFunction = vlidateSearch;
+			_DataResult.refresh();
 			}
 			
 			private function vlidateSearch(item:Object):Boolean{
-				var isMatch:Boolean = false;           
-				if(item[_searchType.selectedItem.value].toLowerCase().search(_searchFilter.toLowerCase()) != -1){
-					isMatch = true
-				}              
-				return isMatch;              
+			var isMatch:Boolean = false;           
+			if(item[_searchType.selectedItem.value].toLowerCase().search(_searchFilter.toLowerCase()) != -1){
+			isMatch = true
+			}              
+			return isMatch;              
 			}
 			
 			private function search():void{
-				_searchFilter = _searchField.text;
-				searchFilter();
+			_searchFilter = _searchField.text;
+			searchFilter();
 			}
 			private var _searchFilter:String 			= new String();
 			[Bindable]	private var _searchTypes:ArrayCollection 	= new ArrayCollection([{label:"Id",     	value:"_idArea"},{label:"Nombre",     	value:"_nombre"}]);
@@ -658,5 +647,5 @@
 	
 	
 	
-
+	
 </s:TitleWindow>

@@ -87,6 +87,11 @@
 			import views.ods.Prediagnostico_Venta;
 			import views.ods.Seguimiento;
 			import views.ods.Confirmacion;
+			import views.ods.Diagnostico;
+			import views.ods.Venta_Facturacion;
+			import views.ods.Ejecucion_Servicio;
+			import views.ods.Cierre_Orden;
+			import views.ods.Diagnostico_Cotizacion;
 			import views.odtProcess.ODTManager;
 			import views.odtProcess.ODTManagerClear;
 			import views.odtProcess.ODTS;
@@ -202,6 +207,11 @@
 				Tipos_Equipos;
 				Codigo_Error;
 				Confirmacion;
+				Diagnostico;
+				Diagnostico_Cotizacion;
+				Venta_Facturacion;
+				Cierre_Orden;
+				Ejecucion_Servicio;
 				//----------GRAPHO-----------------------
 				
 			}
@@ -212,7 +222,7 @@
 				//--------- Load Catalogs ----------
 				_catalogArray =['System_Labels','empresa_companias','empresa_areas','empresa_departamentos','empresa_ceco','empresa_categorias',
 					'Productos_Familias','Productos_SubFamilias','Productos_Reglas_Negocio','Productos_Grupos_Cobro','tipos_servicio',
-					'gs_areasSoporteTecnico','estatus','empleados','equipos','marcas','tipos_equipo'];				
+					'areas_soporte_tecnico','estatus','empleados','equipos','marcas','tipos_equipo'];				
 				//--------- Load Catalogs ----------
 				SystemGlobals.LANGUAGE = '_MX';
 				Catalogs.config(_webApplication,_catalogArray);	

@@ -2,8 +2,8 @@
 <s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009"
 			   xmlns:s="library://ns.adobe.com/flex/spark"
 			   xmlns:mx="library://ns.adobe.com/flex/mx"
-			   width="1208" height="678" backgroundAlpha="1.0" contentBackgroundColor="#D5FBDB"
-			   title="Administración de Órdenes de Servicio">
+			   width="1208" height="716" backgroundAlpha="1.0" contentBackgroundColor="#D5FBDB"
+			   title="Administración de Ordenes de Servicio">
 	<fx:Declarations>
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
 	</fx:Declarations>
@@ -16,7 +16,7 @@
 	<s:Label x="39" y="26" fontWeight="bold" text="OS :"/>
 	<s:Label x="389" y="9" color="#767474" fontSize="10" fontStyle="italic" text="área de soporte"/>
 	<s:Label x="550" y="9" color="#767474" fontSize="10" fontStyle="italic" text="servicio"/>
-	<s:DataGrid id="_dataList" x="714" y="63" width="484" height="508" dataProvider="{_DataResult}"
+	<s:DataGrid id="_dataList" x="714" y="63" width="484" height="531" dataProvider="{_DataResult}"
 				enabled="{_dataReady&amp;&amp;!_newData}" requestedRowCount="4"
 				selectionChange="onDataSelect();">
 		<s:columns>
@@ -29,19 +29,19 @@
 			</s:ArrayList>
 		</s:columns>
 	</s:DataGrid>
-	<s:Button label="Nuevo" width="80" enabled="{_dataReady}" visible="{!_newData&amp;&amp;!_updateData}" click="newData();" y="590" x="71"/>
-	<s:Button label="Cancelar" width="80" enabled="{_dataReady}" visible="{_newData||_updateData}" click="cancel();" y="590" x="159"/>
-	<s:Button label="Aceptar" width="80" enabled="{_dataReady}" visible="{_newData}" click="createData();" y="590" x="71"/>
-	<s:Button label="Eliminar" width="80" enabled="{_dataReady&amp;&amp;!_newData}" visible="{!_newData&amp;&amp;!_updateData}" click="deleteDataAlert();" y="590" x="159"/>
-	<s:Button label="Actualizar" width="80" enabled="{_dataReady&amp;&amp;!_newData&amp;&amp;_updateData}" visible="{_updateData&amp;&amp;!_newData}" click="updateData();" y="590" x="71"/>
-	<s:Button label="Regresar" click="closeWindow();" width="145"  enabled="{!_newData}" y="590" x="1053"/>
+	<s:Button label="Nuevo" width="80" enabled="{_dataReady}" visible="{!_newData&amp;&amp;!_updateData}" click="newData();" y="614" x="71"/>
+	<s:Button label="Cancelar" width="80" enabled="{_dataReady}" visible="{_newData||_updateData}" click="cancel();" y="614" x="159"/>
+	<s:Button label="Aceptar" width="80" enabled="{_dataReady}" visible="{_newData}" click="createData();" y="614" x="71"/>
+	<s:Button label="Eliminar" width="80" enabled="{_dataReady&amp;&amp;!_newData}" visible="{!_newData&amp;&amp;!_updateData}" click="deleteDataAlert();" y="614" x="159"/>
+	<s:Button label="Actualizar" width="80" enabled="{_dataReady&amp;&amp;!_newData&amp;&amp;_updateData}" visible="{_updateData&amp;&amp;!_newData}" click="updateData();" y="614" x="71"/>
+	<s:Button label="Regresar" click="closeWindow();" width="145"  enabled="{!_newData}" y="615" x="1053"/>
 	<s:ComboBox 	x="783" id="_searchType" 	dataProvider="{_searchTypes}" 	width="125" y="32"/>
 	<s:TextInput 	x="916" id="_searchField" 	change="search();" 		width="282" enabled="{!_newData}" y="32"/>
 	<s:Label x="718" text="Filtrar por :" textAlign="right" y="39"/>
 	<s:ComboBox id="_idAreaSoporteTecnico" x="389" y="21" width="150" change="dataChange();"
 				dataProvider="{SystemGlobals.AREAS_SOPORTE}" fontWeight="bold"
 				labelField="_areaSoporteTecnico"></s:ComboBox>
-	<s:ComboBox id="_idTipoServicio" x="550" y="21" width="80" change="dataChange();"
+	<s:ComboBox id="_idTipoServicio" x="546" y="21" width="151" change="dataChange();"
 				dataProvider="{SystemGlobals.TIPOS_SERVICIO}" fontWeight="bold" labelField="_nombre"></s:ComboBox>
 	<s:ComboBox id="_idEstatus" x="300" y="21" width="81" change="dataChange();"
 				dataProvider="{SystemGlobals.ORDEN_ESTATUS}" fontWeight="bold"
@@ -88,23 +88,24 @@
 	<s:Label x="6" y="238" text="Operador :"/>
 	<s:Label x="16" y="205" text="Atendio :"/>
 	<s:ComboBox id="_idEmpleado" x="71" y="200" width="310" change="dataChange();"
-				dataProvider="{SystemGlobals.EMPLEADOS}" labelField="_nombre"></s:ComboBox>
+				dataProvider="{SystemGlobals.EMPLEADOS}" labelFunction="concatenateName" ></s:ComboBox>
 	<s:ComboBox id="_idContacto" x="71" y="169" width="310" change="dataChange();"
-				dataProvider="{_contactos}" labelField="_nombre"></s:ComboBox>
+				dataProvider="{_contactos}" labelFunction="concatenateName"></s:ComboBox>
 	<s:Label x="14" y="175" text="Reporto :"/>
 	<s:Button x="389" y="200" width="28" height="23"
 			  click="openPopUp(&quot;empleados.Empleados&quot;);"
 			  icon="@Embed(source='../../assets/Icons/Buttons/Edit.png')"
 			  skinClass="spark.skins.spark.ButtonSkin"/>
-	<s:TextInput id="_descripcionFalla" x="159" y="313" width="380" prompt="Descripción"/>
+	<s:TextInput id="_descripcionFalla" x="159" y="313" width="416" prompt="Descripción"/>
 	<s:TextInput id="_codigoFalla" x="72" y="313" width="79" prompt="Código"/>
-	<s:Label x="73" y="491" color="#767474" fontSize="10" fontStyle="italic" text="observaciones"/>
+	<s:Label x="73" y="515" color="#767474" fontSize="10" fontStyle="italic" text="observaciones"/>
 	<s:Label x="74" y="262" color="#767474" fontSize="10" fontStyle="italic" text="descripción"/>
 	<s:Label x="20" y="279" text="Equipo :"/>
-	<s:ComboBox id="_idEquipo" x="72" y="274" width="309" change="dataChange();"
-				dataProvider="{_equipos}" labelField="_nombreEquipo"></s:ComboBox>
-	<s:DataGrid id="_listaFallas" x="72" y="345" width="625" dataProvider="{_fallasReportadas}"
-				requestedRowCount="4">
+	<s:ComboBox id="_idEquipo" x="72" y="274" width="503" change="dataChange();"
+				dataProvider="{_equipos}" labelField="_descripcionCompleta"></s:ComboBox>
+	<s:DataGrid id="_listaFallas" x="72" y="345" width="625" height="130"
+				dataProvider="{_fallasReportadas}" requestedRowCount="4"
+				selectionChange="onFailureSelect();">
 		<s:columns>
 			<s:ArrayList>
 				<s:GridColumn width="80" dataField="_codigo" headerText="Código"></s:GridColumn>
@@ -114,14 +115,13 @@
 	</s:DataGrid>
 	<s:Label x="23" y="352" text="Fallas :"/>
 	<s:Label x="28" y="318" text="Falla :"/>
-	<s:TextArea id="_nota" x="72" y="503" width="625" height="67" change="dataChange();"/>
-	<s:Button visible="{!_newData&amp;&amp;!_updateData}" x="547" y="312" width="114" height="24"
+	<s:TextArea id="_nota" x="72" y="527" width="625" height="67" change="dataChange();"/>
+	<s:Button visible="{!_newData}" x="583" y="313" width="114" height="24"
 			  label="Agregar Falla" click="recordIssue();"
 			  enabled="{_dataReady&amp;&amp;!_newData}"/>
-	<s:Button x="667" y="312" width="28" height="23"
-			  click="openPopUp(&quot;empresa.Empresa_Companias&quot;);"
-			  icon="@Embed(source='../../assets/Icons/Buttons/Search.png')"
-			  skinClass="spark.skins.spark.ButtonSkin"/>
+	<s:Button x="583" y="483" width="114" height="24"
+			  label="Borrar Falla" click="deleteIssue();"
+			  enabled="{_failureSelected}"/>
 	
 	<fx:Script>
 		<![CDATA[
@@ -130,6 +130,7 @@
 			import mx.events.CloseEvent;
 			import mx.managers.PopUpManager;
 			import mx.random.constants.Catalogs;
+			import mx.random.constants.ConstantData;
 			import mx.random.constants.Languages;
 			import mx.random.constants.SystemGlobals;
 			import mx.random.converters.Converter;
@@ -141,7 +142,7 @@
 			import mx.rpc.events.FaultEvent;
 			import mx.rpc.events.ResultEvent;
 			import mx.rpc.remoting.RemoteObject;
-			import mx.random.constants.ConstantData;
+			import mx.utils.StringUtil;
 			
 			private var _webApplication:WebApplication;
 			private var Valid:Validator 			= new Validator();
@@ -157,7 +158,7 @@
 			[Bindable]	public var _dataReady:Boolean 			= false;
 			[Bindable]	public var _newData:Boolean 			= false;
 			[Bindable]	public var _updateData:Boolean 			= false;//No podemos agregar nuevos en esta forma, sólo podemos actualizar Siempre mostrar boton actualizar
-			
+			[Bindable]	public var _failureSelected:Boolean 	= false;
 			//-----------Event Manager -----------
 			
 			
@@ -217,7 +218,7 @@
 				
 				//----------- Validaciones ---------------------------
 				
-				
+				Valid.addStringVal(_descripcionFalla,5,100,"Descripcion de la falla");
 				Valid.validateOnChange = true;
 				Valid.setErrorKnot(Validator.CIRCLE_KNOT,0xFF0000);
 			}
@@ -244,13 +245,32 @@
 				
 			}
 			
+			private function concatenateName(value:Object):String
+			{
+				var nombre:String = "";
+				if(value._nombre != null && value._nombre != undefined){
+					nombre += StringUtil.trim(value._nombre) + " ";
+				}
+				if(value._paterno != null && value._paterno != undefined){
+					nombre += StringUtil.trim(value._paterno) + " ";
+				}
+				if(value._materno != null && value._materno != undefined){
+					nombre += StringUtil.trim(value._materno) + " ";
+				}
+				return nombre;
+			}
+			
 			public function initView():void{
 				forceImports();
 				_MainService = _webApplication.getService(_serviceName);
 				_Data.exceptions = ["_idTecnico","_prediagnosticoUnidadTiempo","_descripcionClienteFalla","_creado",
 									"_idCodigoError","_prediagnosticoNumeroTiempo","_servicioNumeroTiempo",
 									"_habloCon","_modificadoPor","_fechaHabloCon","_modificado","_creadoPor","_servicioUnidadTiempo","_idCliente",
-									"_nombreCliente","_nombreEstatus"
+									"_nombreCliente","_nombreEstatus","_importe",
+									"_totalRemisionar","_noRemision","_responsableAsignacionDeFecha",
+									"_domicilioServicio","_fechaServicioInicial","_formaPago","_fechaPagoInicial",
+									"_tecnicoAsignado","_seInformoVisitaA","_fechaPromesaVisita","_tiempoUnidadDiagnostico","_tiempoNumeroDiagnostico",
+									"_diasReparacion","_horaServInicial","_nombreTecnicoAsignado","_totalFacturar","_noFactura"
 									];
 				_MainService.addEventListener(FaultEvent.FAULT,onFault);
 				initData();
@@ -281,8 +301,13 @@
 			
 			private function newData():void{
 				_Data.clear();
+				_fechaCreacion.text = "";
+				_horaCreacion.text = "";
+				_cliente = {};
+				_fallasReportadas = new ArrayCollection();
 				_newData = true;
 				_updateData = false;
+				//_idEmpleado. //SystemGlobals.userName
 				Valid.validateAll();
 				this[_mainFocusField].setFocus();
 				createRecordExtras();
@@ -300,7 +325,7 @@
 			}
 			
 			private function updateData():void{
-				if(Valid.validateAll()){
+				//if(Valid.validateAll()){
 					_dataReady = false;
 					var params:Object = extraUpdateData(_Data.makeData());
 					params[_mainId] = _dataList.selectedItem[_mainId];
@@ -311,18 +336,27 @@
 					_MainService.updateRecord(params);
 					_MainService.updateRecord.addEventListener(ResultEvent.RESULT,onUpdateComplete);
 					_dataIndex =_dataList.selectedIndex;
+				//}else{
+				//	Alert.show(Valid.errors,"Error");
+				//}
+			}
+			
+			private function recordIssue():void{
+				if(Valid.validateAll()){
+					var codigo:String = _codigoFalla.text;
+					var descripcion:String = _descripcionFalla.text;
+					_MainService.recordFailure({_idOrden:_dataList.selectedItem[_mainId],_falla:descripcion,_codigo:codigo});
+					_MainService.recordFailure.addEventListener(ResultEvent.RESULT,onRecordFailureComplete);
+					_codigoFalla.text = "";
+					_descripcionFalla.text = "";
 				}else{
 					Alert.show(Valid.errors,"Error");
 				}
 			}
 			
-			private function recordIssue():void{
-				var codigo:String = _codigoFalla.text;
-				var descripcion:String = _descripcionFalla.text;
-				_fallasReportadas.addItem({_codigo:codigo,_falla:descripcion});
-				_MainService.recordFailure({_idOrden:_dataList.selectedItem[_mainId],_falla:descripcion,_codigo:codigo});
-				_codigoFalla.text = "";
-				_descripcionFalla.text = "";
+			private function deleteIssue():void{
+				_MainService.deleteFailureRecord(_listaFallas.selectedItem._idOrdenFalla);
+				_MainService.deleteFailureRecord.addEventListener(ResultEvent.RESULT,onDeleteFailureComplete);
 			}
 			
 			private function deleteDataAlert():void{
@@ -399,7 +433,6 @@
 					_Data.loadData(_DataResult[_dataIndex]);
 					_dataList.selectedIndex = _dataIndex;
 					_dataList.setSelectedIndex(_dataList.selectedIndex);
-					_dataList.setSelectedIndex(_dataList.selectedIndex);
 					loadExtraFields(_DataResult[_dataIndex]);
 					getClientFromOrder();
 					getFailureList();
@@ -421,6 +454,10 @@
 					getClientFromOrder();
 					getFailureList();
 				}
+			}
+			
+			private function onFailureSelect():void{
+				_failureSelected = true;
 			}
 			
 			public function reloadCurrentCatalogs():void{
@@ -452,6 +489,11 @@
 				getData();
 			}
 			
+			private function onRecordFailureComplete(e:ResultEvent):void{
+				_MainService.recordFailure.removeEventListener(ResultEvent.RESULT,onRecordFailureComplete);
+				getFailureList();
+			}
+			
 			private function onUpdateComplete(e:ResultEvent):void{
 				_MainService.updateRecord.removeEventListener(ResultEvent.RESULT,onUpdateComplete);
 				Catalogs.reload();
@@ -463,6 +505,11 @@
 				_dataIndex = _DataResult.length-2;
 				Catalogs.reload();
 				getData();
+			}
+			
+			private function onDeleteFailureComplete(e:ResultEvent):void{
+				_MainService.deleteFailureRecord.removeEventListener(ResultEvent.RESULT,onDeleteFailureComplete);
+				getFailureList();
 			}
 			
 			//-------------------------------- ResultsEvents --------------------------------------	
@@ -490,6 +537,9 @@
 			public function onGetFailuresOrderResult(e:ResultEvent):void{
 				_MainService.getFailuresFromOrder.removeEventListener(ResultEvent.RESULT,onGetFailuresOrderResult);
 				_fallasReportadas = Converter.arrayConverter(e.result);
+				_listaFallas.selectedIndex = -1;
+				_listaFallas.setSelectedIndex(-1);
+				_failureSelected = false;
 			}
 			
 			public function onGetEquipmentsResult(e:ResultEvent):void{
@@ -540,7 +590,7 @@
 			
 			
 			private var _searchFilter:String 			= new String();
-			[Bindable]	private var _searchTypes:ArrayCollection 	= new ArrayCollection([{label:"Id",  value:"_idOrden"},{label:"Nombre Cliente",value:"_nombreCliente"}]);
+			[Bindable]	private var _searchTypes:ArrayCollection 	= new ArrayCollection([{label:"Id",  value:"_idOrden"},{label:"Fecha",  value:"_creado"},{label:"Nombre Cliente",value:"_nombreCliente"}]);
 			
 			//-------------------------------- Search Engine --------------------------------------					
 			

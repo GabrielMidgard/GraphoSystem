@@ -22,7 +22,7 @@ package mx.random.constants{
 			}
 			
 			public static function config(wa:WebApplication,tables:Array):void{
-				SystemGlobals.systemStatus = "Loadin Catalogs...";
+				SystemGlobals.systemStatus = "Loading Catalogs...";
 				StaticEvent.dispatchEvent(new CatalogEvent(CatalogEvent.CATALOG_INIT));
 				Tables = tables;
 				WA = wa;
@@ -63,9 +63,22 @@ package mx.random.constants{
 				if(DataObject['Productos_Grupos_Cobro'])    SystemGlobals.PRODUCTOS_GRUPOS_COBRO	= Converter.arrayConverter(DataObject['Productos_Grupos_Cobro']);
 				if(DataObject['Productos_Reglas_Negocio'])  SystemGlobals.PRODUCTOS_REGLAS_NEGOCIO	= Converter.arrayConverter(DataObject['Productos_Reglas_Negocio']);
 				if(DataObject['tipos_servicio'])  SystemGlobals.TIPOS_SERVICIO	= Converter.arrayConverter(DataObject['tipos_servicio']);
-				if(DataObject['gs_areasSoporteTecnico'])  SystemGlobals.AREAS_SOPORTE	= Converter.arrayConverter(DataObject['gs_areasSoporteTecnico']);
+				if(DataObject['areas_soporte_tecnico'])  SystemGlobals.AREAS_SOPORTE	= Converter.arrayConverter(DataObject['areas_soporte_tecnico']);
 				if(DataObject['estatus'])  SystemGlobals.ORDEN_ESTATUS	= Converter.arrayConverter(DataObject['estatus']);
 				if(DataObject['empleados'])  SystemGlobals.EMPLEADOS	= Converter.arrayConverter(DataObject['empleados']);
+				if(SystemGlobals.TIPOS_SERVICIO.length == 0 || SystemGlobals.TIPOS_SERVICIO[0]._idTipoServicio != 0){
+					SystemGlobals.TIPOS_SERVICIO.addItemAt({_idTipoServicio:0,_nombre:'Seleccionar'},0);	
+				}
+				if(SystemGlobals.AREAS_SOPORTE.length == 0 || SystemGlobals.AREAS_SOPORTE[0]._idAreaSoporteTecnico != 0){
+					SystemGlobals.AREAS_SOPORTE.addItemAt({_idAreaSoporteTecnico:0,_areaSoporteTecnico:'Seleccionar'},0);	
+				}
+				if(SystemGlobals.ORDEN_ESTATUS.length == 0 || SystemGlobals.ORDEN_ESTATUS[0]._idEstatus != 0){
+					SystemGlobals.ORDEN_ESTATUS.addItemAt({_idEstatus:0,_nombreEstatus:'Seleccionar'},0);	
+				}
+				if(SystemGlobals.EMPLEADOS.length == 0 || SystemGlobals.EMPLEADOS[0]._idEmpleado != 0){
+					SystemGlobals.EMPLEADOS.addItemAt({_idEmpleado:0,_nombre:'Seleccionar'},0);	
+				}
+				
 				if(DataObject['equipos'])  SystemGlobals.EQUIPOS        = Converter.arrayConverter(DataObject['equipos']);
 				if(DataObject['marcas'])  SystemGlobals.MARCAS        = Converter.arrayConverter(DataObject['marcas']);
 				if(DataObject['tipos_equipo'])  SystemGlobals.TIPOS_EQUIPOS        = Converter.arrayConverter(DataObject['tipos_equipo']);
@@ -76,7 +89,15 @@ package mx.random.constants{
 				SystemGlobals.systemStatus = "Updating Catalogs...";
 				StaticEvent.dispatchEvent(new CatalogEvent(CatalogEvent.CATALOG_RELOAD_INIT));
 				DataObject = new Object();
-				SRV.getCatalogs(Tables);
+				SRV.getCatalogs(Tables);	
+				SRV.getCatalogs.addEventListener(ResultEvent.RESULT,onResult);
+			}
+			
+			public static function reloadSpecificTables(specificTables:Array):void{
+				SystemGlobals.systemStatus = "Updating Catalogs...";
+				StaticEvent.dispatchEvent(new CatalogEvent(CatalogEvent.CATALOG_RELOAD_INIT));
+				DataObject = new Object();
+				SRV.getCatalogs(specificTables);	
 				SRV.getCatalogs.addEventListener(ResultEvent.RESULT,onResult);
 			}
 

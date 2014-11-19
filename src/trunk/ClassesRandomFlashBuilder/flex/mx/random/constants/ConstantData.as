@@ -687,9 +687,9 @@ package mx.random.constants{
 		
 		public static var TipoTransporte:ArrayCollection = new ArrayCollection([
 			{label:"Seleccionar", value:"0"},
-			{label:"Terrestre", value:"T"},
-			{label:"Aereo", value:"A"},
-			{label:"Marítimo", value:"M"}
+			{label:"Automóvil", value:"M"},
+			{label:"Autobus", value:"B"},
+			{label:"Avion", value:"O"}
 		]);
 		
 		

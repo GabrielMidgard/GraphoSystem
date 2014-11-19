@@ -371,20 +371,20 @@
 			private function onCreateComplete(e:ResultEvent):void{				
 				_MainService.createRecord.removeEventListener(ResultEvent.RESULT,onCreateComplete);
 				_dataIndex = _DataResult.length;
-				Catalogs.reload();
+				Catalogs.reloadSpecificTables(["equipos"]);
 				getData();
 			}
 			
 			private function onUpdateComplete(e:ResultEvent):void{
 				_MainService.updateRecord.removeEventListener(ResultEvent.RESULT,onUpdateComplete);
-				Catalogs.reload();
+				Catalogs.reloadSpecificTables(["equipos"]);
 				getData();
 			}
 			
 			private function onDeleteComplete(e:ResultEvent):void{
 				_MainService.deleteRecord.removeEventListener(ResultEvent.RESULT,onDeleteComplete);
 				_dataIndex = _DataResult.length-2;
-				Catalogs.reload();
+				Catalogs.reloadSpecificTables(["equipos"]);
 				getData();
 			}
 			

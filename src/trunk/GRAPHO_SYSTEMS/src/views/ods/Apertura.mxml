@@ -7,7 +7,7 @@
 	<fx:Declarations>
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
 	</fx:Declarations>
-	<s:TextInput id="_operador" x="71" y="232" width="310" change="dataChange();"/>
+	<s:TextInput id="_operador" x="71" y="232" width="310" change="dataChange();" enabled="false"/>
 	<s:Label x="6" y="238" text="Operador :"/>
 	<s:TextInput id="_idOrden" x="72" y="21" width="70" contentBackgroundColor="#E7E7E7"
 				 enabled="false" fontWeight="bold" textAlign="center"/>
@@ -19,27 +19,29 @@
 	<s:Label x="226" y="10" color="#767474" fontSize="10" fontStyle="italic" text="hora"/>
 	<s:Label x="302" y="9" color="#767474" fontSize="10" fontStyle="italic" text="estatus"/>
 	<s:Label x="73" y="10" color="#767474" fontSize="10" fontStyle="italic" text="número"/>
-	<s:TextInput id="_descripcionFalla" x="159" y="313" width="380" prompt="Descripción"/>
-	<s:TextInput id="_codigoFalla" x="72" y="313" width="79" prompt="Código"/>
+	<s:TextInput id="_descripcionFalla" x="159" y="313" width="416" enabled="false"
+				 prompt="Descripción"/>
+	<s:TextInput id="_codigoFalla" x="72" y="313" width="79" enabled="false" prompt="Código"/>
 	<s:Label x="73" y="491" color="#767474" fontSize="10" fontStyle="italic" text="observaciones"/>
 	<s:Label x="74" y="262" color="#767474" fontSize="10" fontStyle="italic" text="descripción"/>
 	<s:Label x="39" y="26" fontWeight="bold" text="OS :"/>
 	<s:Label x="16" y="205" text="Atendio :"/>
 	<s:Label x="20" y="279" text="Equipo :"/>
 	<s:ComboBox id="_idEmpleado" x="71" y="200" width="310" change="dataChange();"
-				dataProvider="{SystemGlobals.EMPLEADOS}" labelField="_nombre"></s:ComboBox>
+				dataProvider="{SystemGlobals.EMPLEADOS}" enabled="false" labelField="_nombre"></s:ComboBox>
 	<s:ComboBox id="_idContacto" x="71" y="169" width="310" change="dataChange();"
-				dataProvider="{_contactos}" labelField="_nombre"></s:ComboBox>
+				dataProvider="{_contactos}" enabled="false" labelField="_nombre"></s:ComboBox>
 	<s:Label x="14" y="175" text="Reporto :"/>
 	<s:ComboBox id="_idEquipo" x="72" y="274" width="309" change="dataChange();"
-				dataProvider="{_equipos}" labelField="_nombreEquipo"></s:ComboBox>
+				dataProvider="{_equipos}" enabled="false" labelField="_descripcionCompleta"></s:ComboBox>
 	<s:Label x="389" y="9" color="#767474" fontSize="10" fontStyle="italic" text="área de soporte"/>
 	<s:ComboBox id="_idAreaSoporteTecnico" x="389" y="21" width="150" change="dataChange();"
-				dataProvider="{SystemGlobals.AREAS_SOPORTE}" fontWeight="bold"
+				dataProvider="{SystemGlobals.AREAS_SOPORTE}" enabled="false" fontWeight="bold"
 				labelField="_areaSoporteTecnico"></s:ComboBox>
 	<s:Label x="550" y="9" color="#767474" fontSize="10" fontStyle="italic" text="servicio"/>
 	<s:ComboBox id="_idTipoServicio" x="550" y="21" width="80" change="dataChange();"
-				dataProvider="{SystemGlobals.TIPOS_SERVICIO}" fontWeight="bold" labelField="_nombre"></s:ComboBox>
+				dataProvider="{SystemGlobals.TIPOS_SERVICIO}" enabled="false" fontWeight="bold"
+				labelField="_nombre"></s:ComboBox>
 	<s:DataGrid id="_listaFallas" x="72" y="345" width="625" dataProvider="{_fallasReportadas}"
 				requestedRowCount="4">
 		<s:columns>
@@ -51,23 +53,20 @@
 	</s:DataGrid>
 	<s:Label x="23" y="352" text="Fallas :"/>
 	<s:Label x="28" y="318" text="Falla :"/>
-	<s:TextArea id="_nota" x="72" y="503" width="625" height="67" change="dataChange();"/>
+	<s:TextArea id="_nota" x="72" y="503" width="625" height="67" change="dataChange();"
+				enabled="false"/>
 	<s:Button label="Nuevo" width="80" enabled="{_dataReady}" visible="false" click="newData();" y="576" x="71"/>
 	<s:Button label="Cancelar" width="80" enabled="{_dataReady}" visible="{_newData||_updateData}" click="cancel();" y="576" x="159"/>
 	<s:Button label="Aceptar" width="80" enabled="{_dataReady}" visible="{_newData}" click="createData();" y="576" x="71"/>
 	<s:Button label="Eliminar" width="80" enabled="{_dataReady&amp;&amp;!_newData}" visible="false" click="deleteDataAlert();" y="576" x="159"/>
-	<s:Button visible="{!_newData&amp;&amp;!_updateData}" x="547" y="312" width="114" height="24"
+	<s:Button visible="false" x="583" y="313" width="114" height="24"
 			  label="Agregar Falla" click="recordIssue();"
 			  enabled="{_dataReady&amp;&amp;!_newData}"/>
 	<s:Button label="Actualizar" width="80" enabled="{_dataReady&amp;&amp;!_newData&amp;&amp;_updateData}" visible="{_updateData&amp;&amp;!_newData}" click="updateData();" y="576" x="71"/>
 	<s:Button label="Regresar" click="closeWindow();" width="145"  enabled="{!_newData}" y="576" x="553"/>
-	<s:Button x="389" y="200" width="28" height="23"
+	<s:Button x="389" y="200" width="28" height="23" visible="false"
 			  click="openPopUp(&quot;empleados.Empleados&quot;);"
 			  icon="@Embed(source='../../assets/Icons/Buttons/Edit.png')"
-			  skinClass="spark.skins.spark.ButtonSkin"/>
-	<s:Button x="667" y="312" width="28" height="23"
-			  click="openPopUp(&quot;empresa.Empresa_Companias&quot;);"
-			  icon="@Embed(source='../../assets/Icons/Buttons/Search.png')"
 			  skinClass="spark.skins.spark.ButtonSkin"/>
 	<s:TextInput id="_nombreEmpresa" x="71" y="63" width="310" contentBackgroundColor="#E7E7E7"
 				 enabled="false" text="{_cliente._nombreEmpresa}"/>
@@ -94,17 +93,17 @@
 	<s:Label x="19" y="69" text="Cliente :"/>
 	<s:Label x="71" y="52" color="#767474" fontSize="10" fontStyle="italic" text="nombre / empresa"/>
 	<s:Label x="72" y="128" color="#767474" fontSize="10" fontStyle="italic" text="encargado"/>
-	<s:Button visible="{!_newData&amp;&amp;!_updateData}" x="389" y="138" width="114" height="24"
+	<s:Button visible="false" x="389" y="138" width="114" height="24"
 			  label="Buscar Cliente" click="deleteDataAlert();"
 			  enabled="{_dataReady&amp;&amp;!_newData}"/>
-	<s:Button visible="{!_newData&amp;&amp;!_updateData}" x="389" y="138" width="114" height="24"
+	<s:Button visible="false" x="389" y="138" width="114" height="24"
 			  label="Buscar Cliente" click="openPopUp(&quot;clientes.Clientes_Busqueda&quot;,true);"/>
-	<s:Button x="509" y="138" width="28" height="23"
+	<s:Button x="509" y="138" width="28" height="23" visible="false"
 			  click="openPopUp(&quot;clientes.Clientes&quot;);"
 			  icon="@Embed(source='../../assets/Icons/Buttons/Edit.png')"
 			  skinClass="spark.skins.spark.ButtonSkin"/>
 	<s:ComboBox id="_idEstatus" x="300" y="21" width="81" change="dataChange();"
-				dataProvider="{SystemGlobals.ORDEN_ESTATUS}" fontWeight="bold"
+				dataProvider="{SystemGlobals.ORDEN_ESTATUS}" enabled="false" fontWeight="bold"
 				labelField="_nombreEstatus"></s:ComboBox>
 	
 		<fx:Script>
@@ -241,8 +240,9 @@
 				_Data.exceptions = ["_nombreTipoServicio","_nombreContacto","_nombreEmpleado","_nombreAreaSoporte",
 					"_creado","_modificado","_creadoPor","_creado",	"_modificado","_creadoPor",
 					"_modificadoPor","_descripcionClienteFalla","_idCodigoError","_nombreEstatus","_idCliente",
-					"_idEquipo","_idTecnico","_fechaHabloCon","_prediagnosticoNumeroTiempo","_prediagnosticoUnidadTiempo",
-					"_servicioNumeroTiempo","_servicioUnidadTiempo","_habloCon"
+					"_idTecnico","_fechaHabloCon","_prediagnosticoNumeroTiempo","_prediagnosticoUnidadTiempo",
+					"_servicioNumeroTiempo","_servicioUnidadTiempo","_habloCon","_tiempoNumeroDiagnostico","_tiempoUnidadDiagnostico",
+					"_fechaServInicial","_diasReparacion","_horaServInicial","_nombreTecnicoAsignado","_importe"
 					
 				];
 				_MainService.addEventListener(FaultEvent.FAULT,onFault);
