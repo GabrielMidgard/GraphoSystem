@@ -86,12 +86,12 @@
 			  skinClass="spark.skins.spark.ButtonSkin"/>
 	<s:TextInput id="_operador" x="71" y="232" width="310" change="dataChange();"/>
 	<s:Label x="6" y="238" text="Operador :"/>
-	<s:Label x="16" y="205" text="Atendio :"/>
+	<s:Label x="16" y="205" text="Atendió :"/>
 	<s:ComboBox id="_idEmpleado" x="71" y="200" width="310" change="dataChange();"
 				dataProvider="{SystemGlobals.EMPLEADOS}" labelFunction="concatenateName" ></s:ComboBox>
 	<s:ComboBox id="_idContacto" x="71" y="169" width="310" change="dataChange();"
 				dataProvider="{_contactos}" labelFunction="concatenateName"></s:ComboBox>
-	<s:Label x="14" y="175" text="Reporto :"/>
+	<s:Label x="14" y="175" text="Reportó :"/>
 	<s:Button x="389" y="200" width="28" height="23"
 			  click="openPopUp(&quot;empleados.Empleados&quot;);"
 			  icon="@Embed(source='../../assets/Icons/Buttons/Edit.png')"
@@ -225,6 +225,7 @@
 			
 			private function extraCreateData(params:Object):Object{				
 				//params["_newsImage"] = _image;
+				params["_responsableCotizacion"] = SystemGlobals.userId;
 				return params;
 			}
 			
@@ -233,7 +234,12 @@
 			}
 			
 			private function extraUpdateData(params:Object):Object{	
-				//params['_color'] = areaColor.selectedColor;			
+				//params['_color'] = areaColor.selectedColor;	
+				params[_mainId] = _dataList.selectedItem[_mainId];
+				if(_clientSelected == true){
+					params["_idCliente"] = _cliente._idCliente;
+					_clientSelected = false;
+				}
 				return params;
 			}
 			
@@ -270,7 +276,15 @@
 									"_totalRemisionar","_noRemision","_responsableAsignacionDeFecha",
 									"_domicilioServicio","_fechaServicioInicial","_formaPago","_fechaPagoInicial",
 									"_tecnicoAsignado","_seInformoVisitaA","_fechaPromesaVisita","_tiempoUnidadDiagnostico","_tiempoNumeroDiagnostico",
-									"_diasReparacion","_horaServInicial","_nombreTecnicoAsignado","_totalFacturar","_noFactura"
+									"_diasReparacion","_horaServInicial","_nombreTecnicoAsignado","_totalFacturar","_noFactura",
+									"_tipoCambio","_fechaCotizacion","_cantidadInicial","_responsableCotizacion","_idTecnicoDiagnostico","_idTecnicoAsignado",
+									"_tipoCambio","_fechaCotizacion","_fechaPreCotizacion","_cantidadInicial","_responsableCotizacion","_responsablePreCotizacion",
+									"_tipoTransporte","_costoManoObra","_costoRefaccion","_costoTransporte","_costoHotel","_costoComidas","_costoFleteSobreEquipaje",
+									"_costoGastosDiversos","_observacionesCotDiag","_cantidadComplemento","_importePagoInicial","_fechaPrePagoInicial",
+									"_preImporte",
+									"_tieneServicio","_tienePrediagnostico","_tieneCotizacionPrediagnostico","_tieneVentaPrediagnostico","_tieneConfirmacion",
+									"_tieneDiagnostico","_tieneCotizacionDiagnostico","_tieneVentaDiagnostico",
+									"_fechaDepositoVta","_importeDepositoVta","_formaPagoVta","_observacionesComplVta","_observacionesFacVta"
 									];
 				_MainService.addEventListener(FaultEvent.FAULT,onFault);
 				initData();
@@ -328,11 +342,6 @@
 				//if(Valid.validateAll()){
 					_dataReady = false;
 					var params:Object = extraUpdateData(_Data.makeData());
-					params[_mainId] = _dataList.selectedItem[_mainId];
-					if(_clientSelected == true){
-						params["_idCliente"] = _cliente._idCliente;
-						_clientSelected = false;
-					}
 					_MainService.updateRecord(params);
 					_MainService.updateRecord.addEventListener(ResultEvent.RESULT,onUpdateComplete);
 					_dataIndex =_dataList.selectedIndex;

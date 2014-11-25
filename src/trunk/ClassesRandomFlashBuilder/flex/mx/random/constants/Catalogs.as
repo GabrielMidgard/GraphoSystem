@@ -65,7 +65,11 @@ package mx.random.constants{
 				if(DataObject['tipos_servicio'])  SystemGlobals.TIPOS_SERVICIO	= Converter.arrayConverter(DataObject['tipos_servicio']);
 				if(DataObject['areas_soporte_tecnico'])  SystemGlobals.AREAS_SOPORTE	= Converter.arrayConverter(DataObject['areas_soporte_tecnico']);
 				if(DataObject['estatus'])  SystemGlobals.ORDEN_ESTATUS	= Converter.arrayConverter(DataObject['estatus']);
-				if(DataObject['empleados'])  SystemGlobals.EMPLEADOS	= Converter.arrayConverter(DataObject['empleados']);
+				if(DataObject['empleados'])  SystemGlobals.EMPLEADOS	= Converter.arrayConverter(DataObject['empleados']);				
+				if(DataObject['equipos'])  SystemGlobals.EQUIPOS        = Converter.arrayConverter(DataObject['equipos']);
+				if(DataObject['marcas'])  SystemGlobals.MARCAS        = Converter.arrayConverter(DataObject['marcas']);
+				if(DataObject['tipos_equipo'])  SystemGlobals.TIPOS_EQUIPOS        = Converter.arrayConverter(DataObject['tipos_equipo']);
+				
 				if(SystemGlobals.TIPOS_SERVICIO.length == 0 || SystemGlobals.TIPOS_SERVICIO[0]._idTipoServicio != 0){
 					SystemGlobals.TIPOS_SERVICIO.addItemAt({_idTipoServicio:0,_nombre:'Seleccionar'},0);	
 				}
@@ -78,10 +82,13 @@ package mx.random.constants{
 				if(SystemGlobals.EMPLEADOS.length == 0 || SystemGlobals.EMPLEADOS[0]._idEmpleado != 0){
 					SystemGlobals.EMPLEADOS.addItemAt({_idEmpleado:0,_nombre:'Seleccionar'},0);	
 				}
+				if(SystemGlobals.DEPARTAMENTOS.length == 0 || SystemGlobals.DEPARTAMENTOS[0]._idDepartamento != 0){
+					SystemGlobals.DEPARTAMENTOS.addItemAt({_idDepartamento:0,_nombre:'Seleccionar'},0);	
+				}
+				if(SystemGlobals.PUESTOS.length == 0 || SystemGlobals.PUESTOS[0]._idPuesto != 0){
+					SystemGlobals.PUESTOS.addItemAt({_idPuesto:0,_nombre:'Seleccionar'},0);	
+				}
 				
-				if(DataObject['equipos'])  SystemGlobals.EQUIPOS        = Converter.arrayConverter(DataObject['equipos']);
-				if(DataObject['marcas'])  SystemGlobals.MARCAS        = Converter.arrayConverter(DataObject['marcas']);
-				if(DataObject['tipos_equipo'])  SystemGlobals.TIPOS_EQUIPOS        = Converter.arrayConverter(DataObject['tipos_equipo']);
 				StaticEvent.dispatchEvent(new CatalogEvent(CatalogEvent.CATALOG_COMPLETE));
 			}
 			

@@ -78,43 +78,43 @@
 	<s:Button x="10" y="33" width="192" label="   Apertura de Orden"
 			  click="openPopUp('ods.Apertura',true)"
 			  skinClass="skins.Custom_Button_Light_Skin"/>
-	<s:CheckBox x="16" y="39" enabled="false" id="_tieneServicios"/>
+	<s:CheckBox x="16" y="39" enabled="false" id="_tieneServicio"/>
 	<s:Button x="10" y="65" width="192" label="   Prediagnóstico"
 			  click="openPopUp('ods.Prediagnostico',true)"
 			  skinClass="skins.Custom_Button_Light_Skin"/>
-	<s:CheckBox x="16" y="71" enabled="false" id="_tieneServicios0"/>
+	<s:CheckBox x="16" y="71" enabled="false" id="_tienePrediagnostico"/>
 	<s:Button x="10" y="97" width="192" label="   Cotización Prediagnóstico"
 			  click="openPopUp('ods.Prediagnostico_Cotizacion',true)"
 			  skinClass="skins.Custom_Button_Light_Skin"/>
-	<s:CheckBox x="16" y="103" enabled="false" id="_tieneServicios1"/>
+	<s:CheckBox x="16" y="103" enabled="false" id="_tieneCotizacionPrediagnostico"/>
 	<s:Button x="10" y="129" width="192" label="   Vta de Prediagnóstico"
 			  click="openPopUp('ods.Prediagnostico_Venta',true)"
 			  skinClass="skins.Custom_Button_Light_Skin"/>
-	<s:CheckBox x="16" y="135" enabled="false" id="_tieneServicios2"/>
+	<s:CheckBox x="16" y="135" enabled="false" id="_tieneVentaPrediagnostico"/>
 	<s:Button x="10" y="161" width="192" label="   Confirmación"
 			  click="openPopUp('ods.Confirmacion',true)"
 			  skinClass="skins.Custom_Button_Light_Skin"/>
-	<s:CheckBox x="16" y="167" enabled="false" id="_tieneServicios3"/>
+	<s:CheckBox x="16" y="167" enabled="false" id="_tieneConfirmacion"/>
 	<s:Button x="10" y="193" width="192" label="   Diagnóstico"
 			  click="openPopUp('ods.Diagnostico',true)"
 			  skinClass="skins.Custom_Button_Light_Skin"/>
-	<s:CheckBox x="16" y="199" enabled="false" id="_tieneServicios4"/>
+	<s:CheckBox x="16" y="199" enabled="false" id="_tieneDiagnostico"/>
 	<s:Button x="10" y="226" width="192" label="   Cotización Diagnóstico"
 			  click="openPopUp('ods.Diagnostico_Cotizacion',true)"
 			  skinClass="skins.Custom_Button_Light_Skin"/>
-	<s:CheckBox x="16" y="232" enabled="false" id="_tieneServicios5"/>
+	<s:CheckBox x="16" y="232" enabled="false" id="_tieneCotizacionDiagnostico"/>
 	<s:Button x="10" y="258" width="192" label="   Venta y Facturación"
 			  click="openPopUp('ods.Venta_Facturacion',true)"
 			  skinClass="skins.Custom_Button_Light_Skin"/>
-	<s:CheckBox x="16" y="264" enabled="false" id="_tieneServicios6"/>
+	<s:CheckBox x="16" y="264" enabled="false" id="_tieneVentaDiagnostico"/>
 	<s:Button x="10" y="290" width="192" label="   Ejecución de Servicio"
 			  click="openPopUp('ods.Ejecucion_Servicio',true)"
 			  skinClass="skins.Custom_Button_Light_Skin"/>
-	<s:CheckBox x="16" y="296" enabled="false" id="_tieneServicios7"/>
+	<s:CheckBox x="16" y="296" enabled="false" id="_tieneEjecucionServicio"/>
 	<s:Button x="10" y="322" width="192" label="   Cierre de Orden"
 			  click="openPopUp('ods.Cierre_Orden',true)"
 			  skinClass="skins.Custom_Button_Light_Skin"/>
-	<s:CheckBox x="16" y="328" enabled="false" id="_tieneServicios8"/>
+	<s:CheckBox x="16" y="328" enabled="false" id="_tieneCierreOrden"/>
 	<s:Label x="293" y="252" color="#767474" fontSize="10" fontStyle="italic" text="observaciones"/>
 	<s:TextArea id="_nota" x="292" y="265" width="625" height="87" contentBackgroundColor="#e7e7e7"
 				enabled="false"/>
@@ -197,10 +197,14 @@
 			// ------------------- View Extra Data -------------------------------
 			
 			private function get viewContext():Object{
+				var _currentOrderId = -1;
+				if(_DataResult.length > 0){
+					_currentOrderId = _DataResult[0]._idOrden;
+				}
 				return {webApplication: _webApplication,
 					workManager: this,
 					cliente: _cliente,
-					idOrden: _idOrden.text
+					idOrden: _currentOrderId
 				}					
 			}
 
@@ -218,7 +222,12 @@
 					"_diasReparacion","_horaServInicial","_nombreTecnicoAsignado","_totalFacturar","_noFactura","_importe",
 					"_totalRemisionar","_noRemision","_responsableAsignacionDeFecha",
 					"_domicilioServicio","_fechaServicioInicial","_formaPago","_fechaPagoInicial",
-					"_tecnicoAsignado","_seInformoVisitaA","_fechaPromesaVisita","_tiempoUnidadDiagnostico","_tiempoNumeroDiagnostico"
+					"_tecnicoAsignado","_seInformoVisitaA","_fechaPromesaVisita","_tiempoUnidadDiagnostico","_tiempoNumeroDiagnostico",
+					"_tipoCambio","_fechaCotizacion","_fechaPreCotizacion","_cantidadInicial","_responsableCotizacion","_responsablePreCotizacion",
+					"_tipoTransporte","_costoManoObra","_costoRefaccion","_costoTransporte","_costoHotel","_costoComidas","_costoFleteSobreEquipaje",
+					"_costoGastosDiversos","_observacionesCotDiag","_cantidadComplemento","_importePagoInicial","_fechaPrePagoInicial",
+					"_idTecnicoDiagnostico",
+					"_fechaDepositoVta","_importeDepositoVta","_formaPagoVta","_observacionesComplVta","_observacionesFacVta"
 					];
 				_MainService.addEventListener(FaultEvent.FAULT,onFault);
 				initData();
@@ -232,6 +241,26 @@
 				_MainService.getFields();
 				_MainService.getFields.addEventListener(ResultEvent.RESULT,onGetFieldsResult);
 				_dataReady = false;
+			}
+			
+			private function clearExtraFields():void{
+				_fechaCreacion.text = "";
+				_horaCreacion.text = "";
+				_nombreEstatus.text = "";
+				_nombreAreaSoporte.text = "";
+				_nombreEmpleado.text = "";
+				_nombreContacto.text = "";
+				_nombreTipoServicio.text = "";
+				_tieneServicio.selected = false;
+				_tienePrediagnostico.selected = false;
+				_tieneCotizacionPrediagnostico.selected = false;
+				_tieneVentaPrediagnostico.selected = false;
+				_tieneConfirmacion.selected = false;
+				_tieneDiagnostico.selected = false;
+				_tieneCotizacionDiagnostico.selected = false;
+				_tieneVentaDiagnostico.selected = false;
+				_tieneEjecucionServicio.selected = false;
+				_tieneCierreOrden.selected = false;
 			}
 			
 			public function closeWindow():void{
@@ -281,12 +310,7 @@
 				if(_DataResult.length==0) {
 					Alert.show("No existe orden con el id " + _idOrden.text,"Atención");
 					_Data.clear();
-					_fechaCreacion.text = "";
-					_horaCreacion.text = "";
-					_nombreEstatus.text = "";
-					_nombreAreaSoporte.text = "";
-					_nombreEmpleado.text = "";
-					_nombreContacto.text = "";
+					clearExtraFields();
 				}else{
 					_Data.loadData(_DataResult[0]); //Sólo debe de haber un registro o ninguno
 				}
@@ -320,13 +344,15 @@
 			
 			//-------------------------------- POP UP WINDOW --------------------------------------	
 			public function openPopUp(popUpName:String,modal:Boolean = true):void{
-				var pop:TitleWindow = PopUpManager.createPopUp(this, getDefinitionByName("views."+popUpName) as Class, modal) as TitleWindow;
-				pop.name = popUpName;
-				pop.addEventListener(CloseEvent.CLOSE, closePopup);
-				if(pop.hasOwnProperty("context")){
-					Object(pop).context = viewContext;
+				if(_DataResult.length > 0 || popUpName == 'ods.Administracion_Ordenes'){
+					var pop:TitleWindow = PopUpManager.createPopUp(this, getDefinitionByName("views."+popUpName) as Class, modal) as TitleWindow;
+					pop.name = popUpName;
+					pop.addEventListener(CloseEvent.CLOSE, closePopup);
+					if(pop.hasOwnProperty("context")){
+						Object(pop).context = viewContext;
+					}
+					PopUpManager.centerPopUp(pop);	
 				}
-				PopUpManager.centerPopUp(pop);
 			}
 			
 			private function closePopup(e:CloseEvent):void{

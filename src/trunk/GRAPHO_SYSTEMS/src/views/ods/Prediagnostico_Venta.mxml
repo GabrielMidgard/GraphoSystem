@@ -9,7 +9,7 @@
 	</fx:Declarations>
 
 	
-	<s:ComboBox x="92" y="258" width="310" id="_idEmpleado" labelField="_nombre"  dataProvider="{SystemGlobals.EMPLEADOS}" change="dataChange();" tabIndex="1"/>
+	<s:ComboBox x="92" y="258" width="310" id="_idEmpleado" labelFunction="concatenateName"  dataProvider="{SystemGlobals.EMPLEADOS}" change="dataChange();" tabIndex="1"/>
 											    
 	<s:Label x="7" y="263" text="Responsable :"/>
 	<s:Label x="23" y="298" text="Hablo con :"/>
@@ -20,8 +20,7 @@
 	<s:Label x="491" y="280" color="#767474" fontSize="10" fontStyle="italic" text="hora"/>
 	<s:TextArea id="_comentario" x="89" y="321" width="625" height="78" change="dataChange();"/>
 	<s:Button label="Regresar" click="closeWindow();" width="145"  enabled="{!_newData}" y="499" x="1073"/>
-	<s:Button x="568" y="290" width="70" height="23" label="Ahora" click="getCurrentTime();"
-			  enabled="{_newData||_updateData}"/>
+	<s:Button x="568" y="290" width="70" height="23" label="Ahora" click="getCurrentTime();"/>
 	
 	<s:ComboBox 	x="821" id="_searchType" 	dataProvider="{_searchTypes}" 	width="92" y="19" />
 	<s:TextInput 	x="921" id="_searchField" 	change="search();" 		width="296" enabled="{!_newData}" y="19"/>
@@ -140,6 +139,7 @@
 			import mx.rpc.events.FaultEvent;
 			import mx.rpc.events.ResultEvent;
 			import mx.rpc.remoting.RemoteObject;
+			import mx.utils.StringUtil;
 			import mx.random.constants.ConstantData;
 			
 			private var _webApplication:WebApplication;
@@ -235,6 +235,10 @@
 			
 			private function extraCreateData(params:Object):Object{				
 				//params["_newsImage"] = _image;
+				var dDate:String = _fechaHablo.text + " " + _horaHablo.text;
+				params._fechaHabloCon = dDate;
+				params["_idOrden"] = _idOrdenSelected;
+				params["_esPrediagnostico"] = true;
 				return params;
 			}
 			
@@ -255,14 +259,42 @@
 				
 			}
 			
+			private function concatenateName(value:Object):String
+			{
+				var nombre:String = "";
+				if(value._nombre != null && value._nombre != undefined){
+					nombre += StringUtil.trim(value._nombre) + " ";
+				}
+				if(value._paterno != null && value._paterno != undefined){
+					nombre += StringUtil.trim(value._paterno) + " ";
+				}
+				if(value._materno != null && value._materno != undefined){
+					nombre += StringUtil.trim(value._materno) + " ";
+				}
+				return nombre;
+			}
+			
 			public function initView():void{
 				forceImports();
 				_MainService = _webApplication.getService(_serviceName);
-				_Data.exceptions = _Data.exceptions = ["_creado","_modificado","_creadoPor","_creado",	"_modificado","_creadoPor",
+				_Data.exceptions = ["_creado","_modificado","_creadoPor","_creado",	"_modificado","_creadoPor",
 					"_modificadoPor","_descripcionClienteFalla","_idCodigoError","_idCliente","_idContacto",
-					"_idTipoServicio","_idAreaSoporteTecnico","_idEstatus","_idEmpleado","_idCliente","_idContacto","_idEquipo","_fechaHabloCon",
-					"_idEquipo","_nota"];
-				_DataPreDiagnosticoRes.exceptions = ["_idVentaPrediagnosticoResponsable","_creado","_fechaHabloCon","_idOrden"];
+					"_idTipoServicio","_idAreaSoporteTecnico","_idEstatus","_idEmpleado","_idCliente","_idContacto",
+					"_idEquipo","_fechaHabloCon","_idEquipo","_idRefaccion","_diasReparacion",
+					"_importe","_totalRemisionar","_noRemision","_responsableAsignacionDeFecha",
+					"_domicilioServicio","_fechaServicioInicial","_formaPago","_fechaPagoInicial",
+					"_tecnicoAsignado","_seInformoVisitaA","_fechaPromesaVisita","_tiempoUnidadDiagnostico","_tiempoNumeroDiagnostico",
+					"_diasReparacion","_horaServInicial","_nombreTecnicoAsignado","_totalFacturar","_noFactura","_fechaServInicial","_nota",
+					"_cantidadInicial","_responsableCotizacion","_idTecnicoDiagnostico",
+					"_tipoCambio","_fechaCotizacion","_fechaPreCotizacion","_cantidadInicial","_responsableCotizacion","_responsablePreCotizacion",
+					"_tipoTransporte","_costoManoObra","_costoRefaccion","_costoTransporte","_costoHotel","_costoComidas","_costoFleteSobreEquipaje",
+					"_costoGastosDiversos","_observacionesCotDiag","_cantidadComplemento","_importePagoInicial","_fechaPrePagoInicial",
+					"_preImporte",
+					"_tieneServicio","_tienePrediagnostico","_tieneCotizacionPrediagnostico","_tieneVentaPrediagnostico","_tieneConfirmacion",
+					"_tieneDiagnostico","_tieneCotizacionDiagnostico","_tieneVentaDiagnostico",
+					"_fechaDepositoVta","_importeDepositoVta","_formaPagoVta","_observacionesComplVta","_observacionesFacVta"
+				];
+				_DataPreDiagnosticoRes.exceptions = ["_idVentaDiagnosticoResponsable","_creado","_fechaHabloCon","_idOrden","_esPrediagnostico"];
 				_MainService.addEventListener(FaultEvent.FAULT,onFault);
 				initData();
 				addValidations();
@@ -508,10 +540,6 @@
 				if(Valid.validateAll()){
 					_dataReady = false;
 					var params:Object = extraCreateData(_DataPreDiagnosticoRes.makeData());
-					var dDate:String = _fechaHablo.text + " " + _horaHablo.text;
-					params._fechaHabloCon = dDate;
-					
-					params["_idOrden"] = _idOrdenSelected;
 					_MainService.createPreDiagnosticSellResponsibleRecord(params);
 					_MainService.createPreDiagnosticSellResponsibleRecord.addEventListener(ResultEvent.RESULT,onCreatePreDiagnosticSellResponsibleComplete);
 				}else{
@@ -521,7 +549,7 @@
 			
 			
 			private function onCreatePreDiagnosticSellResponsibleComplete(e:ResultEvent):void{				
-				_MainService.recordPreDiagnostic.removeEventListener(ResultEvent.RESULT,onCreatePreDiagnosticSellResponsibleComplete);
+				_MainService.createPreDiagnosticSellResponsibleRecord.removeEventListener(ResultEvent.RESULT,onCreatePreDiagnosticSellResponsibleComplete);
 				resetVentaPreDiagnosticBooleans();
 				_dataReady = true;
 				//Catalogs.reload();
@@ -544,7 +572,7 @@
 				if(Valid.validateAll()){
 					var params:Object = extraUpdateData(_DataPreDiagnosticoRes.makeData());
 					var dDate:String = _fechaHablo.text + " " + _horaHablo.text;
-					params["_idVentaPrediagnosticoResponsable"] = _dataList.selectedItem["_idVentaPrediagnosticoResponsable"];
+					params["_idVentaDiagnosticoResponsable"] = _dataList.selectedItem["_idVentaDiagnosticoResponsable"];
 					params._fechaHabloCon = dDate;
 					_MainService.updatePreDiagnosticSellResponsibleRecord(params);
 					_MainService.updatePreDiagnosticSellResponsibleRecord.addEventListener(ResultEvent.RESULT,onUpdateComplete);
@@ -588,14 +616,14 @@
 					_DataPreDiagnosticoRes.loadData(_dataList.selectedItem);
 					_dataIndex =_dataList.selectedIndex;
 					loadExtraFields(_dataList.selectedItem);
-					_selectedId = _dataList.selectedItem["_idVentaPrediagnosticoResponsable"];
+					_selectedId = _dataList.selectedItem["_idVentaDiagnosticoResponsable"];
 				}
 			}
 			
 			private function deletePreDiagnosticSellResponsibleData(e:CloseEvent):void{
 				if(e.detail==Alert.YES){
 					var params:Object = new Object();
-					params["_idVentaPrediagnosticoResponsable"] = _dataList.selectedItem["_idVentaPrediagnosticoResponsable"];
+					params["_idVentaDiagnosticoResponsable"] = _dataList.selectedItem["_idVentaDiagnosticoResponsable"];
 					_MainService.deletePreDiagnosticSellResponsibleRecord(params);
 					_MainService.deletePreDiagnosticSellResponsibleRecord.addEventListener(ResultEvent.RESULT,onDeleteComplete);
 					_dataReady = false;

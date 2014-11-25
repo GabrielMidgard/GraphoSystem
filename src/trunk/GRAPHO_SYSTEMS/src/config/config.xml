@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <CMS_Random>
 
-	<webApplication 	gateway		="http://192.168.1.26/random/___WebOrb___/weborb.php" 
+	<webApplication 	gateway		="http://192.168.1.68/random/___WebOrb___/weborb.php" 
 						channelId	="my-amf" 
 						destination	="GenericDestination" >
 		<services> 
@@ -106,7 +106,8 @@
 			<service name='Ordenes' 						source='com.test.webTools.Ordenes'>	<method name=''/></service>
 			<service name='Codigo_Error'     source='com.test.webTools.Codigo_Error'>    <method name=''/></service> 
    			<service name='Equipos'      source='com.test.webTools.Equipos'>    <method name=''/></service> 
-  	 		<service name='Marcas'      source='com.test.webTools.Marcas'>    <method name=''/></service> 
+  	 		<service name='Marcas'      source='com.test.webTools.Marcas'>    <method name=''/></service>
+  	 		<service name='Refacciones'      source='com.test.webTools.Refacciones'>    <method name=''/></service>  
    			<service name='Tipos_Equipos'    source='com.test.webTools.Tipos_Equipos'>    <method name=''/></service> 
 
    
@@ -174,6 +175,7 @@
 	    	<menuitem label="Equipos"      className="equipos.Equipos"      roles="System" method="openPopup"/>
 	    	<menuitem label="Marcas"      className="equipos.Marcas"      roles="System" method="openPopup"/>
 	    	<menuitem label="Tipos de Equipos"    className="equipos.Tipos_Equipos"    roles="System" method="openPopup"/>
+	    	<menuitem label="Refacciones"    className="equipos.Refacciones"    roles="System" method="openPopup"/>
   		</menuitem>
 			
 		<menuitem label="Clientes" 				roles="*" method="openPopup">

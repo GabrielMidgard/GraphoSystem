@@ -2,153 +2,148 @@
 <s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009"
 			   xmlns:s="library://ns.adobe.com/flex/spark"
 			   xmlns:mx="library://ns.adobe.com/flex/mx"
-			   width="1258" height="694" backgroundAlpha="1.0" contentBackgroundColor="#D5E7FB"
-			   title="Cotización Diagnóstico">
+			   width="1414" height="644" backgroundAlpha="1.0" contentBackgroundColor="#D5FBDB"
+			   title="Venta y Facturación de Diagnóstico">
 	<fx:Declarations>
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
 	</fx:Declarations>
-	<s:TextInput id="_nombreTecnico" x="93" y="244" width="310" contentBackgroundColor="#E7E7E7"
-				 enabled="false" fontStyle="italic" text="{_datosPrediagnostico._nombreTecnico}"/>
-	<s:Label x="38" y="250" text="Técnico :"/>
-	<s:TextInput id="_habloCon" x="93" y="278" width="310" contentBackgroundColor="#E7E7E7"
-				 enabled="false" fontStyle="normal" text="{_datosPrediagnostico._habloCon}"/>
-	<s:Label x="27" y="285" text="Hablo con :"/>
-	<s:TextInput id="_fechaHablo" x="412" y="278" width="70" contentBackgroundColor="#E7E7E7"
-				 enabled="false" fontWeight="normal" text="{_datosPrediagnostico._fechaHablo}" textAlign="center"/>
-	<s:Label x="413" y="267" color="#767474" fontSize="10" fontStyle="italic" text="fecha"/>
-	<s:TextInput id="_horaHablo" x="491" y="278" width="70" contentBackgroundColor="#E7E7E7"
-				 enabled="false" fontWeight="normal" text="{_datosPrediagnostico._horaHablo}" textAlign="center"/>
-	<s:Label x="492" y="267" color="#767474" fontSize="10" fontStyle="italic" text="hora"/>
-	<s:Button label="Nuevo" width="80" enabled="{_dataReady}" visible="false" click="newData();" y="616" x="94"/>
-	<s:Button label="Cancelar" width="80" enabled="{_dataReady}" visible="{_newData||_updateData}" click="cancel();" y="616" x="226"/>
-	<s:Button label="Aceptar" width="80" enabled="{_dataReady}" visible="{_newData}" click="createData();" y="616" x="94"/>
-	<s:Button label="Eliminar" width="80" enabled="{_dataReady&amp;&amp;!_newData}" visible="false" click="deleteDataAlert();" y="616" x="226"/>
-	<s:Button label="Actualizar" width="121" enabled="{_dataReady&amp;&amp;!_newData&amp;&amp;_updateData}" visible="{_updateData&amp;&amp;!_newData}" click="updateData();" y="616" x="94"/>
-	<s:Button label="Regresar" click="closeWindow();" width="145"  enabled="{!_newData}" y="616" x="1103"/>
-	<s:TextInput id="_costoManoObra" x="312" y="520" width="130" change="dataChange();"
-				 contentBackgroundColor="#D5FBDB" fontStyle="normal"/>
-	<s:TextInput id="_posibleSolucion" x="92" y="345" width="547" contentBackgroundColor="#e7e7e7"
-				 enabled="false" fontStyle="normal"/>
-	<s:Label x="32" y="351" text="Solución :"/>
-	<s:Label x="92" y="334" color="#767474" fontSize="10" fontStyle="italic" text="posible"/>
-	<s:TextInput id="_costoRefaccion" x="517" y="520" width="121" change="dataChange();"
-				 contentBackgroundColor="#D5FBDB" fontStyle="normal"/>
-	<s:TextInput id="_viaticoTotal" x="93" y="520" width="121" contentBackgroundColor="#D5FBDB"
-				 fontStyle="normal"
-				 text="{Math.round((Number(_costoTransporte.text)+Number(_costoHotel.text)+Number(_costoComidas.text)+Number(_costoFleteSobreEquipaje.text)+Number(_costoGastosDiversos.text))*100)/100}"/>
-	<s:TextInput id="_costoTransporte" x="93" y="397" width="121" change="dataChange();"
-				 contentBackgroundColor="#D5FBDB" fontStyle="normal"/>
-	<s:Label x="22" y="404" text="Transporte :"/>
-	<s:Label x="94" y="386" color="#767474" fontSize="10" fontStyle="italic" text="costo"/>
-	<s:TextInput id="_costoGastosDiversos" x="311" y="470" width="131" change="dataChange();"
-				 contentBackgroundColor="#D5FBDB" fontStyle="normal"/>
-	<s:Label x="259" y="477" text="Gastos :"/>
-	<s:Label x="312" y="460" color="#767474" fontSize="10" fontStyle="italic" text="diversos"/>
-	<s:Label x="38" y="527" text="Viáticos :"/>
-	<s:Label x="450" y="527" text="Refacción :"/>
-	<s:Label x="223" y="526" text="Mano de Obra :"/>
-	<s:Label x="94" y="509" color="#767474" fontSize="10" fontStyle="italic" text="costo total"/>
-	<s:Label x="524" y="509" color="#767474" fontSize="10" fontStyle="italic" text="costo"/>
-	<s:TextInput id="_nombreEmpresa0" x="93" y="564" width="122" contentBackgroundColor="#D5FBDB"
-				 fontStyle="normal" text="{Math.round((Number(_viaticoTotal.text)+Number(_costoManoObra.text)+Number(_costoRefaccion.text))*100)/100}"/>
-	<s:Label x="54" y="571" text="Total :"/>
-	<s:Label x="93" y="552" color="#767474" fontSize="10" fontStyle="italic" text="costo"/>
-	<s:Label x="312" y="509" color="#767474" fontSize="10" fontStyle="italic" text="costo"/>
-	<s:TextInput id="_costoHotel" x="93" y="434" width="121" change="dataChange();"
-				 contentBackgroundColor="#D5FBDB" fontStyle="normal"/>
-	<s:Label x="52" y="441" text="Hotel :"/>
-	<s:Label x="94" y="423" color="#767474" fontSize="10" fontStyle="italic" text="costo"/>
-	<s:TextInput id="_costoFleteSobreEquipaje" x="311" y="434" width="131" change="dataChange();"
-				 contentBackgroundColor="#D5FBDB" fontStyle="normal"/>
-	<s:Label x="272" y="441" text="Flete :"/>
-	<s:Label x="275" y="403" text="Tipo :"/>
-	<s:Label x="311" y="424" color="#767474" fontSize="10" fontStyle="italic" text="y sobre equipaje"/>
-	<s:TextInput id="_costoComidas" x="93" y="472" width="122" change="dataChange();"
-				 contentBackgroundColor="#D5FBDB" fontStyle="normal"/>
-	<s:Label x="30" y="479" text="Comidas :"/>
-	<s:Label x="94" y="461" color="#767474" fontSize="10" fontStyle="italic" text="costo"/>
-	<s:Label x="312" y="386" color="#767474" fontSize="10" fontStyle="italic" text="transporte"/>
 	
-	<s:ComboBox id="_tipoTransporte" x="310" y="397" width="132" change="dataChange();"
-				contentBackgroundColor="#D5FBDB" dataProvider="{ConstantData.TipoTransporte}" labelField="label"
-				fontWeight="bold"></s:ComboBox>
-	<s:TextInput id="_nombreEmpresa" x="92" y="61" width="310" contentBackgroundColor="#e7e7e7"
-				 enabled="false" fontStyle="italic" text="{_cliente._nombreEmpresa}"/>
-	<s:TextInput id="_ciudad" x="92" y="99" width="150" contentBackgroundColor="#e7e7e7"
-				 enabled="false" fontStyle="italic" text="{_cliente._ciudad}"/>
-	<s:TextInput id="_nombreEstado" x="252" y="99" width="150" contentBackgroundColor="#e7e7e7"
-				 enabled="false" fontStyle="italic" text="{_cliente._nombreEstado}"/>
-	<s:Label x="253" y="88" color="#767474" fontSize="10" fontStyle="italic" text="estado"/>
-	<s:Label x="92" y="88" color="#767474" fontSize="10" fontStyle="italic" text="ciudad"/>
-	<s:TextInput id="_telefonoCasa" x="410" y="61" width="150" contentBackgroundColor="#e7e7e7"
-				 enabled="false" fontStyle="italic" text="{_cliente._telefonoCasa}"/>
-	<s:TextInput id="_telefonoOficina" x="568" y="61" width="150" contentBackgroundColor="#e7e7e7"
-				 enabled="false" fontStyle="italic" text="{_cliente._telefonoOficina}"/>
-	<s:TextInput id="_mailSecundario" x="568" y="99" width="150" contentBackgroundColor="#e7e7e7"
-				 enabled="false" fontStyle="italic" text="{_cliente._mailSecundario}"/>
-	<s:TextInput id="_mailPrincipal" x="410" y="99" width="150" contentBackgroundColor="#e7e7e7"
-				 enabled="false" fontStyle="italic" text="{_cliente._mailPrincipal}"/>
-	<s:Label x="411" y="89" color="#767474" fontSize="10" fontStyle="italic" text="mails"/>
-	<s:Label x="411" y="50" color="#767474" fontSize="10" fontStyle="italic" text="teléfonos"/>
-	<s:Label x="41" y="67" text="Cliente :"/>
-	<s:Label x="92" y="50" color="#767474" fontSize="10" fontStyle="italic" text="nombre"/>
-	<s:TextInput id="_idOrden" x="91" y="21" width="70" contentBackgroundColor="#E7E7E7"
-				 enabled="false" fontWeight="bold" textAlign="center"/>
-	<s:TextInput id="_fechaCreacion" x="167" y="21" width="70" contentBackgroundColor="#E7E7E7"
-				 enabled="false" fontWeight="bold" textAlign="center"/>
-	<s:Label x="169" y="10" color="#767474" fontSize="10" fontStyle="italic" text="fecha"/>
-	<s:TextInput id="_horaCreacion" x="243" y="21" width="70" contentBackgroundColor="#E7E7E7"
-				 enabled="false" fontWeight="bold" textAlign="center"/>
-	<s:TextInput id="_nombreEstatus" x="321" y="21" width="79" contentBackgroundColor="#E7E7E7"
-				 enabled="false" fontWeight="bold" textAlign="center"/>
-	<s:Label x="245" y="10" color="#767474" fontSize="10" fontStyle="italic" text="hora"/>
-	<s:Label x="321" y="9" color="#767474" fontSize="10" fontStyle="italic" text="estatus"/>
-	<s:Label x="92" y="10" color="#767474" fontSize="10" fontStyle="italic" text="número"/>
-	<s:Label x="58" y="26" fontWeight="bold" text="OS :"/>
-	<s:Label x="408" y="9" color="#767474" fontSize="10" fontStyle="italic" text="área de soporte"/>
-	<s:Label x="569" y="9" color="#767474" fontSize="10" fontStyle="italic" text="servicio"/>
-	<s:TextInput id="_nombreContacto" x="92" y="139" width="310" contentBackgroundColor="#e7e7e7"
-				 enabled="false" fontStyle="italic"/>
-	<s:TextInput id="_operador" x="92" y="172" width="310" contentBackgroundColor="#e7e7e7"
-				 enabled="false" fontStyle="italic"/>
-	<s:Label x="28" y="178" text="Operador :"/>
-	<s:Label x="92" y="128" color="#767474" fontSize="10" fontStyle="italic" text="reporto"/>
-	<s:Label x="410" y="128" color="#767474" fontSize="10" fontStyle="italic" text="atendio"/>
-	<s:TextInput id="_nombreEmpleado" x="410" y="139" width="308" contentBackgroundColor="#e7e7e7"
-				 enabled="false" fontStyle="italic"/>
-	<s:TextInput id="_serie" x="568" y="212" width="70" contentBackgroundColor="#e7e7e7"
-				 enabled="false" fontStyle="italic" text="{_equipo._serie}"/>
-	<s:TextInput id="_modelo" x="410" y="212" width="150" contentBackgroundColor="#e7e7e7"
-				 enabled="false" fontStyle="italic" text="{_equipo._modelo}"/>
-	<s:Label x="411" y="201" color="#767474" fontSize="10" fontStyle="italic" text="modelo"/>
-	<s:Label x="94" y="198" color="#767474" fontSize="10" fontStyle="italic" text="tipo"/>
-	<s:Label x="254" y="199" color="#767474" fontSize="10" fontStyle="italic" text="marca"/>
-	<s:Label x="569" y="201" color="#767474" fontSize="10" fontStyle="italic" text="no. serie"/>
-	<s:Label x="41" y="216" text="Equipo :"/>
-	<s:TextInput id="_nombreTipo" x="92" y="211" width="150" contentBackgroundColor="#e7e7e7"
-				 enabled="false" fontStyle="italic" text="{_equipo._nombreTipo}"/>
-	<s:TextInput id="_nombreMarca" x="252" y="211" width="150" contentBackgroundColor="#e7e7e7"
-				 enabled="false" fontStyle="italic" text="{_equipo._nombreMarca}"/>
-	<s:Label x="649" y="200" color="#767474" fontSize="10" fontStyle="italic" text="año de fab."/>
-	<s:TextInput id="_anioFabricacion" x="648" y="212" width="70" contentBackgroundColor="#e7e7e7"
-				 enabled="false" fontStyle="italic" text="{_equipo._anioFabricacion}"/>
-	<s:TextInput id="_nombreAreaSoporte" x="409" y="21" width="151" contentBackgroundColor="#E7E7E7"
-				 enabled="false" fontWeight="bold" textAlign="center"/>
-	<s:TextInput id="_nombreTipoServicio" x="568" y="21" width="150" contentBackgroundColor="#E7E7E7"
-				 enabled="false" fontWeight="bold" textAlign="center"/>
-	<s:DataGrid id="_dataList" x="726" y="21" width="522" height="587"
-				contentBackgroundColor="#D5FBDB" dataProvider="{_prediagnosticos}"
-				enabled="{_dataReady&amp;&amp;!_newData}" requestedRowCount="4"
-				selectionChange="onDataPreDiagnosticSelect();">
-		<s:columns>
+	
+	<s:ComboBox x="839" y="10" width="310" id="_idEmpleado" labelFunction="concatenateName"  dataProvider="{SystemGlobals.EMPLEADOS}" change="dataChange();" tabIndex="1"/>
+	
+	<s:Label x="754" y="15" text="Responsable :"/>
+	<s:Label x="770" y="50" text="Hablo con :"/>
+	<s:Label x="762" y="80" text="Comentario :"/>
+	<s:Label x="757" y="166" width="70" text="Acción a &#xd;Seguir :" textAlign="right"/>
+	<s:TextArea id="_accionSeguir" x="836" y="163" width="549" height="78" change="dataChange();"/>
+	<s:Label x="1158" y="32" color="#767474" fontSize="10" fontStyle="italic" text="fecha"/>
+	<s:Label x="1238" y="32" color="#767474" fontSize="10" fontStyle="italic" text="hora"/>
+	<s:TextArea id="_comentario" x="836" y="73" width="549" height="78" change="dataChange();"/>
+	<s:Label x="24" y="322" text="Observaciones :"/>
+	<s:TextArea id="_observacionesFacVta" x="120" y="315" width="546" height="78" change="dataOrdenChange();"/>
+	<s:Button label="Regresar" click="closeWindow();" width="145"  enabled="{!_newData}" y="559" x="1240"/>
+	<s:Button x="1315" y="42" width="70" height="23" label="Ahora" click="getCurrentTime();"/>
+	
+	<s:ComboBox 	x="990" id="_searchType" 	dataProvider="{_searchTypes}" 	width="92" y="287" />
+	<s:TextInput 	x="1090" id="_searchField" 	change="search();" 		width="296" enabled="{!_newData}" y="287"/>
+	<s:Label x="925" text="Filtrar por :" textAlign="right" y="294"/>
+	
+	
+	<s:DataGrid id="_dataList" x="836" y="319" width="550" height="232"
+				dataProvider="{_ventaPrediagnosticos}" selectionChange="onDataPreDiagnosticSellResponsibleSelect();"
+				enabled="{_dataReady&amp;&amp;!_newData&amp;&amp;!_updateData}"
+				selectionMode="singleRow">
+		<s:columns>	
 			<s:ArrayList>
-				<s:GridColumn dataField="falla" headerText="Pre-Diagnóstico"
-							  itemRenderer="renderers.Seguimiento_ItemRenderer2"></s:GridColumn>
+				<s:GridColumn headerText="Hablo con" dataField="_habloCon" ></s:GridColumn>		
+				<s:GridColumn headerText="Comentario" dataField="_comentario"></s:GridColumn>
+				<s:GridColumn headerText="Accion aSeguir" dataField="_accionSeguir" ></s:GridColumn>	
 			</s:ArrayList>
-		</s:columns>	
-		
+		</s:columns>
 	</s:DataGrid>
 	
+	
+	<s:TextInput id="_nombreEmpresa" x="120" y="61" width="310" contentBackgroundColor="#e7e7e7"
+				 enabled="false" fontStyle="italic" text="{_cliente._nombreEmpresa}"/>
+	<s:TextInput id="_ciudad" x="120" y="99" width="150" contentBackgroundColor="#e7e7e7"
+				 enabled="false" fontStyle="italic" text="{_cliente._ciudad}"/>
+	<s:TextInput id="_nombreEstado" x="280" y="99" width="150" contentBackgroundColor="#e7e7e7"
+				 enabled="false" fontStyle="italic" text="{_cliente._nombreEstado}"/>
+	<s:Label x="281" y="88" color="#767474" fontSize="10" fontStyle="italic" text="estado"/>
+	<s:Label x="120" y="88" color="#767474" fontSize="10" fontStyle="italic" text="ciudad"/>
+	<s:TextInput id="_telefonoCasa" x="438" y="61" width="150" contentBackgroundColor="#e7e7e7"
+				 enabled="false" fontStyle="italic" text="{_cliente._telefonoCasa}"/>
+	<s:TextInput id="_telefonoOficina" x="596" y="61" width="150" contentBackgroundColor="#e7e7e7"
+				 enabled="false" fontStyle="italic" text="{_cliente._telefonoOficina}"/>
+	<s:TextInput id="_mailSecundario" x="596" y="99" width="150" contentBackgroundColor="#e7e7e7"
+				 enabled="false" fontStyle="italic" text="{_cliente._mailSecundario}"/>
+	<s:TextInput id="_mailPrincipal" x="438" y="99" width="150" contentBackgroundColor="#e7e7e7"
+				 enabled="false" fontStyle="italic" text="{_cliente._mailPrincipal}"/>
+	<s:Label x="439" y="89" color="#767474" fontSize="10" fontStyle="italic" text="mails"/>
+	<s:Label x="439" y="50" color="#767474" fontSize="10" fontStyle="italic" text="teléfonos"/>
+	<s:Label x="69" y="67" text="Cliente :"/>
+	<s:Label x="120" y="50" color="#767474" fontSize="10" fontStyle="italic" text="nombre"/>
+	<s:TextInput id="_idOrden" x="119" y="21" width="70" contentBackgroundColor="#E7E7E7"
+				 enabled="false" fontWeight="bold" textAlign="center"/>
+	<s:TextInput id="_fechaCreacion" x="195" y="21" width="70" contentBackgroundColor="#E7E7E7"
+				 enabled="false" fontWeight="bold" textAlign="center"/>
+	<s:Label x="197" y="10" color="#767474" fontSize="10" fontStyle="italic" text="fecha"/>
+	<s:TextInput id="_horaCreacion" x="271" y="21" width="70" contentBackgroundColor="#E7E7E7"
+				 enabled="false" fontWeight="bold" textAlign="center"/>
+	<s:TextInput id="_nombreEstatus" x="349" y="21" width="79" contentBackgroundColor="#E7E7E7"
+				 enabled="false" fontWeight="bold" textAlign="center"/>
+	<s:Label x="273" y="10" color="#767474" fontSize="10" fontStyle="italic" text="hora"/>
+	<s:Label x="349" y="9" color="#767474" fontSize="10" fontStyle="italic" text="estatus"/>
+	<s:Label x="120" y="10" color="#767474" fontSize="10" fontStyle="italic" text="número"/>
+	<s:Label x="86" y="26" fontWeight="bold" text="OS :"/>
+	<s:Label x="436" y="9" color="#767474" fontSize="10" fontStyle="italic" text="área de soporte"/>
+	<s:Label x="597" y="9" color="#767474" fontSize="10" fontStyle="italic" text="servicio"/>
+	<s:TextInput id="_nombreContacto" x="120" y="139" width="310" contentBackgroundColor="#e7e7e7"
+				 enabled="false" fontStyle="italic"/>
+	<s:TextInput id="_operador" x="120" y="172" width="310" contentBackgroundColor="#e7e7e7"
+				 enabled="false" fontStyle="italic"/>
+	<s:Label x="56" y="178" text="Operador :"/>
+	<s:Label x="120" y="128" color="#767474" fontSize="10" fontStyle="italic" text="reporto"/>
+	<s:Label x="438" y="128" color="#767474" fontSize="10" fontStyle="italic" text="atendio"/>
+	<s:TextInput id="_nombreEmpleado" x="438" y="139" width="308" contentBackgroundColor="#e7e7e7"
+				 enabled="false" fontStyle="italic"/>
+	<s:TextInput id="_serie" x="596" y="212" width="70" contentBackgroundColor="#e7e7e7"
+				 enabled="false" fontStyle="italic" text="{_equipo._serie}"/>
+	<s:TextInput id="_modelo" x="438" y="212" width="150" contentBackgroundColor="#e7e7e7"
+				 enabled="false" fontStyle="italic" text="{_equipo._modelo}"/>
+	<s:Label x="439" y="201" color="#767474" fontSize="10" fontStyle="italic" text="modelo"/>
+	<s:Label x="122" y="198" color="#767474" fontSize="10" fontStyle="italic" text="tipo"/>
+	<s:Label x="282" y="199" color="#767474" fontSize="10" fontStyle="italic" text="marca"/>
+	<s:Label x="597" y="201" color="#767474" fontSize="10" fontStyle="italic" text="no. serie"/>
+	<s:Label x="69" y="216" text="Equipo :"/>
+	<s:TextInput id="_nombreTipo" x="120" y="211" width="150" contentBackgroundColor="#e7e7e7"
+				 enabled="false" fontStyle="italic" text="{_equipo._nombreTipo}"/>
+	<s:TextInput id="_nombreMarca" x="280" y="211" width="150" contentBackgroundColor="#e7e7e7"
+				 enabled="false" fontStyle="italic" text="{_equipo._nombreMarca}"/>
+	<s:Label x="677" y="200" color="#767474" fontSize="10" fontStyle="italic" text="año de fab."/>
+	<s:TextInput id="_anioFabricacion" x="676" y="212" width="70" contentBackgroundColor="#e7e7e7"
+				 enabled="false" fontStyle="italic" text="{_equipo._anioFabricacion}"/>
+	<s:TextInput id="_nombreAreaSoporte" x="437" y="21" width="151" contentBackgroundColor="#E7E7E7"
+				 enabled="false" fontWeight="bold" textAlign="center"/>
+	<s:TextInput id="_nombreTipoServicio" x="596" y="21" width="150" contentBackgroundColor="#E7E7E7"
+				 enabled="false" fontWeight="bold" textAlign="center"/>
+	<s:TextInput id="_habloCon" x="839" y="43" width="310" change="dataChange();" fontStyle="normal"
+				 text="{_datosVentaPrediagnostico._habloCon}"/>
+	<s:Label x="46" y="285" text="No Factura :"/>
+	<s:Label x="280" y="254" fontSize="14" fontWeight="bold" text="Facturación Complementaria"/>
+	<s:TextInput id="_habloCon0" x="120" y="278" width="69" change="dataChange();" fontStyle="normal"/>
+	<s:Label x="200" y="285" text="Total Factura :"/>
+	<s:TextInput id="_habloCon1" x="281" y="278" width="60" change="dataChange();" fontStyle="normal"/>
+	<s:Label x="353" y="285" text="No Remisión :"/>
+	<s:TextInput id="_habloCon2" x="438" y="279" width="69" change="dataChange();" fontStyle="normal"/>
+	<s:Label x="516" y="285" text="Total Factura :"/>
+	<s:TextInput id="_habloCon3" x="597" y="278" width="69" change="dataChange();" fontStyle="normal"/>
+	<s:Label x="24" y="480" text="Observaciones :"/>
+	<s:TextArea id="_observacionesComplVta" x="120" y="473" width="546" height="78" change="dataOrdenChange();"/>
+	<s:Label x="6" y="443" text="Fecha de depóstio :"/>
+	<s:Label x="280" y="412" fontSize="14" fontWeight="bold" text="Pago Complementario"/>
+	<s:TextInput id="_fechaDepositoVta" x="119" y="436" width="70" change="dataOrdenChange();" fontStyle="normal"/>
+	<s:Label x="256" y="443" text="Importe depósito :"/>
+	<s:TextInput id="_importeDepositoVta" x="359" y="436" width="60" change="dataOrdenChange();" fontStyle="normal"/>
+	<s:TextInput id="_fechaHablo" x="1158" y="43" width="70" change="dataChange();"
+				 fontWeight="normal" text="{_datosVentaPrediagnostico._fechaHablo}" textAlign="center"/>
+	<s:TextInput id="_horaHablo" x="1237" y="43" width="70" change="dataChange();"
+				 fontWeight="normal" text="{_datosVentaPrediagnostico._horaHablo}" textAlign="center"/>
+	
+	
+	<s:Button label="Nuevo" width="80" enabled="{_dataReady}" visible="{!_newData&amp;&amp;!_updateData}" click="newVentaPreDiagnosticData();" y="249" x="1217"/>
+	<s:Button label="Aceptar" width="80" enabled="{_dataReady}" visible="{_newData}" click="createPreDiagnosticSellResponsibleData();" y="249" x="1217"/>
+	
+	<s:Button label="Actualizar" width="80" enabled="{_dataReady&amp;&amp;!_newData&amp;&amp;_updateData}"  visible="{_updateData&amp;&amp;!_newData}" click="updateData();" y="249" x="1217"/>
+	<s:Button label="Cancelar" width="80" enabled="{_dataReady}" visible="{_newData||_updateData}" click="cancelPreDiagnosticSellResponsible();" y="249" x="1305"/>
+	<s:Button label="Eliminar" width="80" enabled="{_dataReady&amp;&amp;!_newData}" visible="{!_newData&amp;&amp;!_updateData}" click="deleteDataAlert();" y="249" x="1305"/>
+	<s:Button x="197" y="436" width="49" height="23" label="Hoy" click="getCurrentTime2();"
+			  enabled="{!_newData}"/>
+	<s:Label x="437" y="444" text="Forma de Pago :"/>
+	<s:ComboBox id="_formaPagoVta" x="537" y="436" width="127" change="dataOrdenChange();"
+				dataProvider="{ConstantData.PaymentTypes}" fontStyle="italic" labelField="label"> </s:ComboBox>
+	<s:Button label="Actualizar" width="80" enabled="{_updateOrdenData&amp;&amp;!_newOrdenData}" visible="true" click="updateOrdenData();" y="564" x="498"/>
+	<s:Button label="Cancelar" width="80" enabled="{_newOrdenData||_updateOrdenData}" visible="true" click="cancel();" y="564" x="586"/>
 	
 	
 	<fx:Script>
@@ -169,6 +164,7 @@
 			import mx.rpc.events.FaultEvent;
 			import mx.rpc.events.ResultEvent;
 			import mx.rpc.remoting.RemoteObject;
+			import mx.utils.StringUtil;
 			import mx.random.constants.ConstantData;
 			
 			private var _webApplication:WebApplication;
@@ -176,8 +172,9 @@
 			private var _workManager:Object 		= new Object();
 			private var _MainService:RemoteObject 		= new RemoteObject();
 			[Bindable]	private var _Data:DataManager 				= new DataManager(this);
-			[Bindable]	private var _DataDiagnostico:DataManager 				= new DataManager(this);
-			[Bindable]	private var _DataResult:ArrayCollection 		= new ArrayCollection();			
+			[Bindable]	private var _DataPreDiagnosticoRes:DataManager 				= new DataManager(this);
+			[Bindable]	private var _DataResult:ArrayCollection 		= new ArrayCollection();	
+			[Bindable]  private var _ventaPrediagnosticos:ArrayCollection = new ArrayCollection();
 			private var _eventManager:EventManager 		= new EventManager(this);
 			private var _dataIndex:Number 			= 0;
 			
@@ -187,6 +184,9 @@
 			[Bindable]	public var _newData:Boolean 			= false;
 			[Bindable]	public var _updateData:Boolean 			= false;
 			
+			[Bindable]	public var _dataOrdenReady:Boolean 			= false;
+			[Bindable]	public var _newOrdenData:Boolean 			= false;
+			[Bindable]	public var _updateOrdenData:Boolean 			= false;
 			//-----------Event Manager -----------
 			
 			
@@ -201,7 +201,7 @@
 			[Bindable] private var _cliente:Object = {};
 			[Bindable] private var _equipo:Object = {};
 			[Bindable] private var _cotizacion:Object = {};
-			[Bindable] private var _datosPrediagnostico:Object = {};
+			[Bindable] private var _datosVentaPrediagnostico:Object = {};
 			[Bindable] private var _prediagnosticos:ArrayCollection = new ArrayCollection();
 			
 			//-----------Local Vars -----------
@@ -245,6 +245,11 @@
 			private function addValidations():void{
 				Valid.changeLanguage(Languages.SPANISH);
 				
+				Valid.addStringVal(_habloCon,1,50,"Hablo Con");
+				Valid.addStringVal(_fechaHablo,4,30,"Fecha");
+				Valid.addStringVal(_horaHablo,4,30,"Hora");
+				
+				
 				//----------- Validaciones ---------------------------
 				//Valid.addStringVal(_nombre,2,100,"Nombre");
 				//Valid.addStringVal(_codigo,1,2,"Código");
@@ -258,6 +263,10 @@
 			
 			private function extraCreateData(params:Object):Object{				
 				//params["_newsImage"] = _image;
+				var dDate:String = _fechaHablo.text + " " + _horaHablo.text;
+				params._fechaHabloCon = dDate;
+				params["_idOrden"] = _idOrdenSelected;
+				params["_esPrediagnostico"] = false;
 				return params;
 			}
 			
@@ -278,16 +287,42 @@
 				
 			}
 			
+			private function concatenateName(value:Object):String
+			{
+				var nombre:String = "";
+				if(value._nombre != null && value._nombre != undefined){
+					nombre += StringUtil.trim(value._nombre) + " ";
+				}
+				if(value._paterno != null && value._paterno != undefined){
+					nombre += StringUtil.trim(value._paterno) + " ";
+				}
+				if(value._materno != null && value._materno != undefined){
+					nombre += StringUtil.trim(value._materno) + " ";
+				}
+				return nombre;
+			}
+			
 			public function initView():void{
 				forceImports();
 				_MainService = _webApplication.getService(_serviceName);
-				_Data.exceptions = _Data.exceptions = ["_creado","_modificado","_creadoPor","_creado",	"_modificado","_creadoPor",
+				_Data.exceptions = ["_creado","_modificado","_creadoPor","_creado",	"_modificado","_creadoPor",
 					"_modificadoPor","_descripcionClienteFalla","_idCodigoError","_idCliente","_idContacto",
-					"_idTipoServicio","_idAreaSoporteTecnico","_idEstatus","_idEmpleado","_idCliente","_idContacto","_idEquipo","_fechaHabloCon",
-					"_idEquipo","_nota"];
-				_DataDiagnostico.exceptions = ["_idDiagnostico","_descripcionFalla","_descripcionSolucion","_esPrediagnostico",
-					"_fechaCreacion","_tiempoNumero","_tiempoUnidad","_porcentajeDificultad","_falla"
+					"_idTipoServicio","_idAreaSoporteTecnico","_idEstatus","_idEmpleado","_idCliente","_idContacto",
+					"_idEquipo","_fechaHabloCon","_idEquipo","_idRefaccion","_diasReparacion",
+					"_importe","_totalRemisionar","_noRemision","_responsableAsignacionDeFecha",
+					"_domicilioServicio","_fechaServicioInicial","_formaPago","_fechaPagoInicial",
+					"_tecnicoAsignado","_seInformoVisitaA","_fechaPromesaVisita","_tiempoUnidadDiagnostico","_tiempoNumeroDiagnostico",
+					"_diasReparacion","_horaServInicial","_nombreTecnicoAsignado","_totalFacturar","_noFactura","_fechaServInicial","_nota",
+					"_cantidadInicial","_responsableCotizacion","_idTecnicoDiagnostico",
+					"_tipoCambio","_fechaCotizacion","_fechaPreCotizacion","_cantidadInicial","_responsableCotizacion","_responsablePreCotizacion",
+					"_tipoTransporte","_costoManoObra","_costoRefaccion","_costoTransporte","_costoHotel","_costoComidas","_costoFleteSobreEquipaje",
+					"_costoGastosDiversos","_observacionesCotDiag","_cantidadComplemento","_importePagoInicial","_fechaPrePagoInicial",
+					"_preImporte","_prediagnosticoNumeroTiempo","_prediagnosticoUnidadTiempo","_servicioNumeroTiempo","_servicioUnidadTiempo",
+					"_idTecnico",
+					"_tieneServicio","_tienePrediagnostico","_tieneCotizacionPrediagnostico","_tieneVentaPrediagnostico","_tieneConfirmacion",
+					"_tieneDiagnostico","_tieneCotizacionDiagnostico","_tieneVentaDiagnostico"
 				];
+				_DataPreDiagnosticoRes.exceptions = ["_idVentaDiagnosticoResponsable","_creado","_fechaHabloCon","_idOrden","_esPrediagnostico"];
 				_MainService.addEventListener(FaultEvent.FAULT,onFault);
 				initData();
 				addValidations();
@@ -304,8 +339,8 @@
 			
 			private function initData():void{
 				_MainService.getFields();
-				_MainService.getDiagnosticFields();
-				_MainService.getDiagnosticFields.addEventListener(ResultEvent.RESULT,onGetDiagnosticFieldsResult);
+				_MainService.getPreDiagnosticSellResponsibleFields();
+				_MainService.getPreDiagnosticSellResponsibleFields.addEventListener(ResultEvent.RESULT,onGetPreDiagnosticSellResponsibleFieldsResult);
 				_MainService.getFields.addEventListener(ResultEvent.RESULT,onGetFieldsResult);
 				_dataReady = false;
 			}
@@ -326,51 +361,26 @@
 				createRecordExtras();
 			}
 			
-			private function createData():void{
-				if(Valid.validateAll()){
-					_dataReady = false;
-					var params:Object = extraCreateData(_Data.makeData());
-					_MainService.createRecord(params);
-					_MainService.createRecord.addEventListener(ResultEvent.RESULT,onCreateComplete);
-				}else{
-					Alert.show(Valid.errors,"Error");
-				}
-			}
 			
-			private function updateData():void{
-				if(Valid.validateAll()){
-					_dataReady = false;
-					var params:Object = extraUpdateData(_DataDiagnostico.makeData());
-					params[_mainId] = _dataList.selectedItem[_mainId];
-					_MainService.updateDiagnosticRecord(params);
-					_MainService.updateDiagnosticRecord.addEventListener(ResultEvent.RESULT,onUpdateComplete);
-					_dataIndex =_dataList.selectedIndex;
-				}else{
-					Alert.show(Valid.errors,"Error");
-				}
-			}
 			
 			private function deleteDataAlert():void{
 				if(_dataList.selectedIndex!=-1){
-					Alert.show("Desea borrar el registro seleccionado?","Atención",Alert.YES|Alert.CANCEL,this,deleteData);
+					Alert.show("Desea borrar el registro seleccionado?","Atención",Alert.YES|Alert.CANCEL,this,deletePreDiagnosticSellResponsibleData);
 				}else{
 					Alert.show("No hay registro selecionado","Error");
 				}
 			}
 			
-			private function deleteData(e:CloseEvent):void{
-				if(e.detail==Alert.YES){
-					var params:Object = new Object();
-					params[_mainId] = _dataList.selectedItem[_mainId];
-					_MainService.deleteRecord(params);
-					_MainService.deleteRecord.addEventListener(ResultEvent.RESULT,onDeleteComplete);
-					_dataReady = false;
-				}
-			}
 			
 			private function cancel():void{
-				onDataSelect();
+				onDataPreDiagnosticSellResponsibleSelect();
 				resetBooleans();
+				Valid.validateAll();
+			}
+			
+			private function cancelOrden():void{
+				getData();
+				resetOrdenBooleans();
 				Valid.validateAll();
 			}
 			
@@ -378,12 +388,16 @@
 				_MainService.getClientFromOrder(_idOrdenSelected);
 				_MainService.getSpecificOrder(_idOrdenSelected);
 				_MainService.getEquipmentFromOrder(_idOrdenSelected);
-				_MainService.getPreDiagnosticRecordsFromOrder(_idOrdenSelected);
+				
+				_MainService.getDiagnosticSellResponsibleData(_idOrdenSelected);
+				
 				_MainService.getSpecificOrder.addEventListener(ResultEvent.RESULT,onGetOrderResult);
 				_MainService.getClientFromOrder.addEventListener(ResultEvent.RESULT,onGetDataClientResult);
 				_MainService.getEquipmentFromOrder.addEventListener(ResultEvent.RESULT,onGetDataSystemResult);
-				_MainService.getPreDiagnosticRecordsFromOrder.addEventListener(ResultEvent.RESULT,onGetPreDiagnosticResult);
+				
+				_MainService.getDiagnosticSellResponsibleData.addEventListener(ResultEvent.RESULT,onGetPreDiagnosticSellResponsibleResult);
 				resetBooleans();
+				resetOrdenBooleans();
 			}
 			
 			private function resetBooleans():void{
@@ -391,8 +405,17 @@
 				_updateData = false;
 			}
 			
+			private function resetOrdenBooleans():void{
+				_newOrdenData = false;
+				_updateOrdenData = false;
+			}
+			
 			private function dataChange():void{
 				_updateData = true;
+			}
+			
+			private function dataOrdenChange():void{
+				_updateOrdenData = true;
 			}
 			
 			private function openImageEditor():void{
@@ -419,16 +442,17 @@
 				_DataResult= new ArrayCollection();
 			}
 			
-			private function onGetDiagnosticFieldsResult(e:ResultEvent):void{
-				_MainService.getDiagnosticFields.removeEventListener(ResultEvent.RESULT,onGetDiagnosticFieldsResult);
+			private function onGetPreDiagnosticSellResponsibleFieldsResult(e:ResultEvent):void{
+				_MainService.getPreDiagnosticSellResponsibleFields.removeEventListener(ResultEvent.RESULT,onGetPreDiagnosticSellResponsibleFieldsResult);
 				if(e){
 					if(e.result) {
-						_DataDiagnostico.createFields(Converter.arrayConverter(e.result));
+						_DataPreDiagnosticoRes.createFields(Converter.arrayConverter(e.result));
 					}
 				}else{
 					Alert.show("Error al cargar los datos","Error");
 					_dataReady = false;
 				}
+				_dataReady = true;
 			}
 			
 			private function onGetDataClientResult(e:ResultEvent):void{
@@ -443,14 +467,6 @@
 				}
 			}
 			
-			private function onGetPreDiagnosticResult(e:ResultEvent):void{
-				_MainService.getPreDiagnosticRecordsFromOrder.removeEventListener(ResultEvent.RESULT,onGetPreDiagnosticResult);
-				_prediagnosticos = Converter.arrayConverter(e.result);
-				_dataList.selectedIndex = _dataIndex;
-				_dataList.setSelectedIndex(_dataList.selectedIndex);
-				onDataPreDiagnosticSelect();
-				_dataReady = true;
-			}
 			
 			private function onGetOrderResult(e:ResultEvent):void{
 				_MainService.getSpecificOrder.removeEventListener(ResultEvent.RESULT,onGetOrderResult);
@@ -460,7 +476,7 @@
 				}else{
 					_Data.loadData(_DataResult[0]); //Sólo debe de haber un registro o ninguno
 				}
-				_dataReady = true;				
+				_dataOrdenReady = true;
 			}
 			
 			private function onGetDataSystemResult(e:ResultEvent):void{
@@ -482,9 +498,9 @@
 				}else{
 					if(_dataIndex<0) _dataIndex = 0;
 					_Data.loadData(_DataResult[_dataIndex]);
-					_dataList.selectedIndex = _dataIndex;
+					/*	_dataList.selectedIndex = _dataIndex;
 					_dataList.setSelectedIndex(_dataList.selectedIndex);
-					_dataList.setSelectedIndex(_dataList.selectedIndex);
+					_dataList.setSelectedIndex(_dataList.selectedIndex);*/
 					loadExtraFields(_DataResult[_dataIndex]);
 				}
 				_dataReady = true;
@@ -495,20 +511,6 @@
 				Alert.show(e.fault.faultString,"Error");
 			}
 			
-			private function onDataPreDiagnosticSelect():void{
-				if(_dataList.selectedIndex == -1) return;
-				_posibleSolucion.text = _dataList.selectedItem["_descripcionSolucion"];
-				_DataDiagnostico.loadData(_dataList.selectedItem);
-			}
-			
-			private function onDataSelect():void{
-				if(_dataList.selectedIndex!=-1) {
-					_DataDiagnostico.loadData(_dataList.selectedItem);
-					_dataIndex =_dataList.selectedIndex;
-					loadExtraFields(_dataList.selectedItem);
-					_selectedId = _dataList.selectedItem[_mainId];
-				}
-			}
 			
 			private function onCreateComplete(e:ResultEvent):void{				
 				_MainService.createRecord.removeEventListener(ResultEvent.RESULT,onCreateComplete);
@@ -518,7 +520,7 @@
 			}
 			
 			private function onUpdateComplete(e:ResultEvent):void{
-				_MainService.updateDiagnosticRecord.removeEventListener(ResultEvent.RESULT,onUpdateComplete);
+				_MainService.updatePreDiagnosticSellResponsibleRecord.removeEventListener(ResultEvent.RESULT,onUpdateComplete);
 				//Catalogs.reload(); No es necesario recargar todosss los catalogos
 				getData();
 			}
@@ -549,29 +551,147 @@
 			//-------------------------------- POP UP WINDOW --------------------------------------
 			
 			//-------------------------------- Search Engine --------------------------------------
-			/*
+			
 			private function searchFilter():void{
-			_DataResult.filterFunction = vlidateSearch;
-			_DataResult.refresh();
+				_ventaPrediagnosticos.filterFunction = vlidateSearch;
+				_ventaPrediagnosticos.refresh();
 			}
 			
 			private function vlidateSearch(item:Object):Boolean{
-			var isMatch:Boolean = false;           
-			if(item[_searchType.selectedItem.value].toLowerCase().search(_searchFilter.toLowerCase()) != -1){
-			isMatch = true
-			}              
-			return isMatch;              
+				var isMatch:Boolean = false;           
+				if(item[_searchType.selectedItem.value].toLowerCase().search(_searchFilter.toLowerCase()) != -1){
+					isMatch = true
+				}              
+				return isMatch;              
 			}
 			
 			private function search():void{
-			_searchFilter = _searchField.text;
-			searchFilter();
+				_searchFilter = _searchField.text;
+				searchFilter();
 			}
 			private var _searchFilter:String 			= new String();
-			[Bindable]	private var _searchTypes:ArrayCollection 	= new ArrayCollection([{label:"Id",     	value:"_idArea"},{label:"Nombre",     	value:"_nombre"}]);
-			*/
+			[Bindable]	private var _searchTypes:ArrayCollection 	= new ArrayCollection([{label:"Hablo Con",     	value:"_habloCon"},{label:"Encargado",     	value:"_idEmpleado"},{label:"fecha",     	value:"_fechaHabloCon"}]);
+			
 			//-------------------------------- Search Engine --------------------------------------					
 			
+			private function getCurrentTime():void{
+				var currentDateTime:Date = new Date();
+				_fechaHablo.text = currentDateTime.fullYear + "-" + currentDateTime.month + "-" + currentDateTime.date;
+				_horaHablo.text = currentDateTime.hours + ":" + currentDateTime.minutes + ":" + currentDateTime.seconds;
+				dataChange();
+			}
+			
+			private function getCurrentTime2():void{
+				var currentDateTime:Date = new Date();
+				_fechaDepositoVta.text = currentDateTime.fullYear + "-" + currentDateTime.month + "-" + currentDateTime.date;
+				dataOrdenChange();
+			}
+			
+			
+			private function createPreDiagnosticSellResponsibleData():void{
+				if(Valid.validateAll()){
+					_dataReady = false;
+					var params:Object = extraCreateData(_DataPreDiagnosticoRes.makeData());
+					_MainService.createPreDiagnosticSellResponsibleRecord(params);
+					_MainService.createPreDiagnosticSellResponsibleRecord.addEventListener(ResultEvent.RESULT,onCreatePreDiagnosticSellResponsibleComplete);
+				}else{
+					Alert.show(Valid.errors,"Error");
+				}
+			}
+			
+			
+			private function onCreatePreDiagnosticSellResponsibleComplete(e:ResultEvent):void{				
+				_MainService.createPreDiagnosticSellResponsibleRecord.removeEventListener(ResultEvent.RESULT,onCreatePreDiagnosticSellResponsibleComplete);
+				resetVentaPreDiagnosticBooleans();
+				_dataReady = true;
+				//Catalogs.reload();
+				getData();
+			}
+			
+			private function cancelPreDiagnosticSellResponsible():void{
+				resetVentaPreDiagnosticBooleans();
+				onDataPreDiagnosticSellResponsibleSelect();
+				Valid.validateAll();
+			}
+			
+			private function resetVentaPreDiagnosticBooleans():void{
+				_newData = false;
+				_updateData = false;
+			}
+			
+			
+			private function updateData():void{
+				if(Valid.validateAll()){
+					var params:Object = extraUpdateData(_DataPreDiagnosticoRes.makeData());
+					var dDate:String = _fechaHablo.text + " " + _horaHablo.text;
+					params["_idVentaDiagnosticoResponsable"] = _dataList.selectedItem["_idVentaDiagnosticoResponsable"];
+					params._fechaHabloCon = dDate;
+					_MainService.updatePreDiagnosticSellResponsibleRecord(params);
+					_MainService.updatePreDiagnosticSellResponsibleRecord.addEventListener(ResultEvent.RESULT,onUpdateComplete);
+				}else{
+					Alert.show(Valid.errors,"Error");
+				}
+			}
+			
+			private function updateOrdenData():void{
+				if(Valid.validateAll()){
+					_dataOrdenReady = false;
+					var params:Object = extraUpdateData(_Data.makeData());
+					_MainService.updateRecord(params);
+					_MainService.updateRecord.addEventListener(ResultEvent.RESULT,onUpdateComplete);
+				}else{
+					Alert.show(Valid.errors,"Error");
+				}
+			}
+			
+			
+			
+			private function newVentaPreDiagnosticData():void{
+				_DataPreDiagnosticoRes.clear();
+				_newData = true;
+				_updateData = false;
+				Valid.validateAll();
+				this["_habloCon"].setFocus();
+				createRecordExtras();
+			}
+			
+			public function onGetPreDiagnosticSellResponsibleResult(e:ResultEvent):void{
+				_MainService.getDiagnosticSellResponsibleData.removeEventListener(ResultEvent.RESULT,onGetPreDiagnosticSellResponsibleResult);
+				_ventaPrediagnosticos = Converter.arrayConverter(e.result);
+				var resArr:ArrayCollection;
+				resArr = Converter.arrayConverter(e.result);
+				if(resArr.length > 0){
+					_datosVentaPrediagnostico = resArr[0]; //Sólo debe de haber un registro o ninguno
+				}else{
+					_datosVentaPrediagnostico = {};
+				}
+				
+				if(_ventaPrediagnosticos.length > 0){
+					if(_dataIndex<0) _dataIndex = 0;
+					_dataList.selectedIndex = _dataIndex;	
+					_DataPreDiagnosticoRes.loadData(_dataList.selectedItem);
+					
+				}
+			}
+			
+			private function onDataPreDiagnosticSellResponsibleSelect():void{
+				if(_dataList.selectedIndex!=-1) {
+					_DataPreDiagnosticoRes.loadData(_dataList.selectedItem);
+					_dataIndex =_dataList.selectedIndex;
+					loadExtraFields(_dataList.selectedItem);
+					_selectedId = _dataList.selectedItem["_idVentaDiagnosticoResponsable"];
+				}
+			}
+			
+			private function deletePreDiagnosticSellResponsibleData(e:CloseEvent):void{
+				if(e.detail==Alert.YES){
+					var params:Object = new Object();
+					params["_idVentaDiagnosticoResponsable"] = _dataList.selectedItem["_idVentaDiagnosticoResponsable"];
+					_MainService.deletePreDiagnosticSellResponsibleRecord(params);
+					_MainService.deletePreDiagnosticSellResponsibleRecord.addEventListener(ResultEvent.RESULT,onDeleteComplete);
+					_dataReady = false;
+				}
+			}
 		]]>
 	</fx:Script>
 	

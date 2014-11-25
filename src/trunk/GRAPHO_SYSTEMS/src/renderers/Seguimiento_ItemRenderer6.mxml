@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:GridItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					xmlns:s="library://ns.adobe.com/flex/spark" 
+					xmlns:mx="library://ns.adobe.com/flex/mx" clipAndEnableScrolling="true">
+	<s:layout>
+		<s:VerticalLayout gap="5" horizontalAlign="left" paddingBottom="5" paddingLeft="5"
+						  paddingRight="5" paddingTop="5"/>
+	</s:layout>
+	<fx:Script>
+		<![CDATA[
+			import mx.random.constants.ConstantData;
+			override public function prepare(hasBeenRecycled:Boolean):void {
+				if(this.data != null){
+					accion_diagnostico.text = "Acción diagnóstico : "+this.data['_descripcionAccion'];
+					falla_confirmada.text = "FALLA CONFIRMADA : "+this.data['_fallaReal'];
+					solucion.text 	= "Solución : "+this.data['_descripcionSolucion'];
+					refaccion.text 	= "Refacciones : "+this.data['_nombreRefaccion'];
+				}			
+			}
+		]]>
+	</fx:Script>
+	
+	<s:Label id="falla_confirmada" color="#000000" fontWeight="bold"/>
+	<s:Label id="accion_diagnostico" color="#525252" fontSize="10"/>
+	<s:Label id="solucion" color="#525252" fontSize="10"/>
+	<s:Label id="refaccion" color="#525252" fontSize="10"/>
+</s:GridItemRenderer>

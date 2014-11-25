@@ -32,7 +32,7 @@
 	<s:ComboBox id="_idContacto" x="71" y="169" width="310" change="dataChange();"
 				dataProvider="{_contactos}" enabled="false" labelField="_nombre"></s:ComboBox>
 	<s:Label x="14" y="175" text="Reporto :"/>
-	<s:ComboBox id="_idEquipo" x="72" y="274" width="309" change="dataChange();"
+	<s:ComboBox id="_idEquipo" x="72" y="274" width="503" change="dataChange();"
 				dataProvider="{_equipos}" enabled="false" labelField="_descripcionCompleta"></s:ComboBox>
 	<s:Label x="389" y="9" color="#767474" fontSize="10" fontStyle="italic" text="área de soporte"/>
 	<s:ComboBox id="_idAreaSoporteTecnico" x="389" y="21" width="150" change="dataChange();"
@@ -242,8 +242,15 @@
 					"_modificadoPor","_descripcionClienteFalla","_idCodigoError","_nombreEstatus","_idCliente",
 					"_idTecnico","_fechaHabloCon","_prediagnosticoNumeroTiempo","_prediagnosticoUnidadTiempo",
 					"_servicioNumeroTiempo","_servicioUnidadTiempo","_habloCon","_tiempoNumeroDiagnostico","_tiempoUnidadDiagnostico",
-					"_fechaServInicial","_diasReparacion","_horaServInicial","_nombreTecnicoAsignado","_importe"
-					
+					"_fechaServInicial","_diasReparacion","_horaServInicial","_nombreTecnicoAsignado","_importe",
+					"_cantidadInicial","_responsableCotizacion","_idTecnicoDiagnostico",
+					"_tipoCambio","_fechaCotizacion","_fechaPreCotizacion","_cantidadInicial","_responsableCotizacion","_responsablePreCotizacion",
+					"_tipoTransporte","_costoManoObra","_costoRefaccion","_costoTransporte","_costoHotel","_costoComidas","_costoFleteSobreEquipaje",
+					"_costoGastosDiversos","_observacionesCotDiag","_cantidadComplemento","_importePagoInicial","_fechaPrePagoInicial",
+					"_preImporte","_fechaPagoInicial",
+					"_tieneServicio","_tienePrediagnostico","_tieneCotizacionPrediagnostico","_tieneVentaPrediagnostico","_tieneConfirmacion",
+					"_tieneDiagnostico","_tieneCotizacionDiagnostico","_tieneVentaDiagnostico",
+					"_fechaDepositoVta","_importeDepositoVta","_formaPagoVta","_observacionesComplVta","_observacionesFacVta"
 				];
 				_MainService.addEventListener(FaultEvent.FAULT,onFault);
 				initData();

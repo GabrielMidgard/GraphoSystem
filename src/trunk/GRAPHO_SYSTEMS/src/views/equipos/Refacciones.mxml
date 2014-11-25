@@ -3,34 +3,22 @@
 			   xmlns:s="library://ns.adobe.com/flex/spark"
 			   xmlns:mx="library://ns.adobe.com/flex/mx"
 			   xmlns:components="views.components.*"
-			   width="584" height="510" horizontalCenter="0"
-			   title="Equipos">
-
-	<s:TextInput x="118" y="10" id="_nombreEquipo" change="dataChange();" width="151" tabIndex="1"/>
-	<s:TextInput x="399" y="9" id="_modelo" change="dataChange();" width="175" tabIndex="2"/>
-	<s:TextInput x="118" y="40" id="_serie" change="dataChange();" width="150" tabIndex="3"/>
-	<s:TextInput x="399" y="39" id="_anioFabricacion" change="dataChange();" width="175" maxChars="4" restrict="0-9"  tabIndex="4"/>
-
-	<s:ComboBox 	x="118" id="_idMarca" 	labelField="_nombreMarca" dataProvider="{SystemGlobals.MARCAS}" change="dataChange();"	width="149" y="70" tabIndex="5"/>
-	<s:ComboBox 	x="399" id="_idTipoEquipo" labelField="_nombreTipo" dataProvider="{SystemGlobals.TIPOS_EQUIPOS}" change="dataChange();"	width="137" y="69" tabIndex="6"/>
-	<s:ComboBox 	x="120" id="_searchType" 	dataProvider="{_searchTypes}" 	width="148" y="152" tabIndex="7"/>
-	<s:TextInput 	x="276" id="_searchField" 	change="search();" 		width="298" enabled="{!_newData}" y="152" tabIndex="8"/>
+			   width="374" height="394" horizontalCenter="0"
+			   title="Refacciones">
 	
 	
-	<s:Label y="14" right="193" width="101" text="Modelo:" textAlign="right"/>
-	<s:Label y="47" right="473" width="101" text="No. Serie:" textAlign="right"/>
-
-
-	<s:DataGrid id="_dataList" left="10" right="10" bottom="50" height="233"
-				dataProvider="{_DataResult}"
+	<s:TextInput x="118" y="10" id="_nombre" change="dataChange();" width="247" tabIndex="1"/>
+	<s:TextInput x="118" y="43" id="_precio" change="dataChange();" width="133" tabIndex="1"/>
+	<s:Label x="10" y="46" width="100" height="16" fontStyle="normal"
+			 text="Precio :" textAlign="right"
+			 verticalAlign="middle"/>
+	
+	<s:DataGrid id="_dataList" y="139" left="10" right="10" height="156" dataProvider="{_DataResult}"
 				enabled="{_dataReady&amp;&amp;!_newData&amp;&amp;!_updateData}"
 				selectionChange="onDataSelect();" selectionMode="singleRow">
 		<s:columns>	
 			<s:ArrayList>
-				<s:GridColumn headerText="Nombre" dataField="_nombreEquipo" ></s:GridColumn>		
-				<s:GridColumn headerText="Modelo" dataField="_modelo"></s:GridColumn>
-				<s:GridColumn headerText="N.Serie" dataField="_serie" ></s:GridColumn>		
-				<s:GridColumn headerText="Año" dataField="_anioFabricacion"></s:GridColumn>
+				<s:GridColumn headerText="Nombre" dataField="_nombre" ></s:GridColumn>	
 			</s:ArrayList>
 		</s:columns>
 	</s:DataGrid>
@@ -52,32 +40,16 @@
 	<s:Button right="10" bottom="10" width="145" height="30"
 			  label="{SystemGlobals.LABELS[9][SystemGlobals.LANGUAGE]}" click="closeWindow();"
 			  enabled="{!_newData}"/>
-	<s:Button x="275" y="69" width="30" height="23"
-			  click="openPopUp(&quot;equipos.Marcas&quot;,true);"
-			  icon="@Embed(source='../../assets/Icons/Buttons/Edit.png')"
-			  skinClass="spark.skins.spark.ButtonSkin"/>
-	<s:Button x="544" y="68" width="30" height="23"
-			  click="openPopUp(&quot;equipos.Tipos_Equipos&quot;,true);"
-			  icon="@Embed(source='../../assets/Icons/Buttons/Edit.png')"
-			  skinClass="spark.skins.spark.ButtonSkin"/>
 	
-	
-	<s:Label y="76" right="191" width="101" text="Tipo Equipo:" textAlign="right"/>
-	
-	<s:Label y="158" right="468" width="105"
-			 text="{SystemGlobals.LABELS[4][SystemGlobals.LANGUAGE]} :" textAlign="right"/>
+	<s:ComboBox id="_searchType" y="95" left="118" width="107" dataProvider="{_searchTypes}"
+				tabIndex="2"/>
+	<s:TextInput id="_searchField" y="95" left="233" width="131" change="search();"
+				 enabled="{!_newData}" tabIndex="3"/>
+	<s:Label y="100" left="6" width="105" text="{SystemGlobals.LABELS[4][SystemGlobals.LANGUAGE]} :"
+			 textAlign="right"/>
 	<s:Label x="10" y="12" width="100" height="16" fontStyle="normal"
-			 text="Descripción:" textAlign="right"
+			 text="Nombre :" textAlign="right"
 			 verticalAlign="middle"/>
-	<s:Label y="47" right="192" width="101" text="Año:" textAlign="right"/>
-	<s:Label y="76" right="473" width="101" text="Marca:" textAlign="right"/>
-	<s:Button x="400" y="102" label="Refacciones" width="174"
-			  click="openPopUp(&quot;equipos.Refacciones&quot;,true);"
-			  enabled="{_dataReady&amp;&amp;!_newData&amp;&amp;!_updateData}" />
-	
-	
-	
-
 	
 	<fx:Script>
 		<![CDATA[
@@ -120,21 +92,11 @@
 			
 			private var _selectedId:Number 		= 0;
 			private var _selectedName:String 	= "";
-			private var _serviceName  			= "Equipos";
-			private var _mainId  				= "_idEquipo";
-			private var _mainFocusField:String 	= "_nombreEquipo";
+			private var _serviceName  			= "Refacciones";
+			private var _mainId  				= "_idRefaccion";
+			private var _mainFocusField:String 	= "_nombre";
 			
-			
-			[Bindable]	private var _idCliente:Number 		= -1;
-			[Bindable]	private var _nombreEmpresa:String 	= "";
-			private var _dataObject:Object  	= new Object();
-			
-			public function set Cliente(value:Object):void	{
-				_nombreEmpresa = value._nombreEmpresa;	
-				_dataObject = value;	
-				_idCliente = 	value._idCliente;
-			}
-			
+			private var _idEquipo = -1;
 			//-----------Local Vars -----------
 			
 			//---------------------------- Context ---------------------------------------------            
@@ -151,6 +113,10 @@
 				_workManager = value;
 			}
 			
+			public function set idEquipo(value:Object):void{
+				_idEquipo = value;
+			}
+			
 			public function set webApplication(value:WebApplication):void{
 				_webApplication = value;
 				initView();
@@ -163,10 +129,8 @@
 			// ------------------- View Extra Data -------------------------------
 			
 			private function get viewContext():Object{
-				if(_dataIndex<0) _dataIndex = 0;
 				return {webApplication: _webApplication,
-					workManager: this, idClient:Number, 
-					idEquipo:_DataResult[_dataIndex]._idEquipo
+					workManager: this
 				}					
 			}
 			
@@ -174,8 +138,7 @@
 				Valid.changeLanguage(Languages.SPANISH);
 				
 				//----------- Validaciones ---------------------------
-				Valid.addStringVal(_nombreEquipo,1,100,"Descripcion del Equipo");
-
+				Valid.addStringVal(_nombre,1,100,"Nombre");
 				
 				//----------- Validaciones ---------------------------
 				
@@ -188,12 +151,9 @@
 				if(_newData||_updateData) Valid.validateAll();//Valid.validateOne(e.currentTarget.name);
 			}
 			
-			private function extraCreateData(params:Object):Object{	
-				if(_idCliente!=-1){
-					params["_idCliente"] = _idCliente;
-				}
-				
+			private function extraCreateData(params:Object):Object{				
 				//params["_newsImage"] = _image;
+				params["_idEquipo"] = _idEquipo;
 				return params;
 			}
 			
@@ -202,7 +162,7 @@
 			}
 			
 			private function extraUpdateData(params:Object):Object{	
-				//params['_color'] = areaColor.selectedColor;			
+				//params['_color'] = areaColor.selectedColor;	
 				return params;
 			}
 			
@@ -217,7 +177,7 @@
 			public function initView():void{
 				forceImports();
 				_MainService = _webApplication.getService(_serviceName);
-				_Data.exceptions = ["_idEquipo", "_idCliente"];
+				_Data.exceptions = ["_idRefaccion","_fechaCreacion","_idEquipo"];
 				_MainService.addEventListener(FaultEvent.FAULT,onFault);
 				initData();
 				addValidations();
@@ -338,13 +298,12 @@
 			}
 			
 			private function getData():void{
-					_MainService.getRecordById(_idCliente);
-					_MainService.getRecordById.addEventListener(ResultEvent.RESULT,onGetDataResult);
+				_MainService.getRecords(_idEquipo);
+				_MainService.getRecords.addEventListener(ResultEvent.RESULT,onGetDataResult);
 			}
 			
 			private function onGetDataResult(e:ResultEvent):void{
-				_MainService.getRecordById.removeEventListener(ResultEvent.RESULT,onGetDataResult);
-				
+				_MainService.getRecords.removeEventListener(ResultEvent.RESULT,onGetDataResult);
 				_DataResult = Converter.arrayConverter(e.result);
 				if(_DataResult.length==0) {
 					Alert.show("No hay registros en la base de datos","Atención")
@@ -352,7 +311,6 @@
 					if(_dataIndex<0) _dataIndex = 0;
 					_Data.loadData(_DataResult[_dataIndex]);
 					_dataList.selectedIndex = _dataIndex;
-					_dataList.setSelectedIndex(_dataList.selectedIndex);
 					_dataList.setSelectedIndex(_dataList.selectedIndex);
 					loadExtraFields(_DataResult[_dataIndex]);
 				}
@@ -376,20 +334,20 @@
 			private function onCreateComplete(e:ResultEvent):void{				
 				_MainService.createRecord.removeEventListener(ResultEvent.RESULT,onCreateComplete);
 				_dataIndex = _DataResult.length;
-				Catalogs.reloadSpecificTables(["equipos"]);
+				Catalogs.reloadSpecificTables(["refacciones"]);
 				getData();
 			}
 			
 			private function onUpdateComplete(e:ResultEvent):void{
 				_MainService.updateRecord.removeEventListener(ResultEvent.RESULT,onUpdateComplete);
-				Catalogs.reloadSpecificTables(["equipos"]);
+				Catalogs.reloadSpecificTables(["refacciones"]);
 				getData();
 			}
 			
 			private function onDeleteComplete(e:ResultEvent):void{
 				_MainService.deleteRecord.removeEventListener(ResultEvent.RESULT,onDeleteComplete);
 				_dataIndex = _DataResult.length-2;
-				Catalogs.reloadSpecificTables(["equipos"]);
+				Catalogs.reloadSpecificTables(["refacciones"]);
 				getData();
 			}
 			
@@ -431,8 +389,7 @@
 				searchFilter();
 			}
 			private var _searchFilter:String 			= new String();
-			[Bindable]	private var _searchTypes:ArrayCollection 	= new ArrayCollection([{label:"Nombre",     	value:"_nombreEquipo"},{label:"Modelo",     	value:"_modelo"},
-																						   {label:"No. Serie",     	value:"_serie"},{label:"Año Fabricacion",     	value:"_anioFabricacion"}]);
+			[Bindable]	private var _searchTypes:ArrayCollection 	= new ArrayCollection([{label:"Nombre", value:"_nombre"}]);
 			
 			//-------------------------------- Search Engine --------------------------------------					
 			

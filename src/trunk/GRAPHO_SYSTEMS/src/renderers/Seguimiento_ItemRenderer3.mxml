@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:GridItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					xmlns:s="library://ns.adobe.com/flex/spark" 
+					xmlns:mx="library://ns.adobe.com/flex/mx" clipAndEnableScrolling="true">
+	<s:layout>
+		<s:VerticalLayout gap="5" horizontalAlign="left" paddingBottom="5" paddingLeft="5"
+						  paddingRight="5" paddingTop="5"/>
+	</s:layout>
+	<fx:Script>
+		<![CDATA[
+			import mx.random.constants.ConstantData;
+			override public function prepare(hasBeenRecycled:Boolean):void {
+				if(this.data != null){
+					falla.text 		= "FALLA : "+this.data['_falla'];
+					causa.text 		= "	CAUSA		: "+this.data['_descripcionFalla'];
+					solucion.text 	= "	SOLUCION	: "+this.data['_descripcionSolucion'];
+					var unidad:String = ConstantData.TiempoEstimado[Number(this.data["_tiempoUnidad"])].label;
+					if(unidad == "Seleccionar"){unidad = "";}
+					estimado.text 	= "	ESTIMADOS	: "+this.data['_tiempoNumero']+" " + unidad + " , "+this.data['_porcentajeDificultad'];
+				}			
+			}
+		]]>
+	</fx:Script>
+	
+	<s:Label id="falla" color="#000000" fontWeight="bold"/>
+	<s:Label id="causa" color="#525252" fontSize="10"/>
+	<s:Label id="solucion" color="#525252" fontSize="10"/>
+	<s:Label id="estimado" color="#525252" fontSize="10"/>
+	
+</s:GridItemRenderer>

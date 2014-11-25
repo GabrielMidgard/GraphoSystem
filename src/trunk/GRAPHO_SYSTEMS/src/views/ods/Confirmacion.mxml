@@ -8,10 +8,10 @@
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
 	</fx:Declarations>
 	<s:Button label="Nuevo" width="80" enabled="{_dataReady}" visible="false" click="newData();" y="645" x="102"/>
-	<s:Button label="Cancelar" width="80" enabled="{_dataReady}" visible="{_newData||_updateData}" click="cancel();" y="645" x="190"/>
+	<s:Button label="Cancelar" width="80" enabled="{_newData||_updateData}" visible="true" click="cancel();" y="645" x="190"/>
 	<s:Button label="Aceptar" width="80" enabled="{_dataReady}" visible="{_newData}" click="createData();" y="645" x="102"/>
 	<s:Button label="Eliminar" width="80" enabled="{_dataReady&amp;&amp;!_newData}" visible="false" click="deleteDataAlert();" y="645" x="190"/>
-	<s:Button label="Actualizar" width="80" enabled="{_dataReady&amp;&amp;!_newData&amp;&amp;_updateData}" visible="{_updateData&amp;&amp;!_newData}" click="updateData();" y="645" x="102"/>
+	<s:Button label="Actualizar" width="80" enabled="{_updateData&amp;&amp;!_newData}" visible="true" click="updateData();" y="645" x="102"/>
 	<s:Button label="Regresar" click="closeWindow();" width="145"  enabled="{!_newData}" y="645" x="584"/>
 	<s:TextInput id="_nombreEmpresa" x="102" y="62" width="310" contentBackgroundColor="#e7e7e7"
 				 enabled="false" fontStyle="italic" text="{_cliente._nombreEmpresa}"/>
@@ -100,7 +100,7 @@
 				 enabled="false" fontWeight="bold"/>
 	<s:TextInput id="_nombreTipoServicio" x="578" y="22" width="150" contentBackgroundColor="#E7E7E7"
 				 enabled="false" fontWeight="bold"/>
-	<s:TextInput id="_fechaPagoInicial" x="103" y="259" width="78" change="dataChange();"
+	<s:TextInput id="_fechaPrePagoInicial" x="103" y="259" width="78" change="dataChange();"
 				 fontWeight="normal"/>
 	<s:Label x="10" y="309" text="Nombre Fiscal :"/>
 	<s:TextInput id="_nombreFiscal" x="103" y="302" width="625" change="dataChange();"
@@ -121,7 +121,7 @@
 	<s:Label x="421" y="464" text="Total a Remisionar :"/>
 	<s:TextInput id="_totalRemisionar" x="539" y="456" width="109" change="dataChange();"
 				 fontWeight="normal"/>
-	<s:Label x="418" y="553" text="Se informó visita a:"/>
+	<s:Label x="421" y="553" text="Se informó visita a:"/>
 	<s:TextInput id="_seInformoVisitaA" x="536" y="545" width="192" change="dataChange();"
 				 fontWeight="normal"/>
 	<s:Label x="262" y="265" text="Importe :"/>
@@ -136,10 +136,10 @@
 				dataProvider="{ConstantData.PaymentTypes}" fontStyle="italic" labelField="label"> </s:ComboBox>
 	<s:Label x="16" y="552" text="Responsable :"/>
 	<s:ComboBox id="_responsableAsignacionDeFecha" x="103" y="545" width="307" change="dataChange();"
-				dataProvider="{SystemGlobals.EMPLEADOS}" fontStyle="italic" labelField="_nombre"> </s:ComboBox>
+				dataProvider="{SystemGlobals.EMPLEADOS}" fontStyle="italic" labelFunction="concatenateName" > </s:ComboBox>
 	<s:Label x="309" y="593" text="Técnico Asignado :"/>
 	<s:ComboBox id="_tecnicoAsignado" x="422" y="587" width="307" change="dataChange();"
-				dataProvider="{SystemGlobals.EMPLEADOS}" fontStyle="italic" labelField="_nombre"> </s:ComboBox>
+				dataProvider="{SystemGlobals.EMPLEADOS}" fontStyle="italic" labelFunction="concatenateName"> </s:ComboBox>
 	<s:Label x="58" y="592" text="Fecha :"/>
 	<s:TextInput id="_fechaPromesaVisita" x="104" y="585" width="78" change="dataChange();"
 				 fontWeight="normal"/>
@@ -164,6 +164,7 @@
 			import mx.rpc.events.FaultEvent;
 			import mx.rpc.events.ResultEvent;
 			import mx.rpc.remoting.RemoteObject;
+			import mx.utils.StringUtil;
 			import mx.random.constants.ConstantData;
 			
 			private var _webApplication:WebApplication;
@@ -273,6 +274,21 @@
 				
 			}
 			
+			private function concatenateName(value:Object):String
+			{
+				var nombre:String = "";
+				if(value._nombre != null && value._nombre != undefined){
+					nombre += StringUtil.trim(value._nombre) + " ";
+				}
+				if(value._paterno != null && value._paterno != undefined){
+					nombre += StringUtil.trim(value._paterno) + " ";
+				}
+				if(value._materno != null && value._materno != undefined){
+					nombre += StringUtil.trim(value._materno) + " ";
+				}
+				return nombre;
+			}
+			
 			public function initView():void{
 				forceImports();
 				_MainService = _webApplication.getService(_serviceName);
@@ -281,7 +297,15 @@
 					"_idEquipo","_idTecnico","_fechaHabloCon","_prediagnosticoNumeroTiempo","_prediagnosticoUnidadTiempo",
 					"_servicioNumeroTiempo","_servicioUnidadTiempo","_habloCon","_nota","_idEmpleado","_idEstatus","_idContacto",
 					"_idTipoServicio","_idAreaSoporteTecnico","_estadoFiscal","_fechaServicioInicial","_fechaServicioInicial","_tiempoNumeroDiagnostico",
-					"_tiempoUnidadDiagnostico","_diasReparacion"
+					"_tiempoUnidadDiagnostico","_diasReparacion","_idTecnicoDiagnostico",
+					"_cantidadInicial","_responsableCotizacion",
+					"_tipoCambio","_fechaCotizacion","_fechaPreCotizacion","_cantidadInicial","_responsableCotizacion","_responsablePreCotizacion",
+					"_tipoTransporte","_costoManoObra","_costoRefaccion","_costoTransporte","_costoHotel","_costoComidas","_costoFleteSobreEquipaje",
+					"_costoGastosDiversos","_observacionesCotDiag","_cantidadComplemento","_importePagoInicial",
+					"_preImporte","_fechaPagoInicial",
+					"_tieneServicio","_tienePrediagnostico","_tieneCotizacionPrediagnostico","_tieneVentaPrediagnostico","_tieneConfirmacion",
+					"_tieneDiagnostico","_tieneCotizacionDiagnostico","_tieneVentaDiagnostico",
+					"_fechaDepositoVta","_importeDepositoVta","_formaPagoVta","_observacionesComplVta","_observacionesFacVta"
 					
 				];
 				_MainService.addEventListener(FaultEvent.FAULT,onFault);
@@ -375,7 +399,7 @@
 			
 			private function getCurrentTime():void{
 				var currentDateTime:Date = new Date();
-				_fechaPagoInicial.text = currentDateTime.fullYear + "-" + currentDateTime.month + "-" + currentDateTime.date;
+				_fechaPrePagoInicial.text = currentDateTime.fullYear + "-" + currentDateTime.month + "-" + currentDateTime.date;
 				dataChange();
 			}
 			

@@ -80,18 +80,7 @@
 			import views.managers.FileManager;
 			import views.managers.UploadManager;
 			import views.nominas.Nominas;
-			import views.ods.Administracion_Ordenes;
-			import views.ods.Apertura;
-			import views.ods.Prediagnostico;
-			import views.ods.Prediagnostico_Cotizacion;
-			import views.ods.Prediagnostico_Venta;
-			import views.ods.Seguimiento;
-			import views.ods.Confirmacion;
-			import views.ods.Diagnostico;
-			import views.ods.Venta_Facturacion;
-			import views.ods.Ejecucion_Servicio;
-			import views.ods.Cierre_Orden;
-			import views.ods.Diagnostico_Cotizacion;
+			import views.ods.*;
 			import views.odtProcess.ODTManager;
 			import views.odtProcess.ODTManagerClear;
 			import views.odtProcess.ODTS;
@@ -212,6 +201,8 @@
 				Venta_Facturacion;
 				Cierre_Orden;
 				Ejecucion_Servicio;
+				Refacciones;
+				Falla_Refacciones;
 				//----------GRAPHO-----------------------
 				
 			}
@@ -220,7 +211,8 @@
 			
 			public function loadCatalogs():void{	
 				//--------- Load Catalogs ----------
-				_catalogArray =['System_Labels','empresa_companias','empresa_areas','empresa_departamentos','empresa_ceco','empresa_categorias',
+				_catalogArray =['System_Labels',
+					'empresa_companias','empresa_areas','empresa_departamentos','empresa_ceco','empresa_categorias','empresa_puestos',
 					'Productos_Familias','Productos_SubFamilias','Productos_Reglas_Negocio','Productos_Grupos_Cobro','tipos_servicio',
 					'areas_soporte_tecnico','estatus','empleados','equipos','marcas','tipos_equipo'];				
 				//--------- Load Catalogs ----------
