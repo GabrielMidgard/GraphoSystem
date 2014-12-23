@@ -219,7 +219,6 @@
 			private var _idOrdenSelected:Number		= -1;
 			[Bindable] private var _cliente:Object = {};
 			[Bindable] private var _equipo:Object = {};
-			[Bindable] private var _datosPrediagnostico:Object = {};
 			[Bindable] private var _fallasReportadas:ArrayCollection = new ArrayCollection();
 			[Bindable] private var _prediagnosticos:ArrayCollection = new ArrayCollection();
 			//-----------Local Vars -----------
@@ -331,6 +330,8 @@
 					"_tipoTransporte","_costoManoObra","_costoRefaccion","_costoTransporte","_costoHotel","_costoComidas","_costoFleteSobreEquipaje",
 					"_costoGastosDiversos","_observacionesCotDiag","_cantidadComplemento","_importePagoInicial","_fechaPrePagoInicial",
 					"_preImporte","_fechaPagoInicial",
+					"_observacionesAccServicio","_observacionesServicio","_observacionesClienteOrden","_fechaFinServicio","_horaFinServicio",
+					"_interesCliente","_tiempoNumeroPruebas","_tiempoUnidadPruebas","_tiempoNumeroTotalServ","_tiempoUnidadTotalServ","_finServicio",
 					"_tieneServicio","_tienePrediagnostico","_tieneCotizacionPrediagnostico","_tieneVentaPrediagnostico","_tieneConfirmacion",
 					"_tieneDiagnostico","_tieneCotizacionDiagnostico","_tieneVentaDiagnostico",
 					"_fechaDepositoVta","_importeDepositoVta","_formaPagoVta","_observacionesComplVta","_observacionesFacVta"
@@ -476,14 +477,14 @@
 				_listaFallas.setSelectedIndex(_listaFallas.selectedIndex);
 				_descripcionFallaReportada.text = _listaFallas.selectedItem._falla;
 				_codigoFalla.text = _listaFallas.selectedItem._codigo;
-				_MainService.getDiagnosticRecords(_listaFallas.selectedItem._idOrdenFalla);
-				_MainService.getDiagnosticRecords.addEventListener(ResultEvent.RESULT,onGetDiagnosticRecordsResult);
+				_MainService.getPreDiagnosticRecords(_listaFallas.selectedItem._idOrdenFalla,0);//send 0 because we want to get only DIAGNOSTIC Data
+				_MainService.getPreDiagnosticRecords.addEventListener(ResultEvent.RESULT,ongetPreDiagnosticRecordsResult);
 				_fallaSelected = true;
 			}
 			
 			private function getCurrentTime():void{
 				var currentDateTime:Date = new Date();
-				_fechaServInicial.text = currentDateTime.fullYear + "-" + currentDateTime.month + "-" + currentDateTime.date;
+				_fechaServInicial.text = currentDateTime.fullYear + "-" + (currentDateTime.month+1) + "-" + currentDateTime.date;
 				_horaServInicial.text = currentDateTime.hours + ":" + currentDateTime.minutes + ":" + currentDateTime.seconds;
 				dataChange();
 			}
@@ -517,7 +518,7 @@
 				if(e){
 					if(e.result) {
 						_DataDiagnostico.createFields(Converter.arrayConverter(e.result));
-						getPrediagnosticData();
+						getDiagnosticData();
 					}
 				}else{
 					Alert.show("Error al cargar los datos","Error");
@@ -526,8 +527,8 @@
 				_DataDiagnosticoResult= new ArrayCollection();
 			}
 			
-			private function onGetDiagnosticRecordsResult(e:ResultEvent):void{
-				_MainService.getDiagnosticRecords.removeEventListener(ResultEvent.RESULT,onGetDiagnosticRecordsResult);
+			private function ongetPreDiagnosticRecordsResult(e:ResultEvent):void{
+				_MainService.getPreDiagnosticRecords.removeEventListener(ResultEvent.RESULT,ongetPreDiagnosticRecordsResult);
 				_prediagnosticos = Converter.arrayConverter(e.result);
 				if(_prediagnosticos.length > 0){
 					if(_dataIndex<0) _dataIndex = 0;
@@ -540,11 +541,9 @@
 				_dataReady = true;
 			}
 			
-			private function getPrediagnosticData():void{
+			private function getDiagnosticData():void{
 				_MainService.getFailuresFromOrder(_idOrdenSelected);
-				_MainService.getPrediagnosticData(_idOrdenSelected);
 				_MainService.getFailuresFromOrder.addEventListener(ResultEvent.RESULT,onGetFailuresOrderResult);
-				_MainService.getPrediagnosticData.addEventListener(ResultEvent.RESULT,onGetPrediagnosticResult);
 				resetPreDiagnosticBooleans();
 			}
 			
@@ -608,7 +607,7 @@
 			
 			private function onUpdateDiagnosticComplete(e:ResultEvent):void{
 				_MainService.updateDiagnosticRecord.removeEventListener(ResultEvent.RESULT,onUpdateDiagnosticComplete);
-				getPrediagnosticData();
+				getDiagnosticData();
 			}
 			
 			private function onDeleteDiagnosticComplete(e:ResultEvent):void{
@@ -627,17 +626,6 @@
 					_Data.loadData(_DataResult[0]); //Sólo debe de haber un registro o ninguno
 				}
 				_dataOrdenReady = true;				
-			}
-			
-			public function onGetPrediagnosticResult(e:ResultEvent):void{
-				_MainService.getPrediagnosticData.removeEventListener(ResultEvent.RESULT,onGetPrediagnosticResult);
-				var resArr:ArrayCollection;
-				resArr = Converter.arrayConverter(e.result);
-				if(resArr.length > 0){
-					_datosPrediagnostico = resArr[0]; //Sólo debe de haber un registro o ninguno
-				}else{
-					_datosPrediagnostico = {};
-				}
 			}
 			
 			public function onGetFailuresOrderResult(e:ResultEvent):void{
@@ -682,7 +670,7 @@
 			private function closePopup(e:CloseEvent):void{
 				PopUpManager.removePopUp(e.target as TitleWindow);
 				getSpares();
-				getPrediagnosticData();
+				getDiagnosticData();
 			}
 			//-------------------------------- POP UP WINDOW --------------------------------------
 			

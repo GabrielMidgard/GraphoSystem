@@ -20,7 +20,7 @@
 				 enabled="false" fontStyle="italic" text="{_cliente._nombreEstado}"/>
 	<s:Label x="453" y="103" color="#767474" fontSize="10" fontStyle="italic" text="estado"/>
 	<s:TextInput id="_idOrden" x="292" y="34" width="70" contentBackgroundColor="#FFFFFF"
-				 fontWeight="bold" textAlign="center"/>
+				 fontWeight="bold" keyDown="searchKeyEnter(event)" textAlign="center"/>
 	<s:TextInput id="_nombreEstatus" x="373" y="34" width="70" contentBackgroundColor="#e7e7e7"
 				 enabled="false" fontWeight="bold" text=" " textAlign="center"/>
 	<s:TextInput id="_fechaCreacion" x="452" y="34" width="70" contentBackgroundColor="#E7E7E7"
@@ -227,7 +227,9 @@
 					"_tipoTransporte","_costoManoObra","_costoRefaccion","_costoTransporte","_costoHotel","_costoComidas","_costoFleteSobreEquipaje",
 					"_costoGastosDiversos","_observacionesCotDiag","_cantidadComplemento","_importePagoInicial","_fechaPrePagoInicial",
 					"_idTecnicoDiagnostico",
-					"_fechaDepositoVta","_importeDepositoVta","_formaPagoVta","_observacionesComplVta","_observacionesFacVta"
+					"_observacionesAccServicio","_observacionesServicio","_observacionesClienteOrden","_fechaFinServicio","_horaFinServicio",
+					"_interesCliente","_tiempoNumeroPruebas","_tiempoUnidadPruebas","_tiempoNumeroTotalServ","_tiempoUnidadTotalServ","_finServicio",
+					"_fechaDepositoVta","_importeDepositoVta","_formaPagoVta","_observacionesComplVta","_observacionesFacVta","_preImporte"
 					];
 				_MainService.addEventListener(FaultEvent.FAULT,onFault);
 				initData();
@@ -341,11 +343,15 @@
 				}
 			}
 			
-			
+			private function searchKeyEnter(e:KeyboardEvent):void{
+				if(e.charCode == 13){
+					searchOrder();
+				}
+			}
 			//-------------------------------- POP UP WINDOW --------------------------------------	
 			public function openPopUp(popUpName:String,modal:Boolean = true):void{
 				if(_DataResult.length > 0 || popUpName == 'ods.Administracion_Ordenes'){
-					var pop:TitleWindow = PopUpManager.createPopUp(this, getDefinitionByName("views."+popUpName) as Class, modal) as TitleWindow;
+					var pop:TitleWindow = PopUpManager.createPopUp(SystemGlobals.mainStage as DisplayObject, getDefinitionByName("views."+popUpName) as Class, modal) as TitleWindow;
 					pop.name = popUpName;
 					pop.addEventListener(CloseEvent.CLOSE, closePopup);
 					if(pop.hasOwnProperty("context")){
@@ -360,11 +366,6 @@
 			}
 			
 			//-------------------------------- POP UP WINDOW --------------------------------------
-			
-		
-			
-			
-						
 			
 			
 		]]>

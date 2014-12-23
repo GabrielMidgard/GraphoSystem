@@ -54,7 +54,7 @@
 			[Bindable]	private var _refacciones:ArrayCollection = new ArrayCollection();
 			[Bindable]	private var _refaccionesAsignadas:ArrayCollection = new ArrayCollection();
 			
-			private var _idEquipo = -1;
+			private var _idEquipo = -2;
 			private var _idDiagnostico = -1;
 			//-----------Local Vars -----------
 			

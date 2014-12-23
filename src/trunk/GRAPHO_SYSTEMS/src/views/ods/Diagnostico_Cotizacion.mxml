@@ -251,7 +251,6 @@
 			[Bindable] private var _cliente:Object = {};
 			[Bindable] private var _equipo:Object = {};
 			[Bindable] private var _cotizacion:Object = {};
-			[Bindable] private var _datosPrediagnostico:Object = {};
 			[Bindable] private var _prediagnosticos:ArrayCollection = new ArrayCollection();
 			
 			//-----------Local Vars -----------
@@ -351,10 +350,12 @@
 					"_idTipoServicio","_idAreaSoporteTecnico","_idEstatus","_idEmpleado","_idCliente","_idContacto",
 					"_idEquipo","_fechaHabloCon","_idEquipo","_idRefaccion","_diasReparacion",
 					"_importe","_totalRemisionar","_noRemision","_responsableAsignacionDeFecha",
-					"_domicilioServicio","_fechaServicioInicial","_formaPago","_fechaPagoInicial",
+					"_domicilioServicio","_fechaServicioInicial","_formaPago",
 					"_tecnicoAsignado","_seInformoVisitaA","_fechaPromesaVisita","_servicioNumeroTiempo","_servicioUnidadTiempo","_habloCon",
 					"_diasReparacion","_nombreTecnicoAsignado","_totalFacturar","_noFactura","_nota","_fechaPreCotizacion",
 					"_responsablePreCotizacion","_cantidadInicial",
+					"_observacionesAccServicio","_observacionesServicio","_observacionesClienteOrden","_fechaFinServicio","_horaFinServicio",
+					"_interesCliente","_tiempoNumeroPruebas","_tiempoUnidadPruebas","_tiempoNumeroTotalServ","_tiempoUnidadTotalServ","_finServicio",
 					"_prediagnosticoNumeroTiempo","_prediagnosticoUnidadTiempo","_idTecnico","_preImporte","_fechaPrePagoInicial",
 					"_tieneServicio","_tienePrediagnostico","_tieneCotizacionPrediagnostico","_tieneVentaPrediagnostico","_tieneConfirmacion",
 					"_tieneDiagnostico","_tieneCotizacionDiagnostico","_tieneVentaDiagnostico",
@@ -471,12 +472,10 @@
 			private function getData():void{
 				_MainService.getClientFromOrder(_idOrdenSelected);
 				_MainService.getEquipmentFromOrder(_idOrdenSelected);
-				_MainService.getPreDiagnosticRecordsFromOrder(_idOrdenSelected);
-				_MainService.getPrediagnosticData(_idOrdenSelected);
+				_MainService.getPreDiagnosticRecordsFromOrder(_idOrdenSelected,0);//We send 0 because went to get only DIAGNOSTIC data
 				_MainService.getClientFromOrder.addEventListener(ResultEvent.RESULT,onGetDataClientResult);
 				_MainService.getEquipmentFromOrder.addEventListener(ResultEvent.RESULT,onGetDataSystemResult);
 				_MainService.getPreDiagnosticRecordsFromOrder.addEventListener(ResultEvent.RESULT,onGetPreDiagnosticResult);
-				_MainService.getPrediagnosticData.addEventListener(ResultEvent.RESULT,onGetPreDiagnosticDataResult);
 				getOrderData();
 				resetBooleans();
 			}
@@ -517,12 +516,12 @@
 			}
 			private function getCurrentTime():void{
 				var currentDateTime:Date = new Date();
-				_fechaCotizacion.text = currentDateTime.fullYear + "-" + currentDateTime.month + "-" + currentDateTime.date;
+				_fechaCotizacion.text = currentDateTime.fullYear + "-" + (currentDateTime.month+1) + "-" + currentDateTime.date;
 				dataOrderChange();
 			}
 			private function getCurrentTime2():void{
 				var currentDateTime:Date = new Date();
-				_fechaPagoInicial.text = currentDateTime.fullYear + "-" + currentDateTime.month + "-" + currentDateTime.date;
+				_fechaPagoInicial.text = currentDateTime.fullYear + "-" + (currentDateTime.month+1) + "-" + currentDateTime.date;
 				dataOrderChange();
 			}
 			
@@ -578,17 +577,6 @@
 				_MainService.getPreDiagnosticRecordsFromOrder.removeEventListener(ResultEvent.RESULT,onGetPreDiagnosticResult);
 				_prediagnosticos = Converter.arrayConverter(e.result);
 				_dataReady = true;
-			}
-			
-			private function onGetPreDiagnosticDataResult(e:ResultEvent):void{
-				_MainService.getPreDiagnosticData.removeEventListener(ResultEvent.RESULT,onGetPreDiagnosticDataResult);
-				var resArr:ArrayCollection;
-				resArr = Converter.arrayConverter(e.result);
-				if(resArr.length > 0){
-					_datosPrediagnostico = resArr[0]; //Sólo debe de haber un registro o ninguno
-				}else{
-					_datosPrediagnostico = {};
-				}
 			}
 			
 			private function onGetOrderResult(e:ResultEvent):void{

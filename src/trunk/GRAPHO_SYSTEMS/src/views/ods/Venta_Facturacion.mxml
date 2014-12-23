@@ -319,6 +319,8 @@
 					"_costoGastosDiversos","_observacionesCotDiag","_cantidadComplemento","_importePagoInicial","_fechaPrePagoInicial",
 					"_preImporte","_prediagnosticoNumeroTiempo","_prediagnosticoUnidadTiempo","_servicioNumeroTiempo","_servicioUnidadTiempo",
 					"_idTecnico",
+					"_observacionesAccServicio","_observacionesServicio","_observacionesClienteOrden","_fechaFinServicio","_horaFinServicio",
+					"_interesCliente","_tiempoNumeroPruebas","_tiempoUnidadPruebas","_tiempoNumeroTotalServ","_tiempoUnidadTotalServ","_finServicio",
 					"_tieneServicio","_tienePrediagnostico","_tieneCotizacionPrediagnostico","_tieneVentaPrediagnostico","_tieneConfirmacion",
 					"_tieneDiagnostico","_tieneCotizacionDiagnostico","_tieneVentaDiagnostico"
 				];
@@ -389,13 +391,13 @@
 				_MainService.getSpecificOrder(_idOrdenSelected);
 				_MainService.getEquipmentFromOrder(_idOrdenSelected);
 				
-				_MainService.getDiagnosticSellResponsibleData(_idOrdenSelected);
+				_MainService.getPreDiagnosticSellResponsibleData(_idOrdenSelected,0);//We send 0 as second param, this means we want diagnostic data not PREdiagnostic data
 				
 				_MainService.getSpecificOrder.addEventListener(ResultEvent.RESULT,onGetOrderResult);
 				_MainService.getClientFromOrder.addEventListener(ResultEvent.RESULT,onGetDataClientResult);
 				_MainService.getEquipmentFromOrder.addEventListener(ResultEvent.RESULT,onGetDataSystemResult);
 				
-				_MainService.getDiagnosticSellResponsibleData.addEventListener(ResultEvent.RESULT,onGetPreDiagnosticSellResponsibleResult);
+				_MainService.getPreDiagnosticSellResponsibleData.addEventListener(ResultEvent.RESULT,onGetPreDiagnosticSellResponsibleResult);
 				resetBooleans();
 				resetOrdenBooleans();
 			}
@@ -576,14 +578,14 @@
 			
 			private function getCurrentTime():void{
 				var currentDateTime:Date = new Date();
-				_fechaHablo.text = currentDateTime.fullYear + "-" + currentDateTime.month + "-" + currentDateTime.date;
+				_fechaHablo.text = currentDateTime.fullYear + "-" + (currentDateTime.month+1) + "-" + currentDateTime.date;
 				_horaHablo.text = currentDateTime.hours + ":" + currentDateTime.minutes + ":" + currentDateTime.seconds;
 				dataChange();
 			}
 			
 			private function getCurrentTime2():void{
 				var currentDateTime:Date = new Date();
-				_fechaDepositoVta.text = currentDateTime.fullYear + "-" + currentDateTime.month + "-" + currentDateTime.date;
+				_fechaDepositoVta.text = currentDateTime.fullYear + "-" + (currentDateTime.month+1) + "-" + currentDateTime.date;
 				dataOrdenChange();
 			}
 			
@@ -656,7 +658,7 @@
 			}
 			
 			public function onGetPreDiagnosticSellResponsibleResult(e:ResultEvent):void{
-				_MainService.getDiagnosticSellResponsibleData.removeEventListener(ResultEvent.RESULT,onGetPreDiagnosticSellResponsibleResult);
+				_MainService.getPreDiagnosticSellResponsibleData.removeEventListener(ResultEvent.RESULT,onGetPreDiagnosticSellResponsibleResult);
 				_ventaPrediagnosticos = Converter.arrayConverter(e.result);
 				var resArr:ArrayCollection;
 				resArr = Converter.arrayConverter(e.result);

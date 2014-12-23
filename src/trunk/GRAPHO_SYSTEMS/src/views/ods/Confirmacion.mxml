@@ -303,6 +303,8 @@
 					"_tipoTransporte","_costoManoObra","_costoRefaccion","_costoTransporte","_costoHotel","_costoComidas","_costoFleteSobreEquipaje",
 					"_costoGastosDiversos","_observacionesCotDiag","_cantidadComplemento","_importePagoInicial",
 					"_preImporte","_fechaPagoInicial",
+					"_observacionesAccServicio","_observacionesServicio","_observacionesClienteOrden","_fechaFinServicio","_horaFinServicio",
+					"_interesCliente","_tiempoNumeroPruebas","_tiempoUnidadPruebas","_tiempoNumeroTotalServ","_tiempoUnidadTotalServ","_finServicio",
 					"_tieneServicio","_tienePrediagnostico","_tieneCotizacionPrediagnostico","_tieneVentaPrediagnostico","_tieneConfirmacion",
 					"_tieneDiagnostico","_tieneCotizacionDiagnostico","_tieneVentaDiagnostico",
 					"_fechaDepositoVta","_importeDepositoVta","_formaPagoVta","_observacionesComplVta","_observacionesFacVta"
@@ -399,13 +401,13 @@
 			
 			private function getCurrentTime():void{
 				var currentDateTime:Date = new Date();
-				_fechaPrePagoInicial.text = currentDateTime.fullYear + "-" + currentDateTime.month + "-" + currentDateTime.date;
+				_fechaPrePagoInicial.text = currentDateTime.fullYear + "-" + (currentDateTime.month+1) + "-" + currentDateTime.date;
 				dataChange();
 			}
 			
 			private function getCurrentTime2():void{
 				var currentDateTime:Date = new Date();
-				_fechaPromesaVisita.text = currentDateTime.fullYear + "-" + currentDateTime.month + "-" + currentDateTime.date;
+				_fechaPromesaVisita.text = currentDateTime.fullYear + "-" + (currentDateTime.month+1) + "-" + currentDateTime.date;
 				dataChange();
 			}
 			

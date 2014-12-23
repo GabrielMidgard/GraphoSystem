@@ -92,10 +92,6 @@
 	<s:ComboBox id="_idContacto" x="71" y="169" width="310" change="dataChange();"
 				dataProvider="{_contactos}" labelFunction="concatenateName"></s:ComboBox>
 	<s:Label x="14" y="175" text="Reportó :"/>
-	<s:Button x="389" y="200" width="28" height="23"
-			  click="openPopUp(&quot;empleados.Empleados&quot;);"
-			  icon="@Embed(source='../../assets/Icons/Buttons/Edit.png')"
-			  skinClass="spark.skins.spark.ButtonSkin"/>
 	<s:TextInput id="_descripcionFalla" x="159" y="313" width="416" prompt="Descripción"/>
 	<s:TextInput id="_codigoFalla" x="72" y="313" width="79" prompt="Código"/>
 	<s:Label x="73" y="515" color="#767474" fontSize="10" fontStyle="italic" text="observaciones"/>
@@ -218,7 +214,7 @@
 				
 				//----------- Validaciones ---------------------------
 				
-				Valid.addStringVal(_descripcionFalla,5,100,"Descripcion de la falla");
+				//Valid.addStringVal(_descripcionFalla,5,100,"Descripcion de la falla");
 				Valid.validateOnChange = true;
 				Valid.setErrorKnot(Validator.CIRCLE_KNOT,0xFF0000);
 			}
@@ -253,17 +249,20 @@
 			
 			private function concatenateName(value:Object):String
 			{
-				var nombre:String = "";
-				if(value._nombre != null && value._nombre != undefined){
-					nombre += StringUtil.trim(value._nombre) + " ";
+				if(value != null && value != undefined){
+					var nombre:String = "";
+					if(value._nombre != null && value._nombre != undefined){
+						nombre += StringUtil.trim(value._nombre) + " ";
+					}
+					if(value._paterno != null && value._paterno != undefined){
+						nombre += StringUtil.trim(value._paterno) + " ";
+					}
+					if(value._materno != null && value._materno != undefined){
+						nombre += StringUtil.trim(value._materno) + " ";
+					}
+					return nombre;	
 				}
-				if(value._paterno != null && value._paterno != undefined){
-					nombre += StringUtil.trim(value._paterno) + " ";
-				}
-				if(value._materno != null && value._materno != undefined){
-					nombre += StringUtil.trim(value._materno) + " ";
-				}
-				return nombre;
+				return "";
 			}
 			
 			public function initView():void{
@@ -282,6 +281,8 @@
 									"_tipoTransporte","_costoManoObra","_costoRefaccion","_costoTransporte","_costoHotel","_costoComidas","_costoFleteSobreEquipaje",
 									"_costoGastosDiversos","_observacionesCotDiag","_cantidadComplemento","_importePagoInicial","_fechaPrePagoInicial",
 									"_preImporte",
+									"_observacionesAccServicio","_observacionesServicio","_observacionesClienteOrden","_fechaFinServicio","_horaFinServicio",
+									"_interesCliente","_tiempoNumeroPruebas","_tiempoUnidadPruebas","_tiempoNumeroTotalServ","_tiempoUnidadTotalServ","_finServicio",
 									"_tieneServicio","_tienePrediagnostico","_tieneCotizacionPrediagnostico","_tieneVentaPrediagnostico","_tieneConfirmacion",
 									"_tieneDiagnostico","_tieneCotizacionDiagnostico","_tieneVentaDiagnostico",
 									"_fechaDepositoVta","_importeDepositoVta","_formaPagoVta","_observacionesComplVta","_observacionesFacVta"
@@ -315,6 +316,8 @@
 			
 			private function newData():void{
 				_Data.clear();
+				_contactos.removeAll();
+				_equipos.removeAll();		
 				_fechaCreacion.text = "";
 				_horaCreacion.text = "";
 				_cliente = {};
@@ -351,9 +354,11 @@
 			}
 			
 			private function recordIssue():void{
-				if(Valid.validateAll()){
-					var codigo:String = _codigoFalla.text;
-					var descripcion:String = _descripcionFalla.text;
+				var codigo:String = _codigoFalla.text;
+				var descripcion:String = _descripcionFalla.text;
+				
+				if(Valid.validateAll() && descripcion != ""){
+						
 					_MainService.recordFailure({_idOrden:_dataList.selectedItem[_mainId],_falla:descripcion,_codigo:codigo});
 					_MainService.recordFailure.addEventListener(ResultEvent.RESULT,onRecordFailureComplete);
 					_codigoFalla.text = "";
@@ -599,7 +604,7 @@
 			
 			
 			private var _searchFilter:String 			= new String();
-			[Bindable]	private var _searchTypes:ArrayCollection 	= new ArrayCollection([{label:"Id",  value:"_idOrden"},{label:"Fecha",  value:"_creado"},{label:"Nombre Cliente",value:"_nombreCliente"}]);
+			[Bindable]	private var _searchTypes:ArrayCollection 	= new ArrayCollection([{label:"Id",  value:"_idOrden"},{label:"Fecha",  value:"_creado"}]);
 			
 			//-------------------------------- Search Engine --------------------------------------					
 			

@@ -350,6 +350,8 @@
 					"_tipoTransporte","_costoManoObra","_costoRefaccion","_costoTransporte","_costoHotel","_costoComidas","_costoFleteSobreEquipaje",
 					"_costoGastosDiversos","_observacionesCotDiag","_cantidadComplemento","_importePagoInicial","_fechaPrePagoInicial",
 					"_preImporte",
+					"_observacionesAccServicio","_observacionesServicio","_observacionesClienteOrden","_fechaFinServicio","_horaFinServicio",
+					"_interesCliente","_tiempoNumeroPruebas","_tiempoUnidadPruebas","_tiempoNumeroTotalServ","_tiempoUnidadTotalServ","_finServicio",
 					"_tieneServicio","_tienePrediagnostico","_tieneCotizacionPrediagnostico","_tieneVentaPrediagnostico","_tieneConfirmacion",
 					"_tieneDiagnostico","_tieneCotizacionDiagnostico","_tieneVentaDiagnostico",
 					"_fechaDepositoVta","_importeDepositoVta","_formaPagoVta","_observacionesComplVta","_observacionesFacVta"
@@ -465,7 +467,7 @@
 			private function getData():void{
 				_MainService.getClientFromOrder(_idOrdenSelected);
 				_MainService.getEquipmentFromOrder(_idOrdenSelected);
-				_MainService.getPreDiagnosticRecordsFromOrder(_idOrdenSelected);
+				_MainService.getPreDiagnosticRecordsFromOrder(_idOrdenSelected,1);//We send 1 because went to get only PREDIAGNOSTIC data
 				_MainService.getPrediagnosticData(_idOrdenSelected);
 				_MainService.getClientFromOrder.addEventListener(ResultEvent.RESULT,onGetDataClientResult);
 				_MainService.getEquipmentFromOrder.addEventListener(ResultEvent.RESULT,onGetDataSystemResult);
@@ -511,7 +513,7 @@
 			}
 			private function getCurrentTime():void{
 				var currentDateTime:Date = new Date();
-				_fechaPreCotizacion.text = currentDateTime.fullYear + "-" + currentDateTime.month + "-" + currentDateTime.date;
+				_fechaPreCotizacion.text = currentDateTime.fullYear + "-" +(currentDateTime.month+1) + "-" + currentDateTime.date;
 				dataOrderChange();
 			}
 			
