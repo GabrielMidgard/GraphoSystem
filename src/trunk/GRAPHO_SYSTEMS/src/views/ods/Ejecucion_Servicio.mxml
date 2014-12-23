@@ -116,8 +116,8 @@
 	<s:Label x="100" y="627" color="#767474" fontSize="10" fontStyle="italic" text="del cliente por equipo"/>
 	<s:Label x="5" y="563" text="Observaciones :"/>
 	<s:Label x="100" y="543" color="#767474" fontSize="10" fontStyle="italic" text="del cliente en orden de servicio :"/>
-	<s:Label x="5" y="481" text="Observaciones :"/>
-	<s:Label x="100" y="461" color="#767474" fontSize="10" fontStyle="italic" text="del servicio :"/>
+	<s:Label x="0" y="481" text="Recomendación :"/>
+	<s:Label x="100" y="461" color="#767474" fontSize="10" fontStyle="italic" text="del técnico:"/>
 	<s:Label x="4" y="356" text="Observaciones :"/>
 	<s:TextArea id="_referencia" x="823" y="178" width="402" height="56"
 				change="dataPreDiagnosticChange();" fontStyle="normal"/>
