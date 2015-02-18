@@ -3,7 +3,7 @@
 	xmlns:fx="http://ns.adobe.com/mxml/2009" 
 	xmlns:s="library://ns.adobe.com/flex/spark" 
 	xmlns:mx="library://ns.adobe.com/flex/mx" 
-	width="520" height="558"  
+	width="520" height="428"  
 	horizontalCenter="0" 
 	title="Administración de Familias" 
 	>
@@ -12,7 +12,7 @@
 	<s:Label x="53" y="12" text="Nombre :" />
 <s:TextInput x="107" y="8" id="_nombre" change="dataChange();" width="403" tabIndex="1"/>
 
-	<s:DataGrid height="373" dataProvider="{_DataResult}" id="_dataList" selectionChange="onDataSelect();" selectionMode="singleRow" enabled="{_dataReady&amp;&amp;!_newData&amp;&amp;!_updateData}" width="500" x="10" y="97">
+	<s:DataGrid height="245" dataProvider="{_DataResult}" id="_dataList" selectionChange="onDataSelect();" selectionMode="singleRow" enabled="{_dataReady&amp;&amp;!_newData&amp;&amp;!_updateData}" width="500" x="10" y="97">
 		<s:columns>	
 			<s:ArrayList>
 				<s:GridColumn headerText="Id" dataField="_idFamilia" width="40"> </s:GridColumn>	
@@ -21,20 +21,21 @@
 			</s:ArrayList>
 		</s:columns>
 	</s:DataGrid>
-	<s:Button label="Nuevo" width="80" enabled="{_dataReady}" visible="{!_newData&amp;&amp;!_updateData}" click="newData();" x="10" y="478"/>
-	<s:Button label="Cancelar" width="80" enabled="{_dataReady}" visible="{_newData||_updateData}" click="cancel();" x="98" y="478"/>
-	<s:Button label="Aceptar" width="80" enabled="{_dataReady}" visible="{_newData}" click="createData();" x="10" y="478"/>
-	<s:Button label="Eliminar" width="80" enabled="{_dataReady&amp;&amp;!_newData}" visible="{!_newData&amp;&amp;!_updateData}" click="deleteDataAlert();" x="98" y="478"/>
-	<s:Button label="Actualizar" width="80" enabled="{_dataReady&amp;&amp;!_newData&amp;&amp;_updateData}" visible="{_updateData&amp;&amp;!_newData}" click="updateData();" x="10" y="478"/>
-	<s:Button label="Regresar" click="closeWindow();" width="145"  enabled="{!_newData}" x="369" y="478"/>
+	<s:Button label="Nuevo" width="80" enabled="{_dataReady}" visible="{!_newData&amp;&amp;!_updateData}" click="newData();" x="6" y="350"/>
+	<s:Button label="Cancelar" width="80" enabled="{_dataReady}" visible="{_newData||_updateData}" click="cancel();" x="94" y="350"/>
+	<s:Button label="Aceptar" width="80" enabled="{_dataReady}" visible="{_newData}" click="createData();" x="6" y="350"/>
+	<s:Button label="Eliminar" width="80" enabled="{_dataReady&amp;&amp;!_newData}" visible="{!_newData&amp;&amp;!_updateData}" click="deleteDataAlert();" x="94" y="350"/>
+	<s:Button label="Actualizar" width="80" enabled="{_dataReady&amp;&amp;!_newData&amp;&amp;_updateData}" visible="{_updateData&amp;&amp;!_newData}" click="updateData();" x="6" y="350"/>
+	<s:Button label="Regresar" click="closeWindow();" width="145"  enabled="{!_newData}" x="365" y="350"/>
 
 	<s:ComboBox 	x="107" id="_searchType" 	dataProvider="{_searchTypes}" 	width="117" y="66" tabIndex="2"/>
 	<s:TextInput 	x="232" id="_searchField" 	change="search();" 		width="278" enabled="{!_newData}" y="67" tabIndex="3"/>
 	<s:Label x="42" text="Filtrar por :" textAlign="right" y="71"/>
-	<s:Label x="9.5" y="44" text="Grupo de Cobro :" />
-	<s:ComboBox id="_idGrupoCobro" x="107" y="37" width="365" change="dataChange();"
-				dataProvider="{SystemGlobals.PRODUCTOS_GRUPOS_COBRO}" labelField="_nombre" tabIndex="2"/>
-	<s:Button x="480" y="37" width="30" height="23"
+	<s:Label visible="false" x="9.5" y="44" text="Grupo de Cobro :"/>
+	<s:ComboBox id="_idGrupoCobro" visible="false" x="107" y="37" width="365" change="dataChange();"
+				dataProvider="{SystemGlobals.PRODUCTOS_GRUPOS_COBRO}" labelField="_nombre"
+				tabIndex="2"/>
+	<s:Button visible="false" x="480" y="37" width="30" height="23"
 			  click="openPopUp(&quot;productos.Productos_Grupos_Cobro&quot;,true);"
 			  icon="@Embed(source='../../assets/Icons/Buttons/Edit.png')"
 			  skinClass="spark.skins.spark.ButtonSkin"/>
@@ -157,7 +158,7 @@
 			public function initView():void{
 				forceImports();
 				_MainService = _webApplication.getService(_serviceName);
-				_Data.exceptions = ["_idFamilia","_nombreGrupo"];
+				_Data.exceptions = ["_idFamilia","_nombreGrupo","_idGrupoCobro"];
 				_MainService.addEventListener(FaultEvent.FAULT,onFault);
 				initData();
 				addValidations();
@@ -323,20 +324,20 @@
 			private function onCreateComplete(e:ResultEvent):void{				
 				_MainService.createRecord.removeEventListener(ResultEvent.RESULT,onCreateComplete);
 				_dataIndex = _DataResult.length;
-				Catalogs.reload();
+				Catalogs.reloadSpecificTables(["Productos_Familias"]);
 				getData();
 			}
 			
 			private function onUpdateComplete(e:ResultEvent):void{
 				_MainService.updateRecord.removeEventListener(ResultEvent.RESULT,onUpdateComplete);
-				Catalogs.reload();
+				Catalogs.reloadSpecificTables(["Productos_Familias"]);
 				getData();
 			}
 			
 			private function onDeleteComplete(e:ResultEvent):void{
 				_MainService.deleteRecord.removeEventListener(ResultEvent.RESULT,onDeleteComplete);
 				_dataIndex = _DataResult.length-2;
-				Catalogs.reload();
+				Catalogs.reloadSpecificTables(["Productos_Familias"]);
 				getData();
 			}
 			

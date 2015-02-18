@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <CMS_Random>
 
-	<webApplication 	gateway		="http://192.168.1.68/random/___WebOrb___/weborb.php" 
+	<webApplication 	gateway		="http://192.168.1.40/random/___WebOrb___/weborb.php" 
 						channelId	="my-amf" 
 						destination	="GenericDestination" >
 		<services> 
@@ -33,7 +33,7 @@
 			<service name='Departamentos' 			source='com.test.webTools.Empresa_Departamentos'>			<method name=''/></service>
 			<service name='Puestos' 				source='com.test.webTools.Empresa_Puestos'>					<method name=''/></service>			
 			<service name='Organigrama' 			source='com.test.webTools.Empresa_Organigrama'>				<method name=''/></service>	
-			<service name='Groups' 					source='com.test.webTools.Empresa_Groups'>					<method name=''/></service>	
+			<!--service name='Groups' 					source='com.test.webTools.Empresa_Groups'>					<method name=''/></service-->	
 			<service name='HistorialLaboral' 		source='com.test.webTools.HistorialLaboral'>		<method name=''/></service>
 			<service name='DependientesEconomicos' 	source='com.test.webTools.DependientesEconomicos'>	<method name=''/></service>	
 			<service name='PerfilCarrera' 			source='com.test.webTools.PerfilCarrera'>			<method name=''/></service>	
@@ -92,7 +92,6 @@
 			
 			<service name='Din' 								source='com.test.webTools.Din'>					<method name=''/></service>
 			<service name='Productos' 							source='com.test.webTools.Productos'>					<method name=''/></service>
-			<service name='Productos_Familias' 					source='com.test.webTools.Productos_Familias'>			<method name=''/></service>
 			<service name='Productos_SubFamilias' 				source='com.test.webTools.Productos_SubFamilias'>		<method name=''/></service>
 			<service name='Productos_Grupos_Cobro' 				source='com.test.webTools.Productos_Grupos_Cobro'>		<method name=''/></service>
 			<service name='Productos_Reglas_Negocio' 			source='com.test.webTools.Productos_Reglas_Negocio'>	<method name=''/></service>
@@ -108,7 +107,12 @@
    			<service name='Equipos'      source='com.test.webTools.Equipos'>    <method name=''/></service> 
   	 		<service name='Marcas'      source='com.test.webTools.Marcas'>    <method name=''/></service>
   	 		<service name='Refacciones'      source='com.test.webTools.Refacciones'>    <method name=''/></service>  
-   			<service name='Tipos_Equipos'    source='com.test.webTools.Tipos_Equipos'>    <method name=''/></service> 
+   			<service name='Tipos_Equipos'    source='com.test.webTools.Tipos_Equipos'>    <method name=''/></service>
+   			<service name='Direcciones'    source='com.test.webTools.Direcciones'>    <method name=''/></service>
+   			<service name='Administracion_Pago'    source='com.test.webTools.Administracion_Pago'>    <method name=''/></service>
+   			<service name='Biblioteca_Fallas'    source='com.test.webTools.Biblioteca_Fallas'>    <method name=''/></service>
+   			<service name='Productos_Familias'    source='com.test.webTools.Productos_Familias'>    <method name=''/></service>
+   			<service name='Lista_Fallas'    source='com.test.webTools.Lista_Fallas'>    <method name=''/></service>  
 
    
 
@@ -127,14 +131,14 @@
 			<menuitem label="Catálogos" roles="System" method="openPopup">
 				<menuitem label="Administrativos" roles="System" method="openPopup">
 					<menuitem label="Usuarios" 			className="system.Users" 		roles="System" method="openPopup"/>
-					<menuitem label="Grupos de Trabajo" className="system.UsersGroups" 	roles="System" method="openPopup"/>
+					<!--menuitem label="Grupos de Trabajo" className="system.UsersGroups" 	roles="System" method="openPopup"/-->
 				</menuitem>
-				<menuitem label="Refacciones" 	roles="*" method="openPopup">
+				<!--menuitem label="Refacciones" 	roles="*" method="openPopup">
 					<menuitem label="Familias" 	    		className="productos.Productos_Familias" 			roles="System" method="openPopup"/>
 					<menuitem label="Sub Familias" 	    	className="productos.Productos_SubFamilias" 		roles="System" method="openPopup"/>
 					<menuitem label="Grupos de Cobro" 	    className="productos.Productos_Grupos_Cobro" 		roles="System" method="openPopup"/>
 					<menuitem label="Reglas de Negocio" 	className="productos.Productos_Reglas_Negocio" 		roles="System" method="openPopup"/>				
-				</menuitem>
+				</menuitem-->
 			</menuitem>						
 			
 			<menuitem label="Empresa" 		roles="System" method="openPopup">
@@ -142,40 +146,40 @@
 				<menuitem label="Áreas" 		className="empresa.Empresa_Areas" 					roles="System" method="openPopup"/>
 				<menuitem label="Departamentos" className="empresa.Empresa_Departamentos" 			roles="System" method="openPopup"/>
 				<menuitem label="Puestos" 		className="empresa.Empresa_Puestos" 				roles="System" method="openPopup"/>
-				<menuitem label="CECOS" 		className="empresa.Empresa_CECOS" 					roles="System" method="openPopup"/>
+				<!--menuitem label="CECOS" 		className="empresa.Empresa_CECOS" 					roles="System" method="openPopup"/-->
 				<menuitem label="Categorías" 	className="empresa.Empresa_Categorias" 				roles="System" method="openPopup"/>
-				<menuitem label="Ubicaciones" 	className="empresa.Empresa_Ubicaciones" 			roles="System" method="openPopup"/>
-				<menuitem label="Competencias"  className="empresa.Empresa_Competencias"			roles="System" method="openPopup"/>
-				<menuitem label="Organigrama" 	className="empresa.Empresa_Organigrama" 			roles="System" method="openPopup"/>
+				<!--menuitem label="Ubicaciones" 	className="empresa.Empresa_Ubicaciones" 			roles="System" method="openPopup"/-->
+				<!--menuitem label="Competencias"  className="empresa.Empresa_Competencias"			roles="System" method="openPopup"/-->
+				<!--menuitem label="Organigrama" 	className="empresa.Empresa_Organigrama" 			roles="System" method="openPopup"/-->
 			</menuitem>
 			
-			<menuitem label="Bancos" 		roles="System" method="openPopup">										
+			<!--menuitem label="Bancos" 		roles="System" method="openPopup">										
 				<menuitem label="Bancos" 				className="bancos.Bancos" 					roles="System,Contador" method="openPopup"/>
 				<menuitem label="Cuentas Bancarias" 	className="bancos.Bancos_Cuentas_Empresa" 	roles="System,Contador" method="openPopup"/>
 				<menuitem label="Monedas y TcFix" 		className="bancos.Bancos_Tipo_Moneda" 		roles="System,Contador" method="openPopup"/>
-			</menuitem>	
+			</menuitem-->	
 		
 			<!-- menuitem label="Credenciales" 	roles="System" method="openPopup">
 				<menuitem label="Codigo de Barras" className="components.BarCodeGen" roles="System" method="openPopup"/>
 			</menuitem -->
 			
 			<menuitem label="Menu Empresa"    className="empresa.Empresa_Menu" roles="System" method="openPopup"/>
-			<menuitem label="Test Empresa"    className="empresa.Empresa_Test" roles="System" method="openPopup"/>
+			<!--menuitem label="Test Empresa"    className="empresa.Empresa_Test" roles="System" method="openPopup"/-->
 		
 		</menuitem>
 		
 		
 		<menuitem label="ODS´s" 				roles="*" method="openPopup">
 			<menuitem label="Seguimiento" 		className="ods.Seguimiento" 			        roles="*" method="openPopup"/>
-			<menuitem label="Busqueda" 	    	className="din.Din_Busqueda"  	roles="System" method="openPopup"/>
 		</menuitem>	
 		
 		<menuitem label="Equipos" 				roles="*" method="openPopup">
-	    	<menuitem label="Codigos de Error"     className="equipos.Codigo_Error"     roles="System" method="openPopup"/>
-	    	<menuitem label="Equipos"      className="equipos.Equipos"      roles="System" method="openPopup"/>
-	    	<menuitem label="Marcas"      className="equipos.Marcas"      roles="System" method="openPopup"/>
-	    	<menuitem label="Tipos de Equipos"    className="equipos.Tipos_Equipos"    roles="System" method="openPopup"/>
-	    	<menuitem label="Refacciones"    className="equipos.Refacciones"    roles="System" method="openPopup"/>
+	    	<menuitem label="Codigos de Error"     className="equipos.Codigo_Error"     roles="*" method="openPopup"/>
+	    	<menuitem label="Biblioteca de Fallas"     className="fallas.Biblioteca_Fallas"     roles="*" method="openPopup"/>
+	    	<menuitem label="Equipos"      className="equipos.Equipos"      roles="*" method="openPopup"/>
+	    	<menuitem label="Marcas"      className="equipos.Marcas"      roles="*" method="openPopup"/>
+	    	<menuitem label="Tipos de Equipos"    className="equipos.Tipos_Equipos"    roles="*" method="openPopup"/>
+	    	<menuitem label="Refacciones"    className="equipos.Refacciones"    roles="*" method="openPopup"/>
   		</menuitem>
 			
 		<menuitem label="Clientes" 				roles="*" method="openPopup">
@@ -189,11 +193,11 @@
 	    		<menuitem label="Soporte"  					className="system.Support"	roles="*" method="openPopup"/>
 	  	 </menuitem>
 	  	 
-	  	 <menuitem label="Idioma" roles="*">	    		
+	  	 <!--menuitem label="Idioma" roles="*">	    		
 	    		<menuitem label="Español"  					value="_MX"	roles="*" method="changeLanguage"/>
 	    		<menuitem label="Ingles"  					value="_EN"	roles="*" method="changeLanguage"/>
 	    		<menuitem label="Frances"  					value="_FR"	roles="*" method="changeLanguage"/>
-	  	 </menuitem>
+	  	 </menuitem-->
 	    
 	   	<menuitem label="Salir" roles="*">
 	    		<menuitem label="Logout"  						roles="*" method="logout"/>

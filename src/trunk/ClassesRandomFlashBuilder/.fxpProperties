@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<fxpProperties abbreviated="false" authoringTool="Flex Builder" parentProject="7937cd05-d2ab-473d-a003-5474b110acf8" projectUUID="34f2b666-984f-46a1-b006-41e69650c85f" pureCatalystProject="false" sdkVersion="4.6.0" uuid="5ab76b6a-6e64-4d4e-b981-0d2c00bd0492" version="15">
+<fxpProperties abbreviated="false" authoringTool="Flex Builder" parentProject="7937cd05-d2ab-473d-a003-5474b110acf8" projectUUID="34f2b666-984f-46a1-b006-41e69650c85f" pureCatalystProject="false" sdkVersion="4.6.0" uuid="b8672c37-3437-4e39-9ab8-66b4ac899f27" version="15">
   <projects/>
   <src>
     <linked isMain="false" location="flex" path="flex" position="0" uuid="f78b0fb7-d84f-49e8-8904-0cd067d675c2"/>
   </src>
   <swc>
-    <linked location="sdkPlaceHolder" path="sdkPlaceHolder" position="0" uuid="5ab76b6a-6e64-4d4e-b981-0d2c00bd0492"/>
+    <linked location="sdkPlaceHolder" path="sdkPlaceHolder" position="0" uuid="b8672c37-3437-4e39-9ab8-66b4ac899f27"/>
   </swc>
   <misc/>
   <theme/>

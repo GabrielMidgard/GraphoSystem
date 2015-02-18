@@ -263,7 +263,7 @@
 			
 			
 			private function initData():void{
-				_MainService.getFields();
+				_MainService.getFields("columnsFromOrderAdministrationTable");
 				_MainService.getFields.addEventListener(ResultEvent.RESULT,onGetFieldsResult);
 				_dataReady = false;
 			}

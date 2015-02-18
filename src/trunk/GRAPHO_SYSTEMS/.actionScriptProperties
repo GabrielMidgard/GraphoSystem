@@ -14,8 +14,8 @@
     <sourceAttachmentPath/>
   </compiler>
   <applications>
-    <application path="FlexUnitCompilerApplication.mxml"/>
     <application path="GRAPHO_SYSTEMS.mxml"/>
+    <application path="FlexUnitCompilerApplication.mxml"/>
   </applications>
   <modules/>
   <buildCSSFiles/>

@@ -1,0 +1,407 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   width="512" height="676" backgroundAlpha="1.0" contentBackgroundColor="#D5E7FB"
+			   title="Prediagnosticos">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:ComboBox id="_tiempoUnidad" x="128" y="173" width="93"
+				dataProvider="{ConstantData.TiempoEstimado}" enabled="{_fallaSelected}"
+				fontStyle="italic"> </s:ComboBox>
+	<s:TextInput id="_descripcionFalla" x="89" y="62" width="402" enabled="false" fontStyle="normal"/>
+	<s:TextInput id="_descripcionFallaReportada" x="89" y="21" width="314"
+				 contentBackgroundColor="#e7e7e7" enabled="false" fontStyle="normal"
+				 text="{_falla._falla}"/>
+	<s:TextInput id="_refaccionesSeleccionadas" x="89" y="136" width="366"
+				 contentBackgroundColor="#e7e7e7" enabled="false" fontStyle="normal"/>
+	<s:TextInput id="_codigoFalla" x="411" y="21" width="79" contentBackgroundColor="#E7E7E7"
+				 enabled="false" fontStyle="normal" text="{_falla._codigo}"/>
+	<s:Label x="50" y="28" text="Falla :"/>
+	<s:Label x="89" y="10" color="#767474" fontSize="10" fontStyle="italic" text="reportada"/>
+	<s:Label x="411" y="10" color="#767474" fontSize="10" fontStyle="italic" text="código"/>
+	<s:TextInput id="_descripcionSolucion" x="89" y="98" width="402" enabled="false"
+				 fontStyle="normal"/>
+	<s:TextInput id="_tiempoNumero" x="89" y="174" width="31"
+				 enabled="{_fallaSelected}" fontStyle="normal" textAlign="center"/>
+	<s:TextInput id="_porcentajeDificultad" x="229" y="174" width="60"
+				 enabled="{_fallaSelected}" fontStyle="normal"
+				 textAlign="center"/>
+	<s:Label x="229" y="163" color="#767474" fontSize="10" fontStyle="italic" text="porcentaje"/>
+	<s:Label x="20" y="181" text="Estimados :"/>
+	<s:Label x="293" y="183" text="%"/>
+	<s:Label x="23" y="143" text="Refacción :"/>
+	<s:Label x="31" y="105" text="Solución :"/>
+	<s:Label x="42" y="69" text="Causa :"/>
+	<s:Label x="89" y="163" color="#767474" fontSize="10" fontStyle="italic" text="tiempo"/>
+	<s:Label x="89" y="125" color="#767474" fontSize="10" fontStyle="italic" text="posible"/>
+	<s:Label x="89" y="87" color="#767474" fontSize="10" fontStyle="italic" text="posible"/>
+	<s:Label x="89" y="51" color="#767474" fontSize="10" fontStyle="italic" text="posible"/>
+	
+	
+	
+	<s:DataGrid id="_listaPrediagnostico" x="89" y="210" width="402" height="373"
+				dataProvider="{_prediagnosticos}" requestedRowCount="4"
+				selectionChange="onDataPreDiagnosticSelect();">
+		<s:columns>
+			<s:ArrayList>
+				<s:GridColumn dataField="falla" headerText="Pre-Diagnóstico"
+							  itemRenderer="renderers.Seguimiento_ItemRenderer3"></s:GridColumn>
+			</s:ArrayList>
+		</s:columns>	
+		
+	</s:DataGrid>
+	<s:Label x="10" y="217" text="Diagnóstico : " textAlign="left"/>
+	<s:Button label="Agregar como diagnóstico" click="recordDiagnostic();" width="181"  enabled="{!_newData}" y="591" x="310"/>
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.managers.PopUpManager;
+			import mx.random.constants.Catalogs;
+			import mx.random.constants.ConstantData;
+			import mx.random.constants.Languages;
+			import mx.random.constants.SystemGlobals;
+			import mx.random.converters.Converter;
+			import mx.random.dataManagers.DataManager;
+			import mx.random.dataManagers.EventManager;
+			import mx.random.forms.Validator;
+			import mx.random.web.WebApplication;
+			import mx.random.windowManagers.PopManager;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.remoting.RemoteObject;
+			import mx.utils.StringUtil;
+			import mx.utils.ObjectUtil;
+			
+			private var _webApplication:WebApplication;
+			private var Valid:Validator 			= new Validator();
+			private var _workManager:Object 		= new Object();
+			private var _MainService:RemoteObject 		= new RemoteObject();
+			[Bindable]	private var _Data:DataManager 				= new DataManager(this);
+			[Bindable]	private var _DataDiagnostico:DataManager 				= new DataManager(this);
+			[Bindable]	private var _DataResult:ArrayCollection 		= new ArrayCollection();
+			[Bindable]	private var _DataDiagnosticoResult:ArrayCollection 		= new ArrayCollection();
+			private var _eventManager:EventManager 		= new EventManager(this);
+			private var _dataIndex:Number 			= 0;
+			
+			//-----------Event Manager -----------
+			
+			[Bindable]	public var _dataReady:Boolean 			= false;
+			[Bindable]	public var _newData:Boolean 			= false;
+			[Bindable]	public var _updateData:Boolean 			= false;
+			[Bindable]	public var _fallaSelected:Boolean 		= false;
+			
+			[Bindable]	public var _newOrdenData				= false;
+			[Bindable]	public var _dataOrdenReady				= false;
+			[Bindable]	public var _updateOrdenData				= false;
+			//-----------Event Manager -----------
+			
+			
+			//-----------Local Vars -----------
+			
+			private var _selectedId:Number 			= 0;
+			private var _selectedName:String 		= "";
+			private var _serviceName  				= "Ordenes";
+			private var _mainId  					= "_idOrden";
+			private var _mainFocusField:String      = "_operador";
+			
+			[Bindable] private var _cliente:Object = {};
+			[Bindable] private var _equipo:Object = {};
+			[Bindable] private var _orderHeader:Object = {};
+			[Bindable] private var _falla:Object = {};
+			[Bindable] private var _datosPrediagnostico:Object = {};
+			[Bindable] private var _fallasReportadas:ArrayCollection = new ArrayCollection();
+			[Bindable] private var _prediagnosticos:ArrayCollection = new ArrayCollection();
+			//-----------Local Vars -----------
+			
+			//---------------------------- Context ---------------------------------------------            
+			
+			public function set context(contextObj:Object):void{
+				for( var p:String in contextObj){
+					if(this.hasOwnProperty(p)){
+						this[p] = contextObj[p];
+					}
+				}
+			}
+			
+			public function set workManager(value:Object):void{
+				_workManager = value;
+			}
+			
+			public function set webApplication(value:WebApplication):void{
+				_webApplication = value;
+				initView();
+			}
+			
+			public function set Falla(value:Object):void{
+				_falla = value;
+			}
+			
+			public function get webApplication():WebApplication{ return _webApplication; } 
+			
+			//---------------------------- Context ---------------------------------------------  
+			
+			//-------------------------------- MainInit --------------------------------------
+			// ------------------- View Extra Data -------------------------------
+			
+			private function get viewContext():Object{
+				return {webApplication: _webApplication,
+					workManager: this
+				}					
+			}
+			
+			private function addValidations():void{
+				Valid.changeLanguage(Languages.SPANISH);
+				
+				//----------- Validaciones ---------------------------
+				//Valid.addStringVal(_nombre,2,100,"Nombre");
+				//Valid.addStringVal(_codigo,1,2,"Código");
+				
+				//----------- Validaciones ---------------------------
+				
+				
+				Valid.validateOnChange = true;
+				Valid.setErrorKnot(Validator.CIRCLE_KNOT,0xFF0000);
+			}
+			
+			private function extraCreateData(params:Object):Object{				
+				//params["_newsImage"] = _image;
+				return params;
+			}
+			
+			private function createRecordExtras():void{
+				//_image = "defaultNew.jpg";
+			}
+			
+			private function extraUpdateData(params:Object):Object{	
+				//params['_color'] = areaColor.selectedColor;			
+				return params;
+			}
+			
+			private function loadExtraFields(params:Object):void{				
+				//_image = params["_newsImage"];
+			}
+			
+			private function forceImports():void{
+				
+			}
+
+			public function initView():void{
+				forceImports();
+				_MainService = _webApplication.getService(_serviceName);
+				_Data.exceptions = [];
+				_DataDiagnostico.exceptions =  ["_idDiagnostico","_esPrediagnostico","_falla","_nombreRefaccion","_nombreTecnico","_costoManoObra",
+					"_costoTransporte","_costoHotel","_costoComidas","_costoFleteSobreEquipaje","_costoGastosDiversos","_costoRefaccion",
+					"_tipoTransporte","_descripcionAccion","_fechaCreacion","_descripcionFallaReal"];
+				_MainService.addEventListener(FaultEvent.FAULT,onFault);
+				initData();
+				addValidations();
+				
+				//_searchType.selectedIndex = 1;
+			}
+			
+			public function imageUploadReady(data:Object):void{
+				
+			}
+			
+			// ------------------- View Extra Data -------------------------------
+			
+			
+			private function initData():void{
+				_MainService.getDiagnosticFields();
+				_MainService.getDiagnosticFields.addEventListener(ResultEvent.RESULT,onGetDiagnosticFieldsResult);
+				_dataReady = false;
+				_dataOrdenReady = false;
+			}
+			
+			public function closeWindow():void{
+				dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
+				PopUpManager.removePopUp(this);
+			}
+			
+			//-------------------------------- MainInit --------------------------------------
+			
+			private function newPreDiagnosticData():void{
+				_DataDiagnostico.clear();
+				_refaccionesSeleccionadas.text = "";
+				_newData = true;
+				_updateData = false;
+				Valid.validateAll();
+				this["_descripcionFalla"].setFocus();
+				createRecordExtras();
+			}
+			
+			private function cancelPrediagnostic():void{
+				resetPreDiagnosticBooleans();
+				onDataPreDiagnosticSelect();
+				Valid.validateAll();
+			}
+			private function resetBooleans():void{
+				_newOrdenData = false;
+				_updateOrdenData = false;
+			}
+			private function resetPreDiagnosticBooleans():void{
+				_newData = false;
+				_updateData = false;
+			}
+
+			private function openImageEditor():void{
+				/*if(_dataList.selectedIndex!=-1){
+				//_newsIdNumber 	= new Number(_dataList.selectedItem._blogId);
+				openPopUp("managers.ImageManager")
+				}else{
+				Alert.show("No hay registro selecionado","Error");
+				}*/
+			}
+			
+			//-------------------------------- Get initial data --------------------------------------
+			
+			private function getData():void{
+				if(_falla != null && _falla !=undefined){
+					_MainService.getPreDiagnosticRecords(_falla._idOrdenFalla,1);
+					_MainService.getPreDiagnosticRecords.addEventListener(ResultEvent.RESULT,onGetPreDiagnosticRecordsResult);	
+				}
+			}
+			
+			private function recordDiagnostic():void{
+				if(_listaPrediagnostico.selectedItem != null){
+					var newFalla = ObjectUtil.clone(_listaPrediagnostico.selectedItem);
+					newFalla["_esPrediagnostico"] = 0;
+					newFalla["_idOrdenFalla"] = _falla._idOrdenFalla;
+					delete newFalla._fechaCreacion;
+					delete newFalla._falla;
+					_MainService.clonePrediagnostic(newFalla);
+					_MainService.clonePrediagnostic.addEventListener(ResultEvent.RESULT,onRecordDiagnosticComplete);	
+				}
+			}
+			
+			
+			//-------------------------------- ResultsEvents --------------------------------------		
+			
+			
+			//--------------Get fields results
+			private function onGetDiagnosticFieldsResult(e:ResultEvent):void{
+				_MainService.getDiagnosticFields.removeEventListener(ResultEvent.RESULT,onGetDiagnosticFieldsResult);
+				if(e){
+					if(e.result) {
+						_DataDiagnostico.createFields(Converter.arrayConverter(e.result));
+						getData();
+					}
+				}else{
+					Alert.show("Error al cargar los datos","Error");
+					_dataReady = false;
+				}
+				_DataDiagnosticoResult= new ArrayCollection();
+			}
+			
+			
+			//------------------------------
+			
+			private function onGetPreDiagnosticRecordsResult(e:ResultEvent):void{
+				_MainService.getPreDiagnosticRecords.removeEventListener(ResultEvent.RESULT,onGetPreDiagnosticRecordsResult);
+				_prediagnosticos = Converter.arrayConverter(e.result);
+				if(_prediagnosticos.length > 0){
+					if(_dataIndex<0) _dataIndex = 0;
+					_DataDiagnostico.loadData(_prediagnosticos[_dataIndex]);
+					_listaPrediagnostico.selectedIndex = _dataIndex;
+					getSpares();
+				}else{
+					_DataDiagnostico.clear();
+				}
+				_dataReady = true;
+			}
+			
+			private function onRecordDiagnosticComplete(e:ResultEvent):void{
+				_MainService.clonePrediagnostic.removeEventListener(ResultEvent.RESULT,onRecordDiagnosticComplete);
+				Alert.show("Diagnóstico agregado");
+			}
+			//-------------------
+			
+			private function onFault(e:FaultEvent):void{
+				Alert.show(e.fault.faultString,"Error");
+			}
+			
+			private function onDataPreDiagnosticSelect():void{
+				if(_listaPrediagnostico.selectedIndex!=-1) {
+					_DataDiagnostico.loadData(_listaPrediagnostico.selectedItem);
+					_dataIndex =_listaPrediagnostico.selectedIndex;
+					loadExtraFields(_listaPrediagnostico.selectedItem);
+					_selectedId = _listaPrediagnostico.selectedItem["_idDiagnostico"];
+					getSpares();
+				}
+			}
+			
+			private function getSpares():void{
+				if(_listaPrediagnostico.selectedIndex != -1){
+					_MainService.getSparesFromDiagnostic(_listaPrediagnostico.selectedItem._idDiagnostico);
+					_MainService.getSparesFromDiagnostic.addEventListener(ResultEvent.RESULT,onGetSparesResult);	
+				}
+			}
+			
+			private function onGetSparesResult(e:ResultEvent):void{
+				_MainService.getSparesFromDiagnostic.removeEventListener(ResultEvent.RESULT,onGetSparesResult);
+				var resArr:ArrayCollection;
+				resArr = Converter.arrayConverter(e.result);
+				var arrString:Array = new Array();
+				_refaccionesSeleccionadas.text = "";
+				if(resArr.length > 0){
+					for(var i = 0; i < resArr.length; i++){
+						arrString.push(resArr[i]._nombre);
+					}					
+					_refaccionesSeleccionadas.text = arrString.join(", ");
+				}
+			}
+			
+			//-------------------------------- ResultsEvents --------------------------------------	
+			private function onGetOrderResult(e:ResultEvent):void{
+				_MainService.getSpecificOrderHeader.removeEventListener(ResultEvent.RESULT,onGetOrderResult);
+				_DataResult = Converter.arrayConverter(e.result);
+				if(_DataResult.length==0) {
+					Alert.show("No existe orden con el id especificado","Atención")
+				}else{
+					_orderHeader = _DataResult[0];//Sólo debe de haber un registro o ninguno
+				}
+				_dataOrdenReady = true;
+			}
+			
+			public function onGetPrediagnosticResult(e:ResultEvent):void{
+				_MainService.getPrediagnosticData.removeEventListener(ResultEvent.RESULT,onGetPrediagnosticResult);
+				var resArr:ArrayCollection;
+				resArr = Converter.arrayConverter(e.result);
+				if(resArr.length > 0){
+					_datosPrediagnostico = resArr[0]; //Sólo debe de haber un registro o ninguno
+				}else{
+					_datosPrediagnostico = {};
+				}
+			}
+			
+			
+			//-------------------------------- POP UP WINDOW --------------------------------------	
+			public function openPopUp(popUpName:String,modal:Boolean = true):void{
+				var pop:TitleWindow = PopUpManager.createPopUp(this, getDefinitionByName("views."+popUpName) as Class, modal) as TitleWindow;
+				pop.name = popUpName;
+				pop.addEventListener(CloseEvent.CLOSE, closePopup);
+				if(pop.hasOwnProperty("context")){
+					Object(pop).context = viewContext;
+				}
+				PopUpManager.centerPopUp(pop);
+			}
+			
+			private function closePopup(e:CloseEvent):void{
+				PopUpManager.removePopUp(e.target as TitleWindow);
+				getSpares();
+			}
+			//-------------------------------- POP UP WINDOW --------------------------------------
+			
+			
+		]]>
+	</fx:Script>
+	
+	
+	
+	
+</s:TitleWindow>

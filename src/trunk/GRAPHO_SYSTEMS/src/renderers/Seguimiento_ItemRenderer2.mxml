@@ -14,7 +14,7 @@
 					falla.text 		= "FALLA : "+this.data['_falla'];
 					causa.text 		= "	CAUSA		: "+this.data['_descripcionFalla'];
 					solucion.text 	= "	SOLUCION	: "+this.data['_descripcionSolucion'];
-					refaccion.text 	= "	REFACCION	: "+this.data['_nombreRefaccion'];
+					refaccion.text 	= "	REFACCION	: "+ this.data['_nombreRefaccion'];
 					var unidad:String = ConstantData.TiempoEstimado[Number(this.data["_tiempoUnidad"])].label;
 					if(unidad == "Seleccionar"){unidad = "";}
 					estimado.text 	= "	ESTIMADOS	: "+this.data['_tiempoNumero']+" " + unidad + " , "+this.data['_porcentajeDificultad'];

@@ -1,16 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:TitleWindow 
-	xmlns:mx="http://www.adobe.com/2006/mxml" 
-	width="352" height="196" 
-	layout="absolute" 
-	horizontalCenter="0" 
-	title="Administración de Accesos a Empleados" 
-	verticalCenter="0"
-	verticalScrollPolicy="off"
-	horizontalScrollPolicy="off"
-	showCloseButton="true">
+<s:TitleWindow 
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:mx="library://ns.adobe.com/flex/mx"
+	title="Administración de Accesos a Empleados"
+	width="352" 
+	height="218" 
+	>
 
-	<mx:Script>
+	<fx:Script>
 		<![CDATA[
 			import mx.random.constants.ConstantData;
 			
@@ -103,9 +101,9 @@
 
 
 				var validFields:ArrayCollection = Valid.validFields;
-				for(var n:Number = 0;n<validFields.length;n++){					
+				/*for(var n:Number = 0;n<validFields.length;n++){					
 					this[validFields[n].obj.name].addEventListener(Event.CHANGE,onFocusOut);
-				}
+				}*/
 				Valid.setErrorKnot(Validator.CIRCLE_KNOT,0xFF0000);
 			}
 
@@ -304,19 +302,19 @@
 				
 			
 		]]>
-	</mx:Script>
-	<mx:Label x="30" y="10" text="Login :" textAlign="right"/>
-<mx:TextInput x="150" y="10" id="_login" change="dataChange();" width="181"/>
-<mx:Label x="30" y="40" text="Psw :" textAlign="right"/>
-<mx:TextInput x="150" y="40" id="_psw" maxChars="10" displayAsPassword="true" change="dataChange();" width="181"/>
-<mx:Label x="30" y="70" text="Mail :" textAlign="right"/>
-<mx:TextInput x="150" y="70" id="_mail" maxChars="50" change="dataChange();" width="181"/>
-<mx:Label x="30" y="100" text="Tipo Acceso :" textAlign="right"/>
-<mx:ComboBox  x="150" y="100" id="_tipoAcceso" change="dataChange();" width="181" dataProvider="{ConstantData.AccessTypes}"/>
+	</fx:Script>
+	<s:Label x="30" y="10" text="Login :" textAlign="right"/>
+<s:TextInput x="150" y="10" id="_login" change="dataChange();" width="181"/>
+<s:Label x="30" y="40" text="Psw :" textAlign="right"/>
+<s:TextInput x="150" y="40" id="_psw" maxChars="10" displayAsPassword="true" change="dataChange();" width="181"/>
+<s:Label x="30" y="70" text="Mail :" textAlign="right"/>
+<s:TextInput x="150" y="70" id="_mail" maxChars="50" change="dataChange();" width="181"/>
+<s:Label x="30" y="100" text="Tipo Acceso :" textAlign="right"/>
+<s:ComboBox  x="150" y="100" id="_tipoAcceso" change="dataChange();" width="181" dataProvider="{ConstantData.AccessTypes}"/>
 
-	<mx:Button label="Cancelar" width="80" enabled="{_dataReady}" visible="{_newData||_updateData}" click="cancel();" x="98" y="130"/>
-	<mx:Button label="Actualizar" width="80" enabled="{_dataReady&amp;&amp;!_newData&amp;&amp;_updateData}" visible="{_updateData&amp;&amp;!_newData}" click="updateData();" x="10" y="130"/>
-	<mx:Button label="Regresar" click="closeWindow();" width="145"  enabled="{!_newData}" x="186" y="130"/>
-	<mx:Button label="Aceptar" width="80" enabled="{_dataReady}" visible="{_newData}" click="createData();" x="10" y="130"/>
+	<s:Button label="Cancelar" width="80" enabled="{_dataReady}" visible="{_newData||_updateData}" click="cancel();" x="98" y="130"/>
+	<s:Button label="Actualizar" width="80" enabled="{_dataReady&amp;&amp;!_newData&amp;&amp;_updateData}" visible="{_updateData&amp;&amp;!_newData}" click="updateData();" x="10" y="130"/>
+	<s:Button label="Regresar" click="closeWindow();" width="145"  enabled="{!_newData}" x="186" y="130"/>
+	<s:Button label="Aceptar" width="80" enabled="{_dataReady}" visible="{_newData}" click="createData();" x="10" y="130"/>
 	
-</mx:TitleWindow>
+</s:TitleWindow>

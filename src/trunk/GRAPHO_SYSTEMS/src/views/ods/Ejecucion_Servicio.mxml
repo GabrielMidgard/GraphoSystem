@@ -2,129 +2,62 @@
 <s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009"
 			   xmlns:s="library://ns.adobe.com/flex/spark"
 			   xmlns:mx="library://ns.adobe.com/flex/mx"
-			   width="1242" height="794" backgroundAlpha="1.0" contentBackgroundColor="#D5E7FB"
+			   width="1242" height="742" backgroundAlpha="1.0" contentBackgroundColor="#D5E7FB"
 			   title="Ejecución de Servicio">
 	<fx:Declarations>
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
 	</fx:Declarations>
-	<s:Label x="101" y="238" color="#767474" fontSize="10" fontStyle="italic" text="observaciones"/>
 	<s:Label x="775" y="391" text="Fallas :" textAlign="left"/>
-	<s:TextArea id="_nota" x="100" y="251" width="625" height="78" contentBackgroundColor="#e7e7e7"
-				enabled="false"/>
 	<s:Button label="Nuevo" width="80" enabled="{_dataReady&amp;&amp;_fallaSelected}" visible="false" y="338" x="1058"/>
-	<s:Button label="Cancelar" width="80" enabled="{_dataReady}" visible="{_newData||_updateData}" click="cancelPrediagnostic();" y="338" x="1146"/>
+	<s:Button label="Cancelar" width="80" enabled="{_dataReady&amp;&amp;!_newData&amp;&amp;_updateData}" click="cancelPrediagnostic();" y="338" x="1146"/>
 	<s:Button label="Aceptar" width="80" enabled="{_dataReady}" visible="false" y="338" x="1058"/>
 	<s:Button label="Eliminar" width="80" enabled="{_dataReady&amp;&amp;!_newData&amp;&amp;_fallaSelected}" visible="false" click="deleteDataAlert();" y="338" x="1146"/>
-	<s:Button label="Actualizar" width="80" enabled="{_dataReady&amp;&amp;!_newData&amp;&amp;_updateData}" visible="{_updateData&amp;&amp;!_newData}" click="updateFailureData();" y="338" x="1058"/>
-	<s:Button label="Regresar" click="closeWindow();" width="145"  enabled="{!_newData}" y="714" x="1087"/>
-	<s:TextInput id="_nombreEmpresa" x="99" y="61" width="310" contentBackgroundColor="#e7e7e7"
-				 enabled="false" fontStyle="italic" text="{_cliente._nombreEmpresa}"/>
-	<s:TextInput id="_ciudad" x="99" y="99" width="150" contentBackgroundColor="#e7e7e7"
-				 enabled="false" fontStyle="italic" text="{_cliente._ciudad}"/>
-	<s:TextInput id="_nombreEstado" x="259" y="99" width="150" contentBackgroundColor="#e7e7e7"
-				 enabled="false" fontStyle="italic" text="{_cliente._nombreEstado}"/>
-	<s:Label x="260" y="88" color="#767474" fontSize="10" fontStyle="italic" text="estado"/>
-	<s:Label x="99" y="88" color="#767474" fontSize="10" fontStyle="italic" text="ciudad"/>
-	<s:TextInput id="_telefonoCasa" x="417" y="61" width="150" contentBackgroundColor="#e7e7e7"
-				 enabled="false" fontStyle="italic" text="{_cliente._telefonoCasa}"/>
-	<s:TextInput id="_telefonoOficina" x="575" y="61" width="150" contentBackgroundColor="#e7e7e7"
-				 enabled="false" fontStyle="italic" text="{_cliente._telefonoOficina}"/>
-	<s:TextInput id="_mailSecundario" x="575" y="99" width="150" contentBackgroundColor="#e7e7e7"
-				 enabled="false" fontStyle="italic" text="{_cliente._mailSecundario}"/>
-	<s:TextInput id="_mailPrincipal" x="417" y="99" width="150" contentBackgroundColor="#e7e7e7"
-				 enabled="false" fontStyle="italic" text="{_cliente._mailPrincipal}"/>
-	<s:Label x="418" y="89" color="#767474" fontSize="10" fontStyle="italic" text="mails"/>
-	<s:Label x="418" y="50" color="#767474" fontSize="10" fontStyle="italic" text="teléfonos"/>
-	<s:Label x="48" y="67" text="Cliente :"/>
-	<s:Label x="99" y="50" color="#767474" fontSize="10" fontStyle="italic" text="nombre"/>
-	<s:TextInput id="_idOrden" x="98" y="21" width="70" contentBackgroundColor="#E7E7E7"
-				 enabled="false" fontWeight="bold" textAlign="center"/>
-	<s:TextInput id="_fechaCreacion" x="174" y="21" width="70" contentBackgroundColor="#E7E7E7"
-				 enabled="false" fontWeight="bold" textAlign="center"/>
-	<s:Label x="176" y="10" color="#767474" fontSize="10" fontStyle="italic" text="fecha"/>
-	<s:TextInput id="_horaCreacion" x="250" y="21" width="70" contentBackgroundColor="#E7E7E7"
-				 enabled="false" fontWeight="bold" textAlign="center"/>
-	<s:TextInput id="_nombreEstatus" x="328" y="21" width="79" contentBackgroundColor="#E7E7E7"
-				 enabled="false" fontWeight="bold" textAlign="center"/>
-	<s:Label x="252" y="10" color="#767474" fontSize="10" fontStyle="italic" text="hora"/>
-	<s:Label x="328" y="9" color="#767474" fontSize="10" fontStyle="italic" text="estatus"/>
-	<s:Label x="99" y="10" color="#767474" fontSize="10" fontStyle="italic" text="número"/>
-	<s:Label x="65" y="26" fontWeight="bold" text="OS :"/>
-	<s:Label x="415" y="9" color="#767474" fontSize="10" fontStyle="italic" text="área de soporte"/>
-	<s:Label x="576" y="9" color="#767474" fontSize="10" fontStyle="italic" text="servicio"/>
-	<s:TextInput id="_nombreContacto" x="99" y="139" width="310" contentBackgroundColor="#e7e7e7"
-				 enabled="false" fontStyle="italic"/>
-	<s:TextInput id="_operador" x="99" y="172" width="310" contentBackgroundColor="#e7e7e7"
-				 enabled="false" fontStyle="italic"/>
-	<s:Label x="35" y="178" text="Operador :"/>
-	<s:Label x="99" y="128" color="#767474" fontSize="10" fontStyle="italic" text="reportó"/>
-	<s:Label x="417" y="128" color="#767474" fontSize="10" fontStyle="italic" text="atendió"/>
-	<s:TextInput id="_nombreEmpleado" x="417" y="139" width="308" contentBackgroundColor="#e7e7e7"
-				 enabled="false" fontStyle="italic"/>
-	<s:TextInput id="_serie" x="575" y="212" width="70" contentBackgroundColor="#e7e7e7"
-				 enabled="false" fontStyle="italic" text="{_equipo._serie}"/>
-	<s:TextInput id="_modelo" x="417" y="212" width="150" contentBackgroundColor="#e7e7e7"
-				 enabled="false" fontStyle="italic" text="{_equipo._modelo}"/>
-	<s:Label x="418" y="201" color="#767474" fontSize="10" fontStyle="italic" text="modelo"/>
-	<s:Label x="101" y="198" color="#767474" fontSize="10" fontStyle="italic" text="tipo"/>
-	<s:Label x="261" y="199" color="#767474" fontSize="10" fontStyle="italic" text="marca"/>
-	<s:Label x="576" y="201" color="#767474" fontSize="10" fontStyle="italic" text="no. serie"/>
-	<s:Label x="48" y="216" text="Equipo :"/>
-	<s:TextInput id="_nombreTipo" x="99" y="211" width="150" contentBackgroundColor="#e7e7e7"
-				 enabled="false" fontStyle="italic" text="{_equipo._nombreTipo}"/>
-	<s:TextInput id="_nombreMarca" x="259" y="211" width="150" contentBackgroundColor="#e7e7e7"
-				 enabled="false" fontStyle="italic" text="{_equipo._nombreMarca}"/>
-	<s:Label x="656" y="200" color="#767474" fontSize="10" fontStyle="italic" text="año de fab."/>
-	<s:TextInput id="_anioFabricacion" x="655" y="212" width="70" contentBackgroundColor="#e7e7e7"
-				 enabled="false" fontStyle="italic" text="{_equipo._anioFabricacion}"/>
-	<s:TextInput id="_nombreAreaSoporte" x="416" y="21" width="151" contentBackgroundColor="#E7E7E7"
-				 enabled="false" fontWeight="bold" textAlign="center"/>
-	<s:TextInput id="_nombreTipoServicio" x="575" y="21" width="150" contentBackgroundColor="#E7E7E7"
-				 enabled="false" fontWeight="bold" textAlign="center"/>
-	<s:DataGrid id="_listaFallas" x="824" y="382" width="402" height="324"
+	<s:Button label="Actualizar" width="80" enabled="{_dataReady&amp;&amp;!_newData&amp;&amp;_updateData}" click="updateFailureData();" y="338" x="1058"/>
+	<s:Button label="Regresar" click="closeWindow();" width="145"  enabled="{!_newData}" y="655" x="1081"/>
+	<s:DataGrid id="_listaFallas" x="824" y="382" width="402" height="265"
 				contentBackgroundColor="#D5E7FB" dataProvider="{_fallasReportadas}" editable="false"
 				enabled="{_dataReady&amp;&amp;!_updateData}"
 				requestedRowCount="4" selectionChange="onFallaSelect();">
 		<s:columns>
 			<s:ArrayList>
-				<s:GridColumn width="80" dataField="_codigo" headerText="Código"></s:GridColumn>
+				<s:GridColumn width="80" dataField="_codigoReal" headerText="Código"></s:GridColumn>
 				<s:GridColumn dataField="_fallaReal" headerText="Falla"></s:GridColumn>
 			</s:ArrayList>
 		</s:columns>
 	</s:DataGrid>
-	<s:Button label="Actualizar" width="80" enabled="{_updateOrdenData&amp;&amp;!_newOrdenData}" visible="true" click="updateData();" y="714" x="100"/>
-	<s:Button label="Cancelar" width="80" enabled="{_newOrdenData||_updateOrdenData}" visible="true" click="cancel();" y="714" x="188"/>
-	<s:Label x="446" y="439" text="Fin Servicio :"/>
-	<s:Label x="520" y="421" color="#767474" fontSize="10" fontStyle="italic" text="fecha"/>
-	<s:Label x="598" y="421" color="#767474" fontSize="10" fontStyle="italic" text="hora"/>
-	<s:Button x="666" y="432" width="59" height="23" label="Ahora" click="getCurrentTime();"/>
-	<s:TextInput id="_fechaFinServicio" x="520" y="432" width="70" change="dataChange();"
-				 fontWeight="normal" textAlign="center"/>
-	<s:TextInput id="_horaFinServicio" x="597" y="432" width="61" change="dataChange();"
-				 fontWeight="normal" textAlign="center"/>
-	<s:TextArea id="_reparacion" x="824" y="61" width="402" height="97"
-				change="dataPreDiagnosticChange();" fontStyle="normal"/>
-	<s:TextArea id="_observacionesAccServicio" x="100" y="349" width="625" height="67"
+	<s:Button label="Actualizar" width="80" enabled="{_updateOrdenData&amp;&amp;!_newOrdenData}" visible="true" click="updateData();" y="655" x="100"/>
+	<s:Button label="Cancelar" width="80" enabled="{_newOrdenData||_updateOrdenData}" visible="true" click="cancel();" y="655" x="188"/>
+	<s:Label x="446" y="429" text="Fin Servicio :"/>
+	<s:Label x="518" y="411" color="#767474" fontSize="10" fontStyle="italic" text="fecha"/>
+	<s:Label x="596" y="411" color="#767474" fontSize="10" fontStyle="italic" text="hora"/>
+	<s:Button x="664" y="422" width="59" height="23" label="Ahora" click="getCurrentTime();"/>
+	<s:TextInput id="_fechaFinServicio" x="518" y="422" width="70" change="dataChange();"
+				 fontWeight="normal" tabIndex="6" textAlign="center"/>
+	<s:TextInput id="_horaFinServicio" x="595" y="422" width="61" change="dataChange();"
+				 fontWeight="normal" tabIndex="7" textAlign="center"/>
+	<s:TextArea id="_reparacion" x="824" y="61" width="402" height="77"
+				change="dataPreDiagnosticChange();" fontStyle="normal" tabIndex="11"/>
+	<s:TextArea id="_observacionesAccServicio" x="100" y="349" width="625" height="54"
+				change="dataChange();" fontStyle="normal" tabIndex="1"/>
+	<s:TextArea id="_observacionesServicio" x="100" y="461" width="625" height="51"
+				change="dataChange();" fontStyle="normal" tabIndex="8"/>
+	<s:TextArea id="_observacionesClienteOrden" x="100" y="529" width="625" height="51"
 				change="dataChange();" fontStyle="normal"/>
-	<s:TextArea id="_observacionesServicio" x="100" y="474" width="625" height="64"
-				change="dataChange();" fontStyle="normal"/>
-	<s:TextArea id="_observacionesClienteOrden" x="100" y="556" width="625" height="64"
-				change="dataChange();" fontStyle="normal"/>
-	<s:TextArea id="_interesCliente" x="100" y="640" width="625" height="64"
-				change="dataChange();" fontStyle="normal"/>
-	<s:Label x="49" y="640" text="Interés :"/>
-	<s:Label x="100" y="627" color="#767474" fontSize="10" fontStyle="italic" text="del cliente por equipo"/>
-	<s:Label x="5" y="563" text="Observaciones :"/>
-	<s:Label x="100" y="543" color="#767474" fontSize="10" fontStyle="italic" text="del cliente en orden de servicio :"/>
-	<s:Label x="0" y="481" text="Recomendación :"/>
-	<s:Label x="100" y="461" color="#767474" fontSize="10" fontStyle="italic" text="del técnico:"/>
+	<s:TextArea id="_interesCliente" x="100" y="597" width="625" height="50" change="dataChange();"
+				fontStyle="normal" tabIndex="10"/>
+	<s:Label x="49" y="597" text="Interés :"/>
+	<s:Label x="100" y="584" color="#767474" fontSize="10" fontStyle="italic" text="del cliente por equipo"/>
+	<s:Label x="5" y="536" text="Observaciones :"/>
+	<s:Label x="100" y="516" color="#767474" fontSize="10" fontStyle="italic" text="del cliente en orden de servicio :"/>
+	<s:Label x="0" y="468" text="Recomendación :"/>
+	<s:Label x="100" y="448" color="#767474" fontSize="10" fontStyle="italic" text="del técnico:"/>
 	<s:Label x="4" y="356" text="Observaciones :"/>
-	<s:TextArea id="_referencia" x="823" y="178" width="402" height="56"
-				change="dataPreDiagnosticChange();" fontStyle="normal"/>
+	<s:TextArea id="_referencia" x="823" y="155" width="402" height="78"
+				change="dataPreDiagnosticChange();" fontStyle="normal" tabIndex="12"/>
 	<s:TextArea id="_pruebas" x="823" y="254" width="402" height="75"
-				change="dataPreDiagnosticChange();" fontStyle="normal"/>
+				change="dataPreDiagnosticChange();" fontStyle="normal" tabIndex="13"/>
 	<s:Label x="735" y="260" text="Pruebas Falla :"/>
-	<s:Label x="752" y="184" text="Referencia :"/>
+	<s:Label x="752" y="161" text="Referencia :"/>
 	<s:TextInput id="_fallaReal" x="824" y="23" width="314" contentBackgroundColor="#e7e7e7"
 				 enabled="false" fontStyle="normal"/>
 	<s:TextInput id="_codigo" x="1146" y="23" width="79" contentBackgroundColor="#E7E7E7"
@@ -134,20 +67,93 @@
 	<s:Label x="1146" y="12" color="#767474" fontSize="10" fontStyle="italic" text="código"/>
 	<s:Label x="748" y="68" text="Reparación :"/>
 	<s:Label x="824" y="50" color="#767474" fontSize="10" fontStyle="italic" text="de falla"/>
-	<s:Label x="824" y="166" color="#767474" fontSize="10" fontStyle="italic" text="de apoyo"/>
+	<s:Label x="824" y="143" color="#767474" fontSize="10" fontStyle="italic" text="de apoyo"/>
 	<s:Label x="100" y="336" color="#767474" fontSize="10" fontStyle="italic" text="de acciones del servicio"/>
-	<s:ComboBox id="_tiempoUnidadPruebas" x="155" y="432" width="75" change="dataChange();"
-				dataProvider="{ConstantData.TiempoEstimado}" fontStyle="italic"> </s:ComboBox>
-	<s:ComboBox id="_tiempoUnidadTotalServ" x="345" y="432" width="93" change="dataChange();"
-				dataProvider="{ConstantData.TiempoEstimado}" fontStyle="italic"> </s:ComboBox>
-	<s:TextInput id="_tiempoNumeroTotalServ" x="289" y="432" width="48" change="dataChange();"
-				 fontStyle="normal" textAlign="center"/>
-	<s:Label x="235" y="435" text="Tiempo :"/>
-	<s:Label x="289" y="421" color="#767474" fontSize="10" fontStyle="italic" text="total servicio"/>
-	<s:TextInput id="_tiempoNumeroPruebas" x="99" y="432" width="48" change="dataChange();"
-				 fontStyle="normal" textAlign="center"/>
-	<s:Label x="45" y="435" text="Tiempo :"/>
-	<s:Label x="99" y="421" color="#767474" fontSize="10" fontStyle="italic" text="en pruebas"/>
+	<s:ComboBox id="_tiempoUnidadPruebas" x="155" y="419" width="75" change="dataChange();"
+				dataProvider="{ConstantData.TiempoEstimado}" fontStyle="italic" tabIndex="3"> </s:ComboBox>
+	<s:ComboBox id="_tiempoUnidadTotalServ" x="345" y="421" width="93" change="dataChange();"
+				dataProvider="{ConstantData.TiempoEstimado}" fontStyle="italic" tabIndex="5"> </s:ComboBox>
+	<s:TextInput id="_tiempoNumeroTotalServ" x="289" y="422" width="48" change="dataChange();"
+				 fontStyle="normal" tabIndex="4" textAlign="center"/>
+	<s:Label x="235" y="425" text="Tiempo :"/>
+	<s:Label x="289" y="411" color="#767474" fontSize="10" fontStyle="italic" text="total servicio"/>
+	<s:TextInput id="_tiempoNumeroPruebas" x="99" y="419" width="48" change="dataChange();"
+				 fontStyle="normal" tabIndex="2" textAlign="center"/>
+	<s:Label x="45" y="422" text="Tiempo :"/>
+	<s:Label x="99" y="408" color="#767474" fontSize="10" fontStyle="italic" text="en pruebas"/>
+	<s:Label x="100" y="238" color="#767474" fontSize="10" fontStyle="italic" text="observaciones"/>
+	<s:TextArea id="_nota" x="99" y="251" width="625" height="78" contentBackgroundColor="#e7e7e7"
+				enabled="false" text="{_orderHeader._nota}"/>
+	<s:TextInput id="_nombreEmpresa" x="98" y="61" width="310" contentBackgroundColor="#e7e7e7"
+				 enabled="false" fontStyle="italic" text="{_cliente._nombreEmpresa}"/>
+	<s:TextInput id="_ciudad" x="98" y="99" width="150" contentBackgroundColor="#e7e7e7"
+				 enabled="false" fontStyle="italic" text="{_cliente._ciudad}"/>
+	<s:TextInput id="_nombreEstado" x="258" y="99" width="150" contentBackgroundColor="#e7e7e7"
+				 enabled="false" fontStyle="italic" text="{_cliente._nombreEstado}"/>
+	<s:Label x="259" y="88" color="#767474" fontSize="10" fontStyle="italic" text="estado"/>
+	<s:Label x="98" y="88" color="#767474" fontSize="10" fontStyle="italic" text="ciudad"/>
+	<s:TextInput id="_telefonoCasa" x="416" y="61" width="150" contentBackgroundColor="#e7e7e7"
+				 enabled="false" fontStyle="italic" text="{_cliente._telefonoCasa}"/>
+	<s:TextInput id="_telefonoOficina" x="574" y="61" width="150" contentBackgroundColor="#e7e7e7"
+				 enabled="false" fontStyle="italic" text="{_cliente._telefonoOficina}"/>
+	<s:TextInput id="_mailSecundario" x="574" y="99" width="150" contentBackgroundColor="#e7e7e7"
+				 enabled="false" fontStyle="italic" text="{_cliente._mailSecundario}"/>
+	<s:TextInput id="_mailPrincipal" x="416" y="99" width="150" contentBackgroundColor="#e7e7e7"
+				 enabled="false" fontStyle="italic" text="{_cliente._mailPrincipal}"/>
+	<s:Label x="417" y="89" color="#767474" fontSize="10" fontStyle="italic" text="mails"/>
+	<s:Label x="417" y="50" color="#767474" fontSize="10" fontStyle="italic" text="teléfonos"/>
+	<s:Label x="47" y="67" text="Cliente :"/>
+	<s:Label x="98" y="50" color="#767474" fontSize="10" fontStyle="italic" text="nombre"/>
+	<s:Label x="175" y="10" color="#767474" fontSize="10" fontStyle="italic" text="fecha"/>
+	<s:Label x="251" y="10" color="#767474" fontSize="10" fontStyle="italic" text="hora"/>
+	<s:Label x="327" y="9" color="#767474" fontSize="10" fontStyle="italic" text="estatus"/>
+	<s:Label x="98" y="10" color="#767474" fontSize="10" fontStyle="italic" text="número"/>
+	<s:Label x="64" y="26" fontWeight="bold" text="OS :"/>
+	<s:Label x="414" y="9" color="#767474" fontSize="10" fontStyle="italic" text="área de soporte"/>
+	<s:Label x="575" y="9" color="#767474" fontSize="10" fontStyle="italic" text="servicio"/>
+	<s:TextInput id="_nombreContacto" x="98" y="139" width="310" contentBackgroundColor="#e7e7e7"
+				 enabled="false" fontStyle="italic" text="{_orderHeader._nombreContacto}"/>
+	<s:TextInput id="_operador" x="98" y="172" width="310" contentBackgroundColor="#e7e7e7"
+				 enabled="false" fontStyle="italic" text="{_orderHeader._operador}"/>
+	<s:Label x="34" y="178" text="Operador :"/>
+	<s:Label x="98" y="128" color="#767474" fontSize="10" fontStyle="italic" text="reportó"/>
+	<s:Label x="416" y="128" color="#767474" fontSize="10" fontStyle="italic" text="atendió"/>
+	<s:TextInput id="_nombreEmpleado" x="416" y="139" width="308" contentBackgroundColor="#e7e7e7"
+				 enabled="false" fontStyle="italic" text="{_orderHeader._nombreEmpleado}"/>
+	<s:TextInput id="_serie" x="574" y="211" width="70" contentBackgroundColor="#e7e7e7"
+				 enabled="false" fontStyle="italic" text="{_equipo._serie}"/>
+	<s:TextInput id="_modelo" x="416" y="211" width="150" contentBackgroundColor="#e7e7e7"
+				 enabled="false" fontStyle="italic" text="{_equipo._modelo}"/>
+	<s:Label x="417" y="200" color="#767474" fontSize="10" fontStyle="italic" text="modelo"/>
+	<s:Label x="100" y="198" color="#767474" fontSize="10" fontStyle="italic" text="tecnología"/>
+	<s:Label x="260" y="199" color="#767474" fontSize="10" fontStyle="italic" text="fabricante"/>
+	<s:Label x="575" y="200" color="#767474" fontSize="10" fontStyle="italic" text="no. serie"/>
+	<s:Label x="47" y="216" text="Equipo :"/>
+	<s:TextInput id="_nombreTipo" x="98" y="211" width="150" contentBackgroundColor="#e7e7e7"
+				 enabled="false" fontStyle="italic" text="{_equipo._nombreTipo}"/>
+	<s:TextInput id="_nombreMarca" x="258" y="211" width="150" contentBackgroundColor="#e7e7e7"
+				 enabled="false" fontStyle="italic" text="{_equipo._nombreMarca}"/>
+	<s:Label x="655" y="199" color="#767474" fontSize="10" fontStyle="italic" text="año de fab."/>
+	<s:TextInput id="_anioFabricacion" x="654" y="211" width="70" contentBackgroundColor="#e7e7e7"
+				 enabled="false" fontStyle="italic" text="{_equipo._anioFabricacion}"/>
+	<s:ComboBox id="_idAreaSoporteTecnico" x="416" y="21" width="150" change="dataChange();"
+				contentBackgroundColor="#E7E7E7" dataProvider="{SystemGlobals.AREAS_SOPORTE}"
+				enabled="false" fontWeight="bold" labelField="_areaSoporteTecnico"
+				selectedIndex="{_orderHeader._idAreaSoporteTecnico}"></s:ComboBox>
+	<s:ComboBox id="_idTipoServicio" x="573" y="21" width="151" change="dataChange();"
+				contentBackgroundColor="#E7E7E7" dataProvider="{SystemGlobals.TIPOS_SERVICIO}"
+				enabled="false" fontWeight="bold" labelField="_nombre"
+				selectedIndex="{_orderHeader._idTipoServicio}"></s:ComboBox>
+	<s:ComboBox id="_idEstatus" x="327" y="21" width="81" change="dataChange();"
+				contentBackgroundColor="#E7E7E7" dataProvider="{SystemGlobals.ORDEN_ESTATUS}"
+				enabled="false" fontWeight="bold" labelField="_nombreEstatus"
+				selectedIndex="{_orderHeader._idEstatus}"></s:ComboBox>
+	<s:TextInput id="_idOrden" x="97" y="22" width="70" contentBackgroundColor="#E7E7E7"
+				 enabled="false" fontWeight="bold" text="{_orderHeader._idOrden}" textAlign="center"/>
+	<s:TextInput id="_fechaCreacion" x="173" y="22" width="70" contentBackgroundColor="#E7E7E7"
+				 enabled="false" fontWeight="bold" text="{_orderHeader._fechaCreacion}" textAlign="center"/>
+	<s:TextInput id="_horaCreacion" x="249" y="22" width="70" contentBackgroundColor="#E7E7E7"
+				 enabled="false" fontWeight="bold" text="{_orderHeader._horaCreacion}" textAlign="center"/>
 	
 	<fx:Script>
 		<![CDATA[
@@ -204,6 +210,7 @@
 			private var _idOrdenSelected:Number		= -1;
 			[Bindable] private var _cliente:Object = {};
 			[Bindable] private var _equipo:Object = {};
+			[Bindable] private var _orderHeader:Object = {};
 			[Bindable] private var _fallasReportadas:ArrayCollection = new ArrayCollection();
 			[Bindable] private var _prediagnosticos:ArrayCollection = new ArrayCollection();
 			//-----------Local Vars -----------
@@ -298,28 +305,8 @@
 			public function initView():void{
 				forceImports();
 				_MainService = _webApplication.getService(_serviceName);
-				_Data.exceptions = ["_creado","_modificado","_creadoPor","_creado",	"_modificado","_creadoPor",
-					"_modificadoPor","_descripcionClienteFalla","_idCodigoError","_idCliente","_idContacto",
-					"_idTipoServicio","_idAreaSoporteTecnico","_idEstatus","_idEmpleado","_idCliente","_idContacto",
-					"_idEquipo","_fechaHabloCon","_idEquipo","_nombreTecnico","_idRefaccion",
-					"_importe","_totalRemisionar","_noRemision","_responsableAsignacionDeFecha",
-					"_domicilioServicio","_fechaServicioInicial","_formaPago","_fechaPagoInicial",
-					"_tecnicoAsignado","_seInformoVisitaA","_fechaPromesaVisita",
-					"_nombreTecnicoAsignado","_totalFacturar","_noFactura",
-					"_idTecnico","_habloCon","_fechaHablo","_horaHablo","_prediagnosticoNumeroTiempo","_prediagnosticoUnidadTiempo",
-					"_servicioNumeroTiempo","_servicioUnidadTiempo",
-					"_cantidadInicial","_responsableCotizacion",
-					"_tipoCambio","_fechaCotizacion","_fechaPreCotizacion","_cantidadInicial","_responsableCotizacion","_responsablePreCotizacion",
-					"_tipoTransporte","_costoManoObra","_costoRefaccion","_costoTransporte","_costoHotel","_costoComidas","_costoFleteSobreEquipaje",
-					"_costoGastosDiversos","_observacionesCotDiag","_cantidadComplemento","_importePagoInicial","_fechaPrePagoInicial",
-					"_idTecnicoDiagnostico","_tiempoUnidadDiagnostico","_tiempoNumeroDiagnostico",
-					"_preImporte","_fechaPagoInicial","_diasReparacion",
-					"_tieneServicio","_tienePrediagnostico","_tieneCotizacionPrediagnostico","_tieneVentaPrediagnostico","_tieneConfirmacion",
-					"_tieneDiagnostico","_tieneCotizacionDiagnostico","_tieneVentaDiagnostico",
-					"_fechaDepositoVta","_importeDepositoVta","_formaPagoVta","_observacionesComplVta","_observacionesFacVta",
-					"_fechaServInicial","_horaServInicial","_finServicio"
-				];
-				_DataFailure.exceptions = ["_idOrdenFalla","_idOrden","_falla","_creado","_modificado","_creadoPor","_modificadoPor","_idFamiliaFalla"];
+				_Data.exceptions = [];
+				_DataFailure.exceptions = ["_idOrdenFalla","_idOrden","_falla","_creado","_modificado","_creadoPor","_modificadoPor","_idFamiliaFalla","_fallaReal","_codigoReal"];
 				_MainService.addEventListener(FaultEvent.FAULT,onFault);
 				initData();
 				addValidations();
@@ -335,7 +322,7 @@
 			
 			
 			private function initData():void{
-				_MainService.getFields();
+				_MainService.getFields("columnsFromExecutionServiceForm");
 				_MainService.getFailureFields();
 				_MainService.getFields.addEventListener(ResultEvent.RESULT,onGetFieldsResult);
 				_MainService.getFailureFields.addEventListener(ResultEvent.RESULT,onGetFailureFieldsResult);
@@ -357,6 +344,7 @@
 					var params:Object = extraUpdateData(_Data.makeData());
 					var dDate:String = _fechaFinServicio.text + " " + _horaFinServicio.text;
 					params._finServicio = dDate;
+					params["_idOrden"] = _idOrdenSelected;
 					_MainService.updateRecord(params);
 					_MainService.updateRecord.addEventListener(ResultEvent.RESULT,onUpdateComplete);
 				}else{
@@ -451,8 +439,49 @@
 				Alert.show("No hay registro selecionado","Error");
 				}*/
 			}
-			//-------------------------------- ResultsEvents --------------------------------------		
 			
+			private function getFailureData():void{
+				_MainService.getFailuresFromOrder(_idOrdenSelected);
+				_MainService.getFailuresFromOrder.addEventListener(ResultEvent.RESULT,onGetFailuresOrderResult);
+				_dataReady = true;
+				resetFailureBooleans();
+			}
+			
+			private function getData():void{
+				_MainService.getClientFromOrder(_idOrdenSelected);
+				_MainService.getSpecificOrderHeader(_idOrdenSelected);
+				_MainService.getExecutionData(_idOrdenSelected);
+				_MainService.getEquipmentFromOrder(_idOrdenSelected);
+				
+				_MainService.getExecutionData.addEventListener(ResultEvent.RESULT,onGetExecutionResult);
+				_MainService.getSpecificOrderHeader.addEventListener(ResultEvent.RESULT,onGetOrderResult);
+				_MainService.getClientFromOrder.addEventListener(ResultEvent.RESULT,onGetDataClientResult);
+				_MainService.getEquipmentFromOrder.addEventListener(ResultEvent.RESULT,onGetDataSystemResult);
+				resetBooleans();
+			}
+			
+			private function onFault(e:FaultEvent):void{
+				Alert.show(e.fault.faultString,"Error");
+			}
+			
+			private function onUpdateComplete(e:ResultEvent):void{
+				_MainService.updateRecord.removeEventListener(ResultEvent.RESULT,onUpdateComplete);
+				//Catalogs.reload();
+				getData();
+			}
+			
+			private function onUpdateFailureComplete(e:ResultEvent):void{
+				_MainService.updateFailureRecord.removeEventListener(ResultEvent.RESULT,onUpdateFailureComplete);
+				getFailureData();
+			}
+			
+			private function onDeleteDiagnosticComplete(e:ResultEvent):void{
+				_MainService.deleteDiagnosticRecord.removeEventListener(ResultEvent.RESULT,onDeleteDiagnosticComplete);
+				_dataIndex = _DataResult.length-2;
+				onFallaSelect();
+			}
+			
+			//-------------------------------- ResultsEvents --------------------------------------	
 			private function onGetFieldsResult(e:ResultEvent):void{
 				_MainService.getFields.removeEventListener(ResultEvent.RESULT,onGetFieldsResult);
 				if(e){
@@ -481,47 +510,8 @@
 				_DataDiagnosticoResult= new ArrayCollection();
 			}
 			
-			private function getFailureData():void{
-				_MainService.getFailuresFromOrder(_idOrdenSelected);
-				_MainService.getFailuresFromOrder.addEventListener(ResultEvent.RESULT,onGetFailuresOrderResult);
-				_dataReady = true;
-				resetFailureBooleans();
-			}
-			
-			private function getData():void{
-				_MainService.getClientFromOrder(_idOrdenSelected);
-				_MainService.getSpecificOrder(_idOrdenSelected);
-				_MainService.getEquipmentFromOrder(_idOrdenSelected);
-				_MainService.getSpecificOrder.addEventListener(ResultEvent.RESULT,onGetOrderResult);
-				_MainService.getClientFromOrder.addEventListener(ResultEvent.RESULT,onGetDataClientResult);
-				_MainService.getEquipmentFromOrder.addEventListener(ResultEvent.RESULT,onGetDataSystemResult);
-				resetBooleans();
-			}
-			
-			private function onFault(e:FaultEvent):void{
-				Alert.show(e.fault.faultString,"Error");
-			}
-			
-			private function onUpdateComplete(e:ResultEvent):void{
-				_MainService.updateRecord.removeEventListener(ResultEvent.RESULT,onUpdateComplete);
-				//Catalogs.reload();
-				getData();
-			}
-			
-			private function onUpdateFailureComplete(e:ResultEvent):void{
-				_MainService.updateFailureRecord.removeEventListener(ResultEvent.RESULT,onUpdateFailureComplete);
-				getFailureData();
-			}
-			
-			private function onDeleteDiagnosticComplete(e:ResultEvent):void{
-				_MainService.deleteDiagnosticRecord.removeEventListener(ResultEvent.RESULT,onDeleteDiagnosticComplete);
-				_dataIndex = _DataResult.length-2;
-				onFallaSelect();
-			}
-			
-			//-------------------------------- ResultsEvents --------------------------------------	
-			private function onGetOrderResult(e:ResultEvent):void{
-				_MainService.getSpecificOrder.removeEventListener(ResultEvent.RESULT,onGetOrderResult);
+			private function onGetExecutionResult(e:ResultEvent):void{
+				_MainService.getExecutionData.removeEventListener(ResultEvent.RESULT,onGetExecutionResult);
 				_DataResult = Converter.arrayConverter(e.result);
 				if(_DataResult.length==0) {
 					Alert.show("No existe orden con el id especificado","Atención")
@@ -529,6 +519,16 @@
 					_Data.loadData(_DataResult[0]); //Sólo debe de haber un registro o ninguno
 				}
 				_dataOrdenReady = true;				
+			}
+			
+			private function onGetOrderResult(e:ResultEvent):void{
+				_MainService.getSpecificOrderHeader.removeEventListener(ResultEvent.RESULT,onGetOrderResult);
+				_DataResult = Converter.arrayConverter(e.result);
+				if(_DataResult.length==0) {
+					Alert.show("No existe orden con el id especificado","Atención")
+				}else{
+					_orderHeader = _DataResult[0];//Sólo debe de haber un registro o ninguno
+				}
 			}
 			
 			public function onGetFailuresOrderResult(e:ResultEvent):void{

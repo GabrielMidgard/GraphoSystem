@@ -155,9 +155,8 @@
 			
 			
 			private function initData():void{
-				//_MainService.getFields();
-				//_MainService.getFields.addEventListener(ResultEvent.RESULT,onGetFieldsResult);
-				getData();
+				_MainService.getFields("noneColumns");
+				_MainService.getFields.addEventListener(ResultEvent.RESULT,onGetFieldsResult);
 				_dataReady = false;
 			}
 			
@@ -222,7 +221,7 @@
 			private function recordSpare():void{
 				if(Valid.validateAll()){
 					if(_refaccion.selectedItem != null && _refaccion.selectedItem != undefined && _refaccion.selectedItem._idRefaccion != -1){
-						_MainService.recordSpare({_idDiagnostico:_idDiagnostico,_idRefaccion:_refaccion.selectedItem._idRefaccion});
+						_MainService.recordSpare({_idDiagnostico:_idDiagnostico,_idRefaccion:_refaccion.selectedItem._idRefaccion,_precioRefaccion:_refaccion.selectedItem._precio});
 						_MainService.recordSpare.addEventListener(ResultEvent.RESULT,onRecordSpareComplete);
 						_dataReady = false;	
 					}

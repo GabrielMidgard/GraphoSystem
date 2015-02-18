@@ -3,7 +3,7 @@
 	xmlns:fx="http://ns.adobe.com/mxml/2009" 
 	xmlns:s="library://ns.adobe.com/flex/spark" 
 	xmlns:mx="library://ns.adobe.com/flex/mx" 
-	width="1274" height="700" 
+	width="1100" height="734" 
 	horizontalCenter="0" 
 	title="Administración de Empleados" >
 
@@ -191,9 +191,14 @@
 				//params["_newsImage"] = _image;
 				params['_fechaNacimiento'] = year.selectedItem.label+'-'+month.selectedItem.value+'-'+day.selectedItem.value;	
 				
-				params['_vencimientoLicencia'] = expira_year.selectedItem.label+'-'+expira_month.selectedItem.value+'-'+expira_day.selectedItem.value;	
-				
-							
+				if(expira_year.selectedItem != null){
+					params['_vencimientoLicencia'] = expira_year.selectedItem.label+'-'+expira_month.selectedItem.value+'-'+expira_day.selectedItem.value;	
+				}				
+				if(_idCompania == -1){
+					if(_idCompaniaCombo.selectedItem != null){
+						_idCompania = _idCompaniaCombo.selectedItem._idCompania;
+					}
+				}
 				params['_idCompania'] 		= _idCompania;
 				params['_idArea'] 			= _idArea;
 				params['_idDepartamento'] 	= _idDepartamento;
@@ -218,9 +223,19 @@
 				
 			}
 			
-			private function extraUpdateData(params:Object):Object{	
-				params['_fechaNacimiento'] = year.selectedItem.label+'-'+month.selectedItem.value+'-'+day.selectedItem.value;	
-				params['_vencimientoLicencia'] = expira_year.selectedItem.label+'-'+expira_month.selectedItem.value+'-'+expira_day.selectedItem.value;	
+			private function extraUpdateData(params:Object):Object{
+				if(year != null){
+					params['_fechaNacimiento'] = year.selectedItem.label+'-'+month.selectedItem.value+'-'+day.selectedItem.value;	
+				}
+				if(expira_year != null){
+					params['_vencimientoLicencia'] = expira_year.selectedItem.label+'-'+expira_month.selectedItem.value+'-'+expira_day.selectedItem.value;	
+				}
+				if(_idCompania == -1){
+					if(_idCompaniaCombo.selectedItem != null){
+						_idCompania = _idCompaniaCombo.selectedItem._idCompania;
+					}
+				}
+				
 				params['_idCompania'] 		= _idCompania;
 				params['_idArea'] 			= _idArea;
 				params['_idDepartamento'] 	= _idDepartamento;
@@ -320,6 +335,13 @@
 					_accessType = 	_webApplication.user.accessType;		
 					PopUpManager.centerPopUp(this);
 				}
+				_idCompaniaCombo.selectedIndex = 0;
+			}
+			
+			public function companiaChange():void{
+				if(_idCompaniaCombo.selectedItem != null){
+					_idCompania = _idCompaniaCombo.selectedItem._idCompania;	
+				}
 			}
 			
 			public function imageUploadReady():void{				
@@ -337,7 +359,7 @@
 			private function openPuesto():void{
 				_selectMode = true;
 				StaticEvent.addEventListener(SelectionEvent.SELECTION_COMPLETE,onPuestoSelectcomplete);
-				openPopUp("Catalogo_Puestos",true);
+				openPopUp("empresa.Empresa_Puestos",true);
 			}
 			
 			private function openCeco():void{
@@ -349,7 +371,7 @@
 			}
 			
 			private function openUbicacion():void{
-				openPopUp("Catalogo_Ubicaciones");
+				openPopUp("empresa.Empresa_Ubicaciones");
 			}
 			
 			private function onPuestoSelectcomplete(e:SelectionEvent):void{ 
@@ -377,8 +399,6 @@
 				_updateData = true;
 				StaticEvent.removeEventListener(SelectionEvent.SELECTION_COMPLETE,onPuestoSelectcomplete);
 			}
-			
-			
 			
 
 			// ------------------- View Extra Data -------------------------------
@@ -648,87 +668,93 @@
 			
 		]]>
 	</fx:Script>
-	<s:Image x="10" y="10" width="138" height="177" source="{_picture}" toolTip="{_picture}"  id="_img" />
-	<s:Button id="_fotografiaBt" x="9" y="195" width="123" label="   Fotografía"
+	<s:Image id="_img" visible="false" x="10" y="10" width="138" height="177" source="{_picture}"
+			 toolTip="{_picture}"/>
+	<s:Button id="_fotografiaBt" visible="false" x="9" y="195" width="123" label="   Fotografía"
 			  click="getPicture();"
 			  enabled="{_dataReady&amp;&amp;_camReady&amp;&amp;_accessType==-1}"
 			  skinClass="skins.Custom_Button_Light_Skin"/>
-	<s:Button x="9" y="226" width="150" label="   Firma" click="openPopUp('empleados.Empleados_Firma',true)"
+	<s:Button visible="false" x="9" y="226" width="150" label="   Firma"
+			  click="openPopUp('empleados.Empleados_Firma',true)"
 			  enabled="{_dataReady&amp;&amp;_accessType==-1}"
 			  skinClass="skins.Custom_Button_Light_Skin"/>
-	<s:Button x="9" y="257" width="96" label="   Credencial"
+	<s:Button visible="false" x="9" y="257" width="96" label="   Credencial"
 			  skinClass="skins.Custom_Button_Light_Skin"/>
-	<s:Button x="107" y="257" width="25" click="openPopUp('empleados.Empleados_Credenciales',true)"
+	<s:Button visible="false" x="107" y="257" width="25"
+			  click="openPopUp('empleados.Empleados_Credenciales',true)"
 			  enabled="{_dataReady&amp;&amp;_accessType==-1}"
 			  skinClass="skins.Custom_Button_Light_Skin">
 		<s:icon>@Embed(source='../../assets/Icons/Buttons/Cred_Horizontal.png')</s:icon>
 	</s:Button>
-	<s:Button x="134" y="257" width="25" click="openPopUp('empleados.Empleados_Credenciales_Vertical',true)"
+	<s:Button visible="false" x="134" y="257" width="25"
+			  click="openPopUp('empleados.Empleados_Credenciales_Vertical',true)"
 			  enabled="{_dataReady&amp;&amp;_accessType==-1}"
 			  skinClass="skins.Custom_Button_Light_Skin">
 		<s:icon>@Embed(source='../../assets/Icons/Buttons/Cred_Vertical.png')</s:icon>
 	</s:Button>
-	<s:Button x="134" y="195" width="25" click="openImageEditor()"
+	<s:Button visible="false" x="134" y="195" width="25" click="openImageEditor()"
 			  enabled="{_dataReady&amp;&amp;_accessType==-1&amp;&amp;!_newData}"
 			  skinClass="skins.Custom_Button_Light_Skin">
 		<s:icon>@Embed(source='../assets/Icons/Buttons/UpLoad.png')</s:icon>
 	</s:Button>
-	<s:Button x="9" y="288" width="150" label="   Vivienda" click="openPopUp('Inmuebles',true)"
-			  enabled="{_dataReady}" skinClass="skins.Custom_Button_Light_Skin"/>
-	<s:Button x="9" y="319" width="150" label="   Intereses" click="openPopUp('Intereses',true)"
-			  enabled="{_dataReady}" skinClass="skins.Custom_Button_Light_Skin"/>
-	<s:Button x="9" y="381" width="150" label="   Historial Laboral"
+	<s:Button visible="false" x="9" y="288" width="150" label="   Vivienda"
+			  click="openPopUp('Inmuebles',true)" enabled="{_dataReady}"
+			  skinClass="skins.Custom_Button_Light_Skin"/>
+	<s:Button visible="false" x="9" y="319" width="150" label="   Intereses"
+			  click="openPopUp('Intereses',true)" enabled="{_dataReady}"
+			  skinClass="skins.Custom_Button_Light_Skin"/>
+	<s:Button visible="false" x="9" y="381" width="150" label="   Historial Laboral"
 			  click="openPopUp('empleados.Empleados_Historial_Laboral',true)" enabled="{_dataReady}"
 			  skinClass="skins.Custom_Button_Light_Skin"/>
-	<s:Label x="232" y="430" text="CIA :" />
-<s:TextInput x="603" y="10" id="_imss" change="dataChange();" width="160" tabIndex="2"/>
-	<s:TextInput x="435" y="46" id="_rfc" change="dataChange();" width="160" editable="true" tabIndex="4"/>
-	<s:Label x="437" y="36" text="rfc"  fontStyle="italic" fontSize="9" color="#8B8B8B"/>
-<s:Label x="604" y="37" text="curp"  fontStyle="italic" fontSize="9" color="#8B8B8B"/>
-<s:TextInput x="604" y="46" id="_curp" change="dataChange();" width="159" tabIndex="5"/>
-<s:Label x="199" y="97" text="Empleado :" />
-	<s:Label x="203" y="165" text="Dirección :" />
-<s:TextInput x="265" y="90" id="_nombre" change="dataChange();" width="160" tabIndex="6"/>
-	<s:Label x="544" y="222" text="E- Mail :" />
-	<s:Label x="215" y="227" text="Celular :" />
-	<s:TextInput x="603" y="220" id="_mail" change="dataChange();" width="160" tabIndex="21"/>
-	<s:TextInput x="265" y="220" id="_celular" change="dataChange();" width="160" tabIndex="20"/>
-<s:Label x="265" y="80" text="nombre(s)"  color="#8B8B8B" fontSize="10" fontStyle="italic"/>
-	<s:Label x="265" y="148" text="calle"  color="#8B8B8B" fontSize="10" fontStyle="italic"/>
-	<s:Label x="435" y="148" text="número"  color="#8B8B8B" fontSize="10" fontStyle="italic"/>
-	<s:Label x="435" y="185" text="estado"  color="#8B8B8B" fontSize="10" fontStyle="italic"/>
-	<s:Label x="265" y="184" text="municipio"  color="#8B8B8B" fontSize="10" fontStyle="italic"/>
-	<s:Label x="603" y="184" text="teléfono"  color="#8B8B8B" fontSize="10" fontStyle="italic"/>
-	<s:Label x="704" y="147" text="c.p."  color="#8B8B8B" fontSize="10" fontStyle="italic"/>
-	<s:Label x="531" y="148" text="colonia"  color="#8B8B8B" fontSize="10" fontStyle="italic"/>
-	<s:Label x="437" y="80" text="paterno"  color="#8B8B8B" fontSize="10" fontStyle="italic"/>
-	<s:Label x="605" y="80" text="materno"  color="#8B8B8B" fontSize="10" fontStyle="italic"/>
-<s:TextInput x="436" y="90" id="_paterno" change="dataChange();" width="160" tabIndex="7"/>
-<s:TextInput x="603" y="90" id="_materno" change="dataChange();" width="160" tabIndex="8"/>
-<s:Label x="177" y="18" text="No. Empleado :" />
-	<s:Label x="213" y="53" text="Ingreso :" />
-	<s:Label x="547" y="16" text="I.M.S.S :" />
-<s:TextInput x="265" y="11" id="_numFortia" change="dataChange();" width="58" editable="true" tabIndex="1"/>
-<s:TextInput x="265" y="158" id="_calle" change="dataChange();" width="160" tabIndex="13"/>
-<s:TextInput x="529" y="158" id="_colonia" change="dataChange();" width="160" tabIndex="15"/>
-<s:TextInput x="434" y="158" id="_numero" change="dataChange();" width="84" tabIndex="14"/>
-<s:TextInput x="703" y="158" id="_cp" change="dataChange();" width="60" tabIndex="16"/>
-<s:TextInput x="434" y="196" id="_estado" change="dataChange();" width="160" tabIndex="18"/>
-<s:TextInput x="265" y="194" id="_municipio" change="dataChange();" width="160" tabIndex="17"/>
-<s:Label x="616" y="367" text="Tipo Sangre :" />
-	<s:Label x="613" y="337" text="Tel :" />
-<s:ComboBox  x="693" y="362" id="_tipoSangre" change="dataChange();" width="70" dataProvider="{Constantes.TiposSangre}" labelField="label" tabIndex="28"/>
-	<s:ComboBox  x="603" y="120" id="_sexo" change="dataChange();" width="160" dataProvider="{Constantes.Sexos}" labelField="label" tabIndex="12"/>
-<s:Label x="189" y="339" text="Emergencia :" />
-<s:TextInput x="265" y="332" id="_emergencia" change="dataChange();" width="328" tabIndex="25"/>
-	<s:TextInput x="265" y="362" id="_alergias" change="dataChange();" width="328" tabIndex="27"/>
-<s:Label x="209" y="369" text="Alergias :" />
-<s:TextInput x="603" y="194" id="_telCasa" change="dataChange();" width="160" tabIndex="19"/>
-	<s:TextInput x="644" y="332" id="_telEme" change="dataChange();" width="119" tabIndex="26"/>
-<s:Label x="188" y="127" text="Fecha Nac.  :" />
-<s:Label x="552" y="122" text="Sexo : " />
+	<s:Label x="65" y="457" text="CIA :" />
+<s:TextInput x="436" y="41" id="_imss" change="dataChange();" width="160" tabIndex="2"/>
+	<s:TextInput x="268" y="77" id="_rfc" change="dataChange();" width="160" editable="true" tabIndex="4"/>
+	<s:Label x="270" y="67" text="rfc"  fontStyle="italic" fontSize="9" color="#8B8B8B"/>
+<s:Label x="437" y="68" text="curp"  fontStyle="italic" fontSize="9" color="#8B8B8B"/>
+<s:TextInput x="437" y="77" id="_curp" change="dataChange();" width="159" tabIndex="5"/>
+<s:Label x="32" y="125" text="Empleado :" />
+	<s:Label x="36" y="193" text="Dirección :" />
+<s:TextInput x="98" y="118" id="_nombre" change="dataChange();" width="160" tabIndex="6"/>
+	<s:Label x="377" y="250" text="E- Mail :" />
+	<s:Label x="48" y="255" text="Celular :" />
+	<s:TextInput x="436" y="248" id="_mail" change="dataChange();" width="160" tabIndex="21"/>
+	<s:TextInput x="98" y="248" id="_celular" change="dataChange();" width="160" tabIndex="20"/>
+<s:Label x="98" y="108" text="nombre(s)"  color="#8B8B8B" fontSize="10" fontStyle="italic"/>
+	<s:Label x="98" y="176" text="calle"  color="#8B8B8B" fontSize="10" fontStyle="italic"/>
+	<s:Label x="268" y="176" text="número"  color="#8B8B8B" fontSize="10" fontStyle="italic"/>
+	<s:Label x="268" y="213" text="estado"  color="#8B8B8B" fontSize="10" fontStyle="italic"/>
+	<s:Label x="98" y="212" text="municipio"  color="#8B8B8B" fontSize="10" fontStyle="italic"/>
+	<s:Label x="436" y="212" text="teléfono"  color="#8B8B8B" fontSize="10" fontStyle="italic"/>
+	<s:Label x="537" y="175" text="c.p."  color="#8B8B8B" fontSize="10" fontStyle="italic"/>
+	<s:Label x="364" y="176" text="colonia"  color="#8B8B8B" fontSize="10" fontStyle="italic"/>
+	<s:Label x="270" y="108" text="paterno"  color="#8B8B8B" fontSize="10" fontStyle="italic"/>
+	<s:Label x="438" y="108" text="materno"  color="#8B8B8B" fontSize="10" fontStyle="italic"/>
+<s:TextInput x="269" y="118" id="_paterno" change="dataChange();" width="160" tabIndex="7"/>
+<s:TextInput x="436" y="118" id="_materno" change="dataChange();" width="160" tabIndex="8"/>
+<s:Label x="10" y="49" text="No. Empleado :" />
+	<s:Label x="46" y="84" text="Ingreso :" />
+	<s:Label x="380" y="47" text="I.M.S.S :" />
+<s:TextInput x="98" y="42" id="_numFortia" change="dataChange();" width="58" editable="true" tabIndex="1"/>
+<s:TextInput x="98" y="186" id="_calle" change="dataChange();" width="160" tabIndex="13"/>
+<s:TextInput x="362" y="186" id="_colonia" change="dataChange();" width="160" tabIndex="15"/>
+<s:TextInput x="267" y="186" id="_numero" change="dataChange();" width="84" tabIndex="14"/>
+<s:TextInput x="536" y="186" id="_cp" change="dataChange();" width="60" tabIndex="16"/>
+<s:TextInput x="267" y="224" id="_estado" change="dataChange();" width="160" tabIndex="18"/>
+<s:TextInput x="98" y="222" id="_municipio" change="dataChange();" width="160" tabIndex="17"/>
+<s:Label x="449" y="394" text="Tipo Sangre :" />
+	<s:Label x="446" y="364" text="Tel :" />
+<s:ComboBox  x="526" y="389" id="_tipoSangre" change="dataChange();" width="70" dataProvider="{Constantes.TiposSangre}" labelField="label" tabIndex="28"/>
+	<s:ComboBox  x="436" y="148" id="_sexo" change="dataChange();" width="160" dataProvider="{Constantes.Sexos}" labelField="label" tabIndex="12"/>
+<s:Label x="22" y="366" text="Emergencia :" />
+<s:TextInput x="98" y="359" id="_emergencia" change="dataChange();" width="328" tabIndex="25"/>
+	<s:TextInput x="98" y="389" id="_alergias" change="dataChange();" width="328" tabIndex="27"/>
+<s:Label x="42" y="396" text="Alergias :" />
+<s:TextInput x="436" y="222" id="_telCasa" change="dataChange();" width="160" tabIndex="19"/>
+	<s:TextInput x="477" y="359" id="_telEme" change="dataChange();" width="119" tabIndex="26"/>
+<s:Label x="21" y="155" text="Fecha Nac.  :" />
+<s:Label x="385" y="150" text="Sexo : " />
 
-	<s:DataGrid height="504" dataProvider="{_DataResult}" id="_dataList" selectionChange="onDataSelect();" enabled="{_dataReady&amp;&amp;!_newData&amp;&amp;!_updateData}" y="76" width="474" x="790">
+	<s:DataGrid height="570" dataProvider="{_DataResult}" id="_dataList" selectionChange="onDataSelect();" enabled="{_dataReady&amp;&amp;!_newData&amp;&amp;!_updateData}" y="73" width="474" x="604">
 		<s:columns>	
 			<s:ArrayList>	
 				<s:GridColumn headerText="A/B" width="40" >			
@@ -748,108 +774,114 @@
 		</s:columns>
 	</s:DataGrid>
 	
-	<s:Button label="Nuevo" width="80" enabled="{_dataReady}" visible="{!_newData&amp;&amp;!_updateData&amp;&amp;_accessType==-1}" click="newData();" y="621" x="265" id="button5"/>
-	<s:Button label="Cancelar" width="80" enabled="{_dataReady}" visible="{_newData||_updateData}" click="cancel();" y="621" x="353"/>
-	<s:Button label="Aceptar" width="80" enabled="{_dataReady}" visible="{_newData}" click="createData();" y="621" x="265" id="button4"/>
-	<s:Button label="Eliminar" width="80" enabled="{_dataReady&amp;&amp;!_newData}" visible="{!_newData&amp;&amp;!_updateData&amp;&amp;_accessType==-1}" click="deleteDataAlert();" y="621" x="353" id="button2"/>
-	<s:Button label="Actualizar" width="80" enabled="{_dataReady&amp;&amp;!_newData&amp;&amp;_updateData}" visible="{_updateData&amp;&amp;!_newData}" click="updateData();" y="621" x="265" id="button3"/>
-	<s:Button label="Regresar" click="closeWindow();" width="145"  enabled="{!_newData}" y="588" x="1117" id="button1"/>
+	<s:Button label="Nuevo" width="80" enabled="{_dataReady}" visible="{!_newData&amp;&amp;!_updateData&amp;&amp;_accessType==-1}" click="newData();" y="654" x="97" id="button5"/>
+	<s:Button label="Cancelar" width="80" enabled="{_dataReady}" visible="{_newData||_updateData}" click="cancel();" y="654" x="185"/>
+	<s:Button label="Aceptar" width="80" enabled="{_dataReady}" visible="{_newData}" click="createData();" y="654" x="97" id="button4"/>
+	<s:Button label="Eliminar" width="80" enabled="{_dataReady&amp;&amp;!_newData}" visible="{!_newData&amp;&amp;!_updateData&amp;&amp;_accessType==-1}" click="deleteDataAlert();" y="654" x="185" id="button2"/>
+	<s:Button label="Actualizar" width="80" enabled="{_dataReady&amp;&amp;!_newData&amp;&amp;_updateData}" visible="{_updateData&amp;&amp;!_newData}" click="updateData();" y="654" x="97" id="button3"/>
+	<s:Button label="Regresar" click="closeWindow();" width="145"  enabled="{!_newData}" y="654" x="933" id="button1"/>
 
-	<s:ComboBox 	x="858" id="_searchType" 	dataProvider="{_searchTypes}" 	width="160" y="41"/>
-	<s:TextInput 	x="1026" id="_searchField" 	change="search();" 		width="238" enabled="{!_newData}" y="41"/>
-	<s:Label x="790" text="Filtrar por :" textAlign="right" y="47"/>
-	<s:ComboBox x="265" y="120" id="day" dataProvider="{ConstantData.Days}" labelField="label" width="52" change="dataChange();" tabIndex="9"></s:ComboBox>
-	<s:ComboBox x="324" y="120" id="month" dataProvider="{ConstantData.Months}" labelField="label" width="104" change="dataChange();" tabIndex="10"></s:ComboBox>
-	<s:ComboBox x="436" y="120" id="year" dataProvider="{ConstantData.Years}" labelField="label" width="69" change="dataChange();" tabIndex="11"></s:ComboBox>
-	<s:CheckBox x="437" y="11" id="_verificacion" label="Verificación RH" click="dataChange();"/>
-	<s:CheckBox x="333" y="11" id="_estatus" label="activo / baja" click="dataChange();"/>
+	<s:ComboBox 	x="672" id="_searchType" 	dataProvider="{_searchTypes}" 	width="160" y="38"/>
+	<s:TextInput 	x="840" id="_searchField" 	change="search();" 		width="238" enabled="{!_newData}" y="38"/>
+	<s:Label x="604" text="Filtrar por :" textAlign="right" y="44"/>
+	<s:ComboBox x="98" y="148" id="day" dataProvider="{ConstantData.Days}" labelField="label" width="52" change="dataChange();" tabIndex="9"></s:ComboBox>
+	<s:ComboBox x="157" y="148" id="month" dataProvider="{ConstantData.Months}" labelField="label" width="104" change="dataChange();" tabIndex="10"></s:ComboBox>
+	<s:ComboBox x="269" y="148" id="year" dataProvider="{ConstantData.Years}" labelField="label" width="69" change="dataChange();" tabIndex="11"></s:ComboBox>
+	<s:CheckBox x="270" y="42" id="_verificacion" label="Verificación RH" click="dataChange();"/>
+	<s:CheckBox x="166" y="42" id="_estatus" label="activo / baja" click="dataChange();"/>
 
-	<s:TextInput x="434" y="264" id="_numeroLicencia" change="dataChange();" width="161" tabIndex="23"/>
-	<s:Label x="435" y="253" text="número"  color="#8B8B8B" fontSize="10" fontStyle="italic"/>
-	<s:Label x="265" y="251" text="tipo"  color="#8B8B8B" fontSize="10" fontStyle="italic"/>
-	<s:Label x="265" y="288" text="expira"  color="#8B8B8B" fontSize="10" fontStyle="italic"/>
-	<s:ComboBox  x="265" y="262" id="_tipoLicencia" change="dataChange();" width="158" dataProvider="{ConstantData.LicenceType}" labelField="label" tabIndex="22"/>
-	<s:ComboBox  x="265" y="390" id="_idDiscapacidad" change="dataChange();" width="161" dataProvider="{ConstantData.Discapacidades}" labelField="label" tabIndex="22"/>
-	<s:Label x="181" y="400" text="Discapacidad : "  height="20"/>
-	<s:Label x="209" y="269" text="Licencia : "  height="20"/>
-	<mx:TextInput x="265" y="46" id="_fechaIngreso" width="109" tabIndex="3"/>
-	<s:CheckBox x="13" y="291" enabled="false" id="_tieneInmueble"/>
-	<s:CheckBox x="13" y="322" enabled="false" id="_tieneIntereses"/>
-	<s:CheckBox x="14" y="384" enabled="false" id="_tieneHistorialLaboral"/>
-	<s:Button x="9" y="412" width="150" label="   Historial Familiar"
-			  click="openPopUp('empleados.Empleados_Dependientes_Economicos',true)" enabled="{_dataReady}"
-			  skinClass="skins.Custom_Button_Light_Skin"/>
-	<s:Button id="button14" x="9" y="443" width="150" label="   Perfil de Carrera"
+	<s:TextInput x="267" y="292" id="_numeroLicencia" change="dataChange();" width="161" tabIndex="23"/>
+	<s:Label x="268" y="281" text="número"  color="#8B8B8B" fontSize="10" fontStyle="italic"/>
+	<s:Label x="98" y="279" text="tipo"  color="#8B8B8B" fontSize="10" fontStyle="italic"/>
+	<s:Label x="98" y="315" text="expira"  color="#8B8B8B" fontSize="10" fontStyle="italic"/>
+	<s:ComboBox  x="98" y="290" id="_tipoLicencia" change="dataChange();" width="158" dataProvider="{ConstantData.LicenceType}" labelField="label" tabIndex="22"/>
+	<s:ComboBox  x="98" y="417" id="_idDiscapacidad" change="dataChange();" width="161" dataProvider="{ConstantData.Discapacidades}" labelField="label" tabIndex="22"/>
+	<s:Label x="14" y="427" text="Discapacidad : "  height="20"/>
+	<s:Label x="42" y="297" text="Licencia : "  height="20"/>
+	<mx:TextInput x="98" y="77" id="_fechaIngreso" width="109" tabIndex="3"/>
+	<s:CheckBox id="_tieneInmueble" visible="false" x="13" y="291" enabled="false"/>
+	<s:CheckBox id="_tieneIntereses" visible="false" x="13" y="322" enabled="false"/>
+	<s:CheckBox id="_tieneHistorialLaboral" visible="false" x="14" y="384" enabled="false"/>
+	<s:Button visible="false" x="9" y="412" width="150" label="   Historial Familiar"
+			  click="openPopUp('empleados.Empleados_Dependientes_Economicos',true)"
+			  enabled="{_dataReady}" skinClass="skins.Custom_Button_Light_Skin"/>
+	<s:Button id="button14" visible="false" x="9" y="443" width="150" label="   Perfil de Carrera"
 			  click="openPopUp('empleados.Empleados_Perfil_Carrera',true)" enabled="{_dataReady}"
 			  skinClass="skins.Custom_Button_Light_Skin"/>
-	<s:CheckBox x="14" y="446" enabled="false" id="_tienePerfil"/>
-	<s:Button id="button13" x="9" y="474" width="150" label="   Areas de Interés"
+	<s:CheckBox id="_tienePerfil" visible="false" x="14" y="446" enabled="false"/>
+	<s:Button id="button13" visible="false" x="9" y="474" width="150" label="   Areas de Interés"
 			  click="openPopUp('empleados.Empleados_Areas_Interes',true)" enabled="{_dataReady}"
 			  skinClass="skins.Custom_Button_Light_Skin"/>
-	<s:Button id="button0" x="9" y="505" width="150" label="   Competencias"
-			  click="openPopUp('empleados.Empleados.Empleados_Competencias',true)" enabled="{_dataReady}"
-			  skinClass="skins.Custom_Button_Light_Skin"/>
-	<s:CheckBox x="14" y="505" enabled="false" id="_tieneCompetencias"/>
-	<s:CheckBox x="14" y="477" enabled="false" id="_tieneAreasInteres"/>
-	<s:Button x="9" y="350" width="150" label="   Historial Académico"
+	<s:Button id="button0" visible="false" x="9" y="505" width="150" label="   Competencias"
+			  click="openPopUp('empleados.Empleados.Empleados_Competencias',true)"
+			  enabled="{_dataReady}" skinClass="skins.Custom_Button_Light_Skin"/>
+	<s:CheckBox id="_tieneCompetencias" visible="false" x="14" y="505" enabled="false"/>
+	<s:CheckBox id="_tieneAreasInteres" visible="false" x="14" y="477" enabled="false"/>
+	<s:Button visible="false" x="9" y="350" width="150" label="   Historial Académico"
 			  click="openPopUp('empleados.Empleados_Antecedentes_Academicos',true)"
 			  enabled="{_dataReady}" skinClass="skins.Custom_Button_Light_Skin"/>
-	<s:CheckBox x="14" y="353" enabled="false" id="_tieneHistorialAcademico"/>
-	<s:Button id="button12" visible="{_accessType==-1}" x="601" y="426" width="162"
-			  label="   Acceso al Sistema" click="openPopUp('Empleados_Accesos',true)"
+	<s:CheckBox id="_tieneHistorialAcademico" visible="false" x="14" y="353" enabled="false"/>
+	<s:Button id="button12" visible="{_accessType==-1}" x="434" y="453" width="162"
+			  label="   Acceso al Sistema" click="openPopUp('empleados.Empleados_Accesos',true)"
 			  enabled="{_dataReady}" skinClass="spark.skins.spark.ButtonSkin" />
-	<s:Button visible="{_accessType==-1}" x="790" y="588" width="37" click="initData();"
+	<s:Button visible="{_accessType==-1}" x="604" y="661" width="37" click="initData();"
 			  enabled="{_dataReady}" skinClass="spark.skins.spark.ButtonSkin" >
 		<s:icon>@Embed(source='../assets/Icons/Buttons/refresh.png')</s:icon>
 	</s:Button>
-	<s:CheckBox x="606" y="427" enabled="false" id="_tieneAcceso" visible="{_accessType==-1}"/>
-	<s:CheckBox x="14" y="415" enabled="false" id="_tieneDependientes"/>
-	<s:CheckBox x="13" y="198" enabled="false" id="_tieneFotografia"/>
-	<s:CheckBox x="13" y="229" enabled="false" id="_tieneFirma"/>
-	<s:CheckBox x="13" y="260" enabled="false" id="_tieneCredencial"/>
-	<s:Label x="177" y="496" text="Departamento :" />
-	<s:Label x="215" y="515" text="Puesto :" />
-	<s:Label x="215" y="515" text="Puesto :" />
-	<s:Label x="218" y="542" text="CECO :" />
-	<s:Label x="200" y="569" text="Categoría :" />
-	<s:TextInput x="265" y="508" width="326" id="_puesto" editable="false"/>
-	<s:Label x="227" y="459" text="Area :" />
-	<s:Button id="button10" visible="{_accessType==-1}" x="601" y="507" width="162"
+	<s:CheckBox x="439" y="454" enabled="false" id="_tieneAcceso" visible="{_accessType==-1}"/>
+	<s:CheckBox id="_tieneDependientes" visible="false" x="14" y="415" enabled="false"/>
+	<s:CheckBox id="_tieneFotografia" visible="false" x="13" y="198" enabled="false"/>
+	<s:CheckBox id="_tieneFirma" visible="false" x="13" y="229" enabled="false"/>
+	<s:CheckBox id="_tieneCredencial" visible="false" x="13" y="260" enabled="false"/>
+	<s:Label x="10" y="523" text="Departamento :" />
+	<s:Label x="48" y="542" text="Puesto :" />
+	<s:Label x="48" y="542" text="Puesto :" />
+	<s:Label x="50" y="575" text="CECO :" />
+	<s:Label x="32" y="602" text="Categoría :" />
+	<s:TextInput x="98" y="535" width="326" id="_puesto" editable="false"/>
+	<s:Label x="60" y="486" text="Area :" />
+	<s:Button id="button10" visible="{_accessType==-1}" x="434" y="534" width="162"
 			  label="Buscar Puesto" click="openPuesto()"
 			  icon="@Embed(source='../assets/Icons/Buttons/Search.png')"
 			  skinClass="spark.skins.spark.ButtonSkin" tabIndex="29" />
 
-	<s:Label x="197" y="597" text="Ubicación  :" />
-	<s:ComboBox x="265" y="589" id="_idUbicacion" change="dataChange();" width="328" dataProvider="{SystemGlobals.UBICACIONES}" labelField="_nombre" tabIndex="30"/>
-	<s:Button id="button11" visible="{_accessType==-1}" x="603" y="588" click="openUbicacion()"
+	<s:Label visible="false" x="29" y="630" text="Ubicación  :"/>
+	<s:ComboBox id="_idUbicacion" visible="false" x="97" y="622" width="328" change="dataChange();"
+				dataProvider="{SystemGlobals.UBICACIONES}" labelField="_nombre" tabIndex="30"/>
+	<s:Button id="button11" visible="false" x="435" y="621" click="openUbicacion()"
 			  icon="@Embed(source='../assets/Icons/Buttons/Edit.png')"
 			  skinClass="spark.skins.spark.ButtonSkin"/>
 
-	<s:Button x="940" y="10" label="Todos" click="chageRange(2)"
+	<s:Button x="754" y="7" label="Todos" click="chageRange(2)"
 			  skinClass="spark.skins.spark.ButtonSkin"/>
-	<s:Button x="865" y="10" label="En Baja" click="chageRange(1)" 
+	<s:Button x="679" y="7" label="En Baja" click="chageRange(1)" 
 			  skinClass="spark.skins.spark.ButtonSkin"/>
-	<s:Button x="790" y="10" label="Activos" click="chageRange(0)"
+	<s:Button x="604" y="7" label="Activos" click="chageRange(0)"
 			  skinClass="spark.skins.spark.ButtonSkin"/>
-	<s:TextInput x="265" y="425" width="326" id="_cia" editable="false"/>
-	<s:TextInput x="265" y="452" width="326" id="_area" editable="false"/>
-	<s:TextInput x="265" y="480" width="326" id="_depto" editable="false"/>
-	<s:TextInput x="265" y="535" width="326" id="_ceco" editable="false"/>
-	<s:TextInput x="265" y="562" width="326" id="_categoria" editable="false"/>
-	<s:ComboBox x="265" y="298" id="expira_day" dataProvider="{ConstantData.Days}" labelField="label" width="52" change="dataChange();" tabIndex="9"></s:ComboBox>
-	<s:ComboBox x="325" y="298" id="expira_month" dataProvider="{ConstantData.Months}" labelField="label" width="101" change="dataChange();" tabIndex="10"></s:ComboBox>
-	<s:ComboBox x="434" y="298" id="expira_year" dataProvider="{ConstantData.YearsUP}" labelField="label" width="69" change="dataChange();" tabIndex="11"></s:ComboBox>
-	<s:Button x="10" y="536" width="149" label="   Evaluaciones"
+	<s:TextInput x="98" y="452" width="326" id="_cia" editable="false"/>
+	<s:TextInput x="98" y="479" width="326" id="_area" editable="false"/>
+	<s:TextInput x="98" y="507" width="326" id="_depto" editable="false"/>
+	<s:TextInput x="97" y="568" width="326" id="_ceco" editable="false"/>
+	<s:TextInput x="97" y="595" width="326" id="_categoria" editable="false"/>
+	<s:ComboBox x="98" y="325" id="expira_day" dataProvider="{ConstantData.Days}" labelField="label" width="52" change="dataChange();" tabIndex="9"></s:ComboBox>
+	<s:ComboBox x="158" y="325" id="expira_month" dataProvider="{ConstantData.Months}" labelField="label" width="101" change="dataChange();" tabIndex="10"></s:ComboBox>
+	<s:ComboBox x="267" y="325" id="expira_year" dataProvider="{ConstantData.YearsUP}" labelField="label" width="69" change="dataChange();" tabIndex="11"></s:ComboBox>
+	<s:Button visible="false" x="10" y="536" width="149" label="   Evaluaciones"
 			  click="openPopUp('evaluaciones.Evaluaciones',true);" enabled="{_dataReady}"
 			  skinClass="skins.Custom_Button_Light_Skin"/>
-	<s:CheckBox x="14" y="533" enabled="false" id="_tieneEvaluaciones"/>
-	<s:Button x="10" y="567" width="149" label="   Expedientes"
+	<s:CheckBox id="_tieneEvaluaciones" visible="false" x="14" y="533" enabled="false"/>
+	<s:Button visible="false" x="10" y="567" width="149" label="   Expedientes"
 			  click="openPopUp('empleados.Empleados_Documentos',true);" enabled="{_dataReady}"
 			  skinClass="skins.Custom_Button_Light_Skin"/>
-	<s:CheckBox x="14" y="561" enabled="false" id="_tieneExpediente"/>
-	<s:Button x="10" y="598" width="149" label="Reportes"
+	<s:CheckBox id="_tieneExpediente" visible="false" x="14" y="561" enabled="false"/>
+	<s:Button visible="false" x="10" y="598" width="149" label="Reportes"
 			  click="openPopUp('reportes.Reportes_Manager',true);" enabled="{_dataReady}"
 			  skinClass="skins.Custom_Button_Light_Skin">
 	</s:Button>
+	<s:Label x="27" y="17" text="Compañía :" />
+	<s:ComboBox x="98" y="10" width="401" id="_idCompaniaCombo" dataProvider="{SystemGlobals.COMPANIAS}" labelField="_nombre" change="companiaChange()"></s:ComboBox>
+	<s:Button x="507" y="10" width="30" height="23" click="openPopUp('empresa.Empresa_Companias',true);"
+			  icon="@Embed(source='../assets/Icons/Buttons/Edit.png')"
+			  skinClass="spark.skins.spark.ButtonSkin"/>
 	
 </s:TitleWindow>

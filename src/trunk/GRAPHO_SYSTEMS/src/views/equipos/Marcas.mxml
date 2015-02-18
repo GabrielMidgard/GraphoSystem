@@ -4,7 +4,7 @@
 			   xmlns:mx="library://ns.adobe.com/flex/mx"
 			   xmlns:components="views.components.*"
 			   width="374" height="330" horizontalCenter="0"
-			   title="Marcas">
+			   title="Fabricantes">
 
 	
 <s:TextInput x="118" y="10" id="_nombreMarca" change="dataChange();" width="247" tabIndex="1"/>

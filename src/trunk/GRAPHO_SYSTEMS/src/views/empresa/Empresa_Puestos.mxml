@@ -2,7 +2,7 @@
 <s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009"
 			   xmlns:s="library://ns.adobe.com/flex/spark"
 			   xmlns:mx="library://ns.adobe.com/flex/mx"
-			   width="978" height="724" skinClass="skins.Custom_TileWindow_Skin"
+			   width="584" height="604" skinClass="skins.Custom_TileWindow_Skin"
 			   title="Administración de Puestos">
 	
 	<fx:Script>
@@ -471,8 +471,10 @@
 			}      
 			
 			public function deptosFilter(item:Object):Boolean{
-				var result:Boolean=false;    
-				if (!item._idArea.length|| item._idArea==_idArea.selectedItem._idArea) result=true;      
+				var result:Boolean=false;
+				if(item != null && item._idArea != null && _idArea.selectedItem != null){
+					if (!item._idArea.length|| item._idArea==_idArea.selectedItem._idArea) result=true;	
+				}
 				return result;
 			}
 			//----
@@ -507,12 +509,13 @@
 		]]>
 	</fx:Script>
 	
-	<s:Label x="433" y="248" text="Jefe Inmediato :" />
-	<s:TextInput x="527" y="244" id="_puestoInmediato" change="dataChange();" width="401" editable="false" tabIndex="4"/>
-	<s:Label x="407" y="17" text="Nombre del Puesto :" />
-	<s:TextInput x="527" y="10" id="_nombre" change="dataChange();" width="439" tabIndex="1"/>
+	<s:Label visible="false" x="36" y="248" text="Jefe Inmediato :"/>
+	<s:TextInput id="_puestoInmediato" visible="false" x="130" y="244" width="401"
+				 change="dataChange();" editable="false" tabIndex="4"/>
+	<s:Label x="10" y="17" text="Nombre del Puesto :" />
+	<s:TextInput x="130" y="10" id="_nombre" change="dataChange();" width="439" tabIndex="1"/>
 	
-	<s:DataGrid height="309" dataProvider="{_DataResult}" id="_dataList" selectionChange="onDataSelect();" enabled="{_dataReady&amp;&amp;!_newData&amp;&amp;!_updateData}" width="956" x="10" y="324" tabIndex="7">
+	<s:DataGrid height="309" dataProvider="{_DataResult}" id="_dataList" selectionChange="onDataSelect();" enabled="{_dataReady&amp;&amp;!_newData&amp;&amp;!_updateData}" width="559" x="10" y="202" tabIndex="7">
 		<s:columns>	
 			<s:ArrayList>						
 				<s:GridColumn headerText="Id" dataField="_idPuesto" width="40"/>
@@ -522,84 +525,92 @@
 			</s:ArrayList>
 		</s:columns>
 	</s:DataGrid>
-	<s:Button label="Nuevo" width="80" enabled="{_dataReady}" visible="{!_newData&amp;&amp;!_updateData}" click="newData();" x="10" y="641"/>
-	<s:Button label="Cancelar" width="80" enabled="{_dataReady}" visible="{_newData||_updateData}" click="cancel();" x="98" y="641"/>
-	<s:Button label="Aceptar" width="80" enabled="{_dataReady}" visible="{_newData}" click="createData();" x="10" y="641"/>
-	<s:Button label="Eliminar" width="80" enabled="{_dataReady&amp;&amp;!_newData}" visible="{!_newData&amp;&amp;!_updateData}" click="deleteDataAlert();" x="98" y="641"/>
-	<s:Button label="Actualizar" width="80" enabled="{_dataReady&amp;&amp;!_newData&amp;&amp;_updateData}" visible="{_updateData&amp;&amp;!_newData}" click="updateData();" x="10" y="641"/>
-	<s:Button label="Regresar" click="closeWindow();" width="164"  enabled="{!_newData}" x="801" y="642" id="_backBT"/>
+	<s:Button label="Nuevo" width="80" enabled="{_dataReady}" visible="{!_newData&amp;&amp;!_updateData}" click="newData();" x="10" y="519"/>
+	<s:Button label="Cancelar" width="80" enabled="{_dataReady}" visible="{_newData||_updateData}" click="cancel();" x="98" y="519"/>
+	<s:Button label="Aceptar" width="80" enabled="{_dataReady}" visible="{_newData}" click="createData();" x="10" y="519"/>
+	<s:Button label="Eliminar" width="80" enabled="{_dataReady&amp;&amp;!_newData}" visible="{!_newData&amp;&amp;!_updateData}" click="deleteDataAlert();" x="98" y="519"/>
+	<s:Button label="Actualizar" width="80" enabled="{_dataReady&amp;&amp;!_newData&amp;&amp;_updateData}" visible="{_updateData&amp;&amp;!_newData}" click="updateData();" x="10" y="519"/>
+	<s:Button label="Regresar" click="closeWindow();" width="164"  enabled="{!_newData}" x="405" y="522" id="_backBT"/>
 	
-	<s:ComboBox 	x="85" id="_searchType" 	dataProvider="{_searchTypes}" 	width="152" y="294" tabIndex="5"/>
-	<s:TextInput 	x="245" id="_searchField" 	change="search();" 		width="721" enabled="{!_newData}" y="294" tabIndex="6"/>
-	<s:Label x="10" text="Filtrar por :" textAlign="right" y="300"/>
-	<s:Button x="936" y="243" width="30" height="23" click="selectPuesto()"
+	<s:ComboBox 	x="85" id="_searchType" 	dataProvider="{_searchTypes}" 	width="152" y="172" tabIndex="5"/>
+	<s:TextInput 	x="245" id="_searchField" 	change="search();" 		width="324" enabled="{!_newData}" y="172" tabIndex="6"/>
+	<s:Label x="10" text="Filtrar por :" textAlign="right" y="178"/>
+	<s:Button visible="false" x="539" y="243" width="30" height="23" click="selectPuesto()"
 			  enabled="{!_selectionMode}" icon="@Embed(source='../assets/Icons/Buttons/Search.png')"
 			  skinClass="spark.skins.spark.ButtonSkin"/>
 	
-	<s:Label x="486" y="120" text="Area :" />
-	<s:ComboBox  x="527" y="113" id="_idArea" change="dataChange();areaChange();" width="401" dataProvider="{_areas}" labelField="_nombre" tabIndex="2"/>
-	<s:Button x="936" y="112" width="30" height="23" click="openPopUp('empresa.Empresa_Areas',true)"
+	<s:Label x="89" y="120" text="Area :" />
+	<s:ComboBox  x="130" y="113" id="_idArea" change="dataChange();areaChange();" width="401" dataProvider="{_areas}" labelField="_nombre" tabIndex="2"/>
+	<s:Button x="539" y="112" width="30" height="23" click="openPopUp('empresa.Empresa_Areas',true)"
 			  icon="@Embed(source='../assets/Icons/Buttons/Edit.png')"
 			  skinClass="spark.skins.spark.ButtonSkin"/>
-	<s:Label x="436" y="148" text="Departamento :" />
-	<s:ComboBox  x="527" y="142" id="_idDepartamento" change="dataChange();" width="401" dataProvider="{_deptos}" labelField="_nombre" tabIndex="3"/>
-	<s:Button x="936" y="141" width="30" height="23" click="openPopUp('empresa.Empresa_Departamentos',true)"
+	<s:Label x="39" y="148" text="Departamento :" />
+	<s:ComboBox  x="130" y="142" id="_idDepartamento" change="dataChange();" width="401" dataProvider="{_deptos}" labelField="_nombre" tabIndex="3"/>
+	<s:Button x="539" y="141" width="30" height="23" click="openPopUp('empresa.Empresa_Departamentos',true)"
 			  icon="@Embed(source='../assets/Icons/Buttons/Edit.png')"
 			  skinClass="spark.skins.spark.ButtonSkin"/>
-	<s:Label x="477" y="189" text="CECO :" />
-	<s:ComboBox  x="527" y="182" id="_idCECO" change="dataChange();" width="401" dataProvider="{SystemGlobals.CECO}" labelField="_nombre" tabIndex="3"/>
-	<s:Button x="936" y="181" width="30" height="23" click="openPopUp('empresa.Empresa_Cecos',true)"
+	<s:Label visible="false" x="80" y="189" text="CECO :"/>
+	<s:ComboBox id="_idCECO" visible="false" x="130" y="182" width="401" change="dataChange();"
+				dataProvider="{SystemGlobals.CECO}" labelField="_nombre" tabIndex="3"/>
+	<s:Button visible="false" x="539" y="181" width="30" height="23"
+			  click="openPopUp('empresa.Empresa_Cecos',true)"
 			  icon="@Embed(source='../assets/Icons/Buttons/Edit.png')"
 			  skinClass="spark.skins.spark.ButtonSkin"/>
-	<s:Label x="459" y="220" text="Categoría :" />
-	<s:ComboBox  x="527" y="213" id="_idCategoria" change="dataChange();" width="401" dataProvider="{SystemGlobals.CATEGORIAS}" labelField="_nombre" tabIndex="3"/>
-	<s:Button x="936" y="212" width="30" height="23" click="openPopUp('empresa.Empresa_Categorias',true)"
+	<s:Label visible="false" x="62" y="220" text="Categoría :"/>
+	<s:ComboBox id="_idCategoria" visible="false" x="130" y="213" width="401" change="dataChange();"
+				dataProvider="{SystemGlobals.CATEGORIAS}" labelField="_nombre" tabIndex="3"/>
+	<s:Button visible="false" x="539" y="212" width="30" height="23"
+			  click="openPopUp('empresa.Empresa_Categorias',true)"
 			  icon="@Embed(source='../assets/Icons/Buttons/Edit.png')"
 			  skinClass="spark.skins.spark.ButtonSkin"/>
-	<s:Label x="456" y="90" text="Compañía :" />
-	<s:ComboBox x="527" y="83" width="401" id="_idCompania" dataProvider="{SystemGlobals.COMPANIAS}" labelField="_nombre" change="dataChange();companiaChange()"></s:ComboBox>
-	<s:Button x="936" y="83" width="30" height="23" click="openPopUp('empresa.Empresa_Companias',true);"
+	<s:Label x="59" y="90" text="Compañía :" />
+	<s:ComboBox x="130" y="83" width="401" id="_idCompania" dataProvider="{SystemGlobals.COMPANIAS}" labelField="_nombre" change="dataChange();companiaChange()"></s:ComboBox>
+	<s:Button x="539" y="83" width="30" height="23" click="openPopUp('empresa.Empresa_Companias',true);"
 			  icon="@Embed(source='../assets/Icons/Buttons/Edit.png')"
 			  skinClass="spark.skins.spark.ButtonSkin"/>
-	<s:Label x="434" y="45" text="No. de Puesto :" />
-	<s:TextInput x="527" y="40" id="_idFortia" width="53"/>
-	<s:Button x="8" y="10" width="180" height="30" label="   Información del Puesto"
+	<s:Label x="37" y="45" text="No. de Puesto :" />
+	<s:TextInput x="130" y="40" id="_idFortia" width="53"/>
+	<s:Button visible="false" x="8" y="10" width="180" height="30" label="   Información del Puesto"
 			  click="openPopUp('Empresa.Empresa_Puestos_Informacion_General',true)"
 			  enabled="{_dataReady&amp;&amp;!_updateData}"/>
-	<s:Button x="8" y="86" width="180" height="30" label="   Idiomas"
+	<s:Button visible="false" x="8" y="86" width="180" height="30" label="   Idiomas"
 			  click="openPopUp('Empresa.Empresa_Puestos_Idiomas',true)"
 			  enabled="{_dataReady&amp;&amp;!_updateData}"/>
-	<s:Button x="8" y="124" width="180" height="30" label="   Escolaridad"
+	<s:Button visible="false" x="8" y="124" width="180" height="30" label="   Escolaridad"
 			  enabled="{_dataReady&amp;&amp;!_updateData}">
 		<s:click>openPopUp('Empresa.Empresa_Puestos_Escolaridad',true)</s:click>
 	</s:Button>
-	<s:CheckBox x="14" y="91" enabled="false" id="_tieneIdiomas"/>
-	<s:Button x="8" y="48" width="180" height="30" label="   Generales del Aspirante"
+	<s:CheckBox id="_tieneIdiomas" visible="false" x="14" y="91" enabled="false"/>
+	<s:Button visible="false" x="8" y="48" width="180" height="30" label="   Generales del Aspirante"
 			  click="openPopUp('Empresa.Empresa_Puestos_Descripcion_Empleado',true)"
 			  enabled="{_dataReady&amp;&amp;!_updateData}"/>
-	<s:CheckBox x="14" y="53" enabled="false" id="_tieneDescripcionEmpleado"/>
-	<s:CheckBox x="14" y="129" enabled="false" id="_tieneEscolaridad"/>
-	<s:Button x="8" y="162" width="180" height="30" label="   Prefiles"
+	<s:CheckBox id="_tieneDescripcionEmpleado" visible="false" x="14" y="53" enabled="false"/>
+	<s:CheckBox id="_tieneEscolaridad" visible="false" x="14" y="129" enabled="false"/>
+	<s:Button visible="false" x="8" y="162" width="180" height="30" label="   Prefiles"
 			  click="openPopUp('Empresa.Empresa_Puestos_Perfil_Carrera',true)"
 			  enabled="{_dataReady&amp;&amp;!_updateData}"/>
-	<s:CheckBox x="14" y="167" enabled="false" id="_tienePerfil"/>
-	<s:CheckBox x="14" y="15" enabled="false" id="_tieneInformacionGeneral"/>
-	<s:Button x="195" y="10" width="180" height="30" label="   Competencias"
+	<s:CheckBox id="_tienePerfil" visible="false" x="14" y="167" enabled="false"/>
+	<s:CheckBox id="_tieneInformacionGeneral" visible="false" x="14" y="15" enabled="false"/>
+	<s:Button visible="false" x="195" y="10" width="180" height="30" label="   Competencias"
 			  click="openPopUp('Empresa.Empresa_Puestos_Competencias',true)"
 			  enabled="{_dataReady&amp;&amp;!_updateData}"/>
-	<s:Button x="195" y="48" width="180" height="30" label="   Plan de Sucesión" enabled="false"/>
-	<s:Button x="195" y="86" width="180" height="30" label="   Contactos Internos" enabled="false"/>
-	<s:CheckBox x="201" y="53" enabled="false"/>
-	<s:CheckBox x="201" y="91" enabled="false"/>
-	<s:Button x="195" y="124" width="180" height="30" label="   Relaciones Externas" enabled="false"/>
-	<s:CheckBox x="201" y="129" enabled="false"/>
-	<s:Button x="195" y="162" width="180" height="30" label="   Recusros Asignados" enabled="false"/>
-	<s:Button x="8" y="232" width="367" height="30" label="   Observaciones"
+	<s:Button visible="false" x="195" y="48" width="180" height="30" label="   Plan de Sucesión"
+			  enabled="false"/>
+	<s:Button visible="false" x="195" y="86" width="180" height="30" label="   Contactos Internos"
+			  enabled="false"/>
+	<s:CheckBox visible="false" x="201" y="53" enabled="false"/>
+	<s:CheckBox visible="false" x="201" y="91" enabled="false"/>
+	<s:Button visible="false" x="195" y="124" width="180" height="30" label="   Relaciones Externas"
+			  enabled="false"/>
+	<s:CheckBox visible="false" x="201" y="129" enabled="false"/>
+	<s:Button visible="false" x="195" y="162" width="180" height="30" label="   Recusros Asignados"
+			  enabled="false"/>
+	<s:Button visible="false" x="8" y="232" width="367" height="30" label="   Observaciones"
 			  click="openPopUp('Empresa.Empresa_Puestos_Observaciones',true)"
 			  enabled="{_dataReady&amp;&amp;!_updateData}"/>
-	<s:CheckBox x="14" y="237" enabled="false" id="_tieneObservaciones"/>
-	<s:CheckBox x="201" y="167" enabled="false"/>
-	<s:CheckBox x="201" y="15" enabled="false" id="_tieneCompetencias"/>
+	<s:CheckBox id="_tieneObservaciones" visible="false" x="14" y="237" enabled="false"/>
+	<s:CheckBox visible="false" x="201" y="167" enabled="false"/>
+	<s:CheckBox id="_tieneCompetencias" visible="false" x="201" y="15" enabled="false"/>
 	
 	
 </s:TitleWindow>

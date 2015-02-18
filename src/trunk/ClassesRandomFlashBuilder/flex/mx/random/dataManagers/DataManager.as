@@ -64,7 +64,9 @@ package mx.random.dataManagers{
 					var className:String = getQualifiedClassName(_ref[_props[n]]);
 					var classType:Array = className.split("::");
 					className = classType[1];
-					res[_props[n]] = extractValue(_props[n],className).toString();
+					if(className != null){//Whe the control hasn't been created, we don't want to get it's value
+						res[_props[n]] = extractValue(_props[n],className).toString();	
+					}
 				}
 			}
 			return res;
@@ -128,7 +130,8 @@ package mx.random.dataManagers{
 					if(item){
 						if(item[prop]){
 							res = item[prop];
-						}else{
+						}
+						else{
 							res = _ref[prop].selectedIndex;
 						}
 					}else{

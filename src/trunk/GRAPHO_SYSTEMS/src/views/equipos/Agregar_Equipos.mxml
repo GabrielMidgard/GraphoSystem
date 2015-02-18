@@ -3,61 +3,9 @@
 			   xmlns:s="library://ns.adobe.com/flex/spark"
 			   xmlns:mx="library://ns.adobe.com/flex/mx"
 			   xmlns:components="views.components.*"
-			   width="742" height="458" horizontalCenter="0"
-			   title="Refacciones">
+			   width="626" height="272" horizontalCenter="0"
+			   title="Equipos">
 	
-	
-	<s:TextInput x="118" y="10" id="_nombre" change="dataChange();" width="247" tabIndex="1"/>
-	<s:TextInput x="118" y="43" id="_noParte" change="dataChange();" width="247" tabIndex="1"/>
-	<s:Label x="10" y="48" width="100" height="16" fontStyle="normal"
-			 text="No. Parte:" textAlign="right"
-			 verticalAlign="middle"/>
-	<s:TextInput x="118" y="76" id="_precio" change="dataChange();" width="133" tabIndex="1"/>
-	<s:Label x="10" y="80" width="100" height="16" fontStyle="normal"
-			 text="Precio :" textAlign="right"
-			 verticalAlign="middle"/>
-	<s:Label x="371" y="12" width="75" height="16" fontStyle="normal"
-			 text="Referencias:" textAlign="right"
-			 verticalAlign="middle"/>
-	
-	<s:DataGrid id="_dataList" y="209" left="19" right="15" height="156" dataProvider="{_DataResult}"
-				enabled="{_dataReady&amp;&amp;!_newData&amp;&amp;!_updateData}"
-				selectionChange="onDataSelect();" selectionMode="singleRow">
-		<s:columns>	
-			<s:ArrayList>
-				<s:GridColumn headerText="Nombre" dataField="_nombre" ></s:GridColumn>	
-			</s:ArrayList>
-		</s:columns>
-	</s:DataGrid>
-	<s:Button visible="{!_newData&amp;&amp;!_updateData}" left="19" bottom="10" width="80"
-			  height="30" label="{SystemGlobals.LABELS[5][SystemGlobals.LANGUAGE]}"
-			  click="newData();" enabled="{_dataReady&amp;&amp;_idsRefacciones==null}"/>
-	<s:Button visible="{_newData||_updateData}" left="107" bottom="10" width="80" height="30"
-			  label="{SystemGlobals.LABELS[7][SystemGlobals.LANGUAGE]}" click="cancel();"
-			  enabled="{_dataReady}"/>
-	<s:Button visible="{_newData}" left="19" bottom="10" width="80" height="30"
-			  label="{SystemGlobals.LABELS[10][SystemGlobals.LANGUAGE]}" click="createData();"
-			  enabled="{_dataReady}"/>
-	<s:Button visible="{!_newData&amp;&amp;!_updateData}" left="107" bottom="10" width="80"
-			  height="30" label="{SystemGlobals.LABELS[6][SystemGlobals.LANGUAGE]}"
-			  click="deleteDataAlert();" enabled="{_dataReady&amp;&amp;!_newData&amp;&amp;_idsRefacciones==null}"/>
-	<s:Button visible="{_updateData&amp;&amp;!_newData}" left="19" bottom="10" width="80" height="30"
-			  label="{SystemGlobals.LABELS[8][SystemGlobals.LANGUAGE]}" click="updateData();"
-			  enabled="{_dataReady&amp;&amp;!_newData&amp;&amp;_updateData}"/>
-	<s:Button right="15" bottom="10" width="145" height="30"
-			  label="{SystemGlobals.LABELS[9][SystemGlobals.LANGUAGE]}" click="closeWindow();"
-			  enabled="{!_newData}"/>
-	
-	<s:ComboBox id="_searchType" y="165" left="86" width="107" dataProvider="{_searchTypes}"
-				tabIndex="2"/>
-	<s:TextInput id="_searchField" y="165" left="201" width="131" change="search();"
-				 enabled="{!_newData}" tabIndex="3"/>
-	<s:Label y="170" left="-26" width="105" text="{SystemGlobals.LABELS[4][SystemGlobals.LANGUAGE]} :"
-			 textAlign="right"/>
-	<s:Label x="10" y="12" width="100" height="16" fontStyle="normal"
-			 text="Nombre :" textAlign="right"
-			 verticalAlign="middle"/>
-	<s:TextArea id="_referencias" x="451" y="10" width="276" height="177" change="dataChange();"/>
 	
 	<fx:Script>
 		<![CDATA[
@@ -100,13 +48,13 @@
 			
 			private var _selectedId:Number 		= 0;
 			private var _selectedName:String 	= "";
-			private var _serviceName  			= "Refacciones";
-			private var _mainId  				= "_idRefaccion";
+			private var _serviceName  			= "Equipos";
+			private var _mainId  				= "_idEquipo";
 			private var _mainFocusField:String 	= "_nombre";
-			
-			private var _idEquipo = -1;
-			private var _idsRefacciones = null; //stores a list of a spare parts the need to be displayed in the grid
-			private var _idsPrediagnosticos = null;
+			private var _idCliente = -1;
+			[Bindable]	private var _equipos:ArrayCollection = new ArrayCollection();
+			[Bindable]	private var _equiposFiltrados:ArrayCollection = new ArrayCollection();
+
 			//-----------Local Vars -----------
 			
 			//---------------------------- Context ---------------------------------------------            
@@ -123,16 +71,8 @@
 				_workManager = value;
 			}
 			
-			public function set idEquipo(value:Object):void{
-				_idEquipo = value;
-			}
-			
-			public function set idsRefacciones(value:Object):void{//Indicates a list of ids that need to be displayed, these need to be the only in the grid
-				_idsRefacciones = value;
-			}
-			
-			public function set idsPrediagnosticos(value:Object):void{
-				_idsPrediagnosticos = value;
+			public function set idCliente(value:Number):void{
+				_idCliente = value;
 			}
 			
 			public function set webApplication(value:WebApplication):void{
@@ -156,7 +96,7 @@
 				Valid.changeLanguage(Languages.SPANISH);
 				
 				//----------- Validaciones ---------------------------
-				Valid.addStringVal(_nombre,1,100,"Nombre");
+				//Valid.addStringVal(_nombre,1,100,"Nombre");
 				
 				//----------- Validaciones ---------------------------
 				
@@ -171,7 +111,6 @@
 			
 			private function extraCreateData(params:Object):Object{				
 				//params["_newsImage"] = _image;
-				params["_idEquipo"] = _idEquipo;
 				return params;
 			}
 			
@@ -195,12 +134,12 @@
 			public function initView():void{
 				forceImports();
 				_MainService = _webApplication.getService(_serviceName);
-				_Data.exceptions = ["_idRefaccion","_fechaCreacion","_idEquipo"];
+				_Data.exceptions = ["_idEquipo","_idCliente"];
 				_MainService.addEventListener(FaultEvent.FAULT,onFault);
 				initData();
 				addValidations();
-				
-				_searchType.selectedIndex = 1;
+				getData();
+				//_searchType.selectedIndex = 1;
 			}
 			
 			public function imageUploadReady(data:Object):void{
@@ -211,8 +150,9 @@
 			
 			
 			private function initData():void{
-				_MainService.getFields();
-				_MainService.getFields.addEventListener(ResultEvent.RESULT,onGetFieldsResult);
+				//_MainService.getFields();
+				//_MainService.getFields.addEventListener(ResultEvent.RESULT,onGetFieldsResult);
+				getData();
 				_dataReady = false;
 			}
 			
@@ -250,12 +190,6 @@
 					params[_mainId] = _dataList.selectedItem[_mainId];
 					_MainService.updateRecord(params);
 					_MainService.updateRecord.addEventListener(ResultEvent.RESULT,onUpdateComplete);
-					if(this._idsRefacciones != null){
-						if(_idsPrediagnosticos != null && _idsPrediagnosticos.length > 0){
-							_MainService.updateSparePartPrize(_idsPrediagnosticos.join(","),params[_mainId],params['_precio']);	
-							_MainService.updateSparePartPrize.addEventListener(ResultEvent.RESULT,onUpdateSparePartPrizeComplete);
-						}
-					}
 					_dataIndex =_dataList.selectedIndex;
 				}else{
 					Alert.show(Valid.errors,"Error");
@@ -277,6 +211,25 @@
 					_MainService.deleteRecord(params);
 					_MainService.deleteRecord.addEventListener(ResultEvent.RESULT,onDeleteComplete);
 					_dataReady = false;
+				}
+			}
+			
+			private function recordEquipment():void{
+				if(Valid.validateAll()){
+					if(_equipo.selectedItem != null && _equipo.selectedItem != undefined && _equipo.selectedItem._idEquipo != -1){
+						_MainService.recordEquipment({_idEquipo:_equipo.selectedItem._idEquipo, _idCliente:_idCliente});
+						_MainService.recordEquipment.addEventListener(ResultEvent.RESULT,onRecordSpareComplete);
+						_dataReady = false;	
+					}
+				}else{
+					Alert.show(Valid.errors,"Error");
+				}
+			}
+			
+			private function deleteEquipment():void{
+				if(_dataList.selectedIndex != -1){
+					_MainService.deleteEquipmentRecord({_idEquipo:_dataList.selectedItem._idEquipo,_idCliente:_idCliente});
+					_MainService.deleteEquipmentRecord.addEventListener(ResultEvent.RESULT,onDeleteSpareComplete);	
 				}
 			}
 			
@@ -321,29 +274,32 @@
 				
 			}
 			
+			private function concatenateEquipment(item:Object):String{
+				return item._nombreEquipo + " ";
+			}
+			
 			private function getData():void{
-				if(_idsRefacciones != null){
-					_MainService.getRecords(_idEquipo,_idsRefacciones.join(","));	
-				}else{
-					_MainService.getRecords(_idEquipo);
-				}				
+				_MainService.getRecords();
+				_MainService.getFilteredRecords(_idCliente);
 				_MainService.getRecords.addEventListener(ResultEvent.RESULT,onGetDataResult);
+				_MainService.getFilteredRecords.addEventListener(ResultEvent.RESULT,onGetEquipmentsResult);
 			}
 			
 			private function onGetDataResult(e:ResultEvent):void{
 				_MainService.getRecords.removeEventListener(ResultEvent.RESULT,onGetDataResult);
-				_DataResult = Converter.arrayConverter(e.result);
-				if(_DataResult.length==0) {
-					Alert.show("No hay registros en la base de datos","Atención")
-				}else{
-					if(_dataIndex<0) _dataIndex = 0;
-					_Data.loadData(_DataResult[_dataIndex]);
-					_dataList.selectedIndex = _dataIndex;
-					_dataList.setSelectedIndex(_dataList.selectedIndex);
-					loadExtraFields(_DataResult[_dataIndex]);
-				}
+				_equipos = Converter.arrayConverter(e.result);
 				_dataReady = true;
 				resetBooleans();
+			}
+			
+			private function onGetEquipmentsResult(e:ResultEvent):void{
+				_MainService.getFilteredRecords.removeEventListener(ResultEvent.RESULT,onGetEquipmentsResult);
+				_equiposFiltrados = Converter.arrayConverter(e.result);
+			}
+			
+			private function onRecordSpareComplete(e:ResultEvent):void{
+				_MainService.recordEquipment.removeEventListener(ResultEvent.RESULT,onRecordSpareComplete);
+				getData();
 			}
 			
 			private function onFault(e:FaultEvent):void{
@@ -372,15 +328,15 @@
 				getData();
 			}
 			
-			private function onUpdateSparePartPrizeComplete(e:ResultEvent):void{
-				_MainService.updateSparePartPrize.removeEventListener(ResultEvent.RESULT,onUpdateSparePartPrizeComplete);
-				//getData();
-			}
-			
 			private function onDeleteComplete(e:ResultEvent):void{
 				_MainService.deleteRecord.removeEventListener(ResultEvent.RESULT,onDeleteComplete);
 				_dataIndex = _DataResult.length-2;
 				Catalogs.reloadSpecificTables(["refacciones"]);
+				getData();
+			}
+			
+			private function onDeleteSpareComplete(e:ResultEvent):void{
+				_MainService.deleteEquipmentRecord.removeEventListener(ResultEvent.RESULT,onDeleteSpareComplete);
 				getData();
 			}
 			
@@ -403,24 +359,25 @@
 			//-------------------------------- POP UP WINDOW --------------------------------------
 			
 			//-------------------------------- Search Engine --------------------------------------
-			
+			/*
 			private function searchFilter():void{
-				_DataResult.filterFunction = vlidateSearch;
-				_DataResult.refresh();
+			_DataResult.filterFunction = vlidateSearch;
+			_DataResult.refresh();
 			}
 			
 			private function vlidateSearch(item:Object):Boolean{
-				var isMatch:Boolean = false;           
-				if(item[_searchType.selectedItem.value].toLowerCase().search(_searchFilter.toLowerCase()) != -1){
-					isMatch = true
-				}              
-				return isMatch;              
+			var isMatch:Boolean = false;           
+			if(item[_searchType.selectedItem.value].toLowerCase().search(_searchFilter.toLowerCase()) != -1){
+			isMatch = true
+			}              
+			return isMatch;              
 			}
 			
 			private function search():void{
-				_searchFilter = _searchField.text;
-				searchFilter();
+			_searchFilter = _searchField.text;
+			searchFilter();
 			}
+			*/
 			private var _searchFilter:String 			= new String();
 			[Bindable]	private var _searchTypes:ArrayCollection 	= new ArrayCollection([{label:"Nombre", value:"_nombre"}]);
 			
@@ -428,5 +385,21 @@
 			
 		]]>
 	</fx:Script>
+	<s:DataGrid id="_dataList" x="94" y="42" width="503" height="130"
+				contentBackgroundColor="#D5E7FE" dataProvider="{_equiposFiltrados}"
+				requestedRowCount="4">
+		<s:columns>
+			<s:ArrayList>
+				<s:GridColumn dataField="_nombreEquipo" headerText="Falla"></s:GridColumn>
+			</s:ArrayList>
+		</s:columns>
+	</s:DataGrid>
+	<s:Label x="10" y="49" text="Equipos :"/>
+	<s:Button visible="{!_newData}" x="472" y="10" width="125" height="24" label="Agregar Equipo"
+			  click="recordEquipment();" enabled="{_dataReady&amp;&amp;!_newData}"/>
+	<s:Button x="483" y="180" width="114" height="24" label="Borrar Equipo" click="deleteEquipment();"/>
+	<s:ComboBox id="_equipo" x="94" y="11" width="370" change="dataChange();"
+				contentBackgroundColor="#D5E7FE" dataProvider="{_equipos}"
+				labelFunction="concatenateEquipment" ></s:ComboBox>
 	
 </s:TitleWindow>

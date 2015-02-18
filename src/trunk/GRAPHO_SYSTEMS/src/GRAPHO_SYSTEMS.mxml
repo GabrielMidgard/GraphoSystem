@@ -98,6 +98,8 @@
 			import views.system.*;
 			import views.ventas.*;
 			import views.equipos.*;
+			import views.fallas.*;
+			import views.productos.*;
 			
 			
 			[Bindable]	private var _configXML:XML;			
@@ -203,6 +205,13 @@
 				Ejecucion_Servicio;
 				Refacciones;
 				Falla_Refacciones;
+				Domicilios;
+				ListaDiagnosticos;
+				Administracion_Pagos;
+				Biblioteca_Fallas;
+				Agregar_Equipos;
+				Productos_Familias;
+				Lista_Fallas;
 				//----------GRAPHO-----------------------
 				
 			}

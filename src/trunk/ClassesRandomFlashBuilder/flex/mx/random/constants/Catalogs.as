@@ -1,9 +1,9 @@
 package mx.random.constants{
 	import mx.collections.ArrayCollection;
 	import mx.random.converters.Converter;
-	import mx.random.web.WebApplication;
 	import mx.random.events.CatalogEvent;
 	import mx.random.events.StaticEvent;
+	import mx.random.web.WebApplication;
 	import mx.rpc.events.FaultEvent;
 	import mx.rpc.events.ResultEvent;
 	import mx.rpc.remoting.RemoteObject;
@@ -65,7 +65,18 @@ package mx.random.constants{
 				if(DataObject['tipos_servicio'])  SystemGlobals.TIPOS_SERVICIO	= Converter.arrayConverter(DataObject['tipos_servicio']);
 				if(DataObject['areas_soporte_tecnico'])  SystemGlobals.AREAS_SOPORTE	= Converter.arrayConverter(DataObject['areas_soporte_tecnico']);
 				if(DataObject['estatus'])  SystemGlobals.ORDEN_ESTATUS	= Converter.arrayConverter(DataObject['estatus']);
-				if(DataObject['empleados'])  SystemGlobals.EMPLEADOS	= Converter.arrayConverter(DataObject['empleados']);				
+				if(DataObject['empleados'])  SystemGlobals.EMPLEADOS	= Converter.arrayConverter(DataObject['empleados']);
+				//para hacerlo compatible con el nombre del combo para que se guarde el id de la dirección y no el index del combo
+				for(var i:Number = 0; i < SystemGlobals.EMPLEADOS.length; i++){
+					SystemGlobals.EMPLEADOS.getItemAt(i)._idTecnico = SystemGlobals.EMPLEADOS.getItemAt(i)._idEmpleado;
+					SystemGlobals.EMPLEADOS.getItemAt(i)._responsablePreCotizacion = SystemGlobals.EMPLEADOS.getItemAt(i)._idEmpleado;
+					SystemGlobals.EMPLEADOS.getItemAt(i)._responsableAsignacionDeFecha = SystemGlobals.EMPLEADOS.getItemAt(i)._idEmpleado;
+					SystemGlobals.EMPLEADOS.getItemAt(i)._tecnicoAsignado = SystemGlobals.EMPLEADOS.getItemAt(i)._idEmpleado;
+					SystemGlobals.EMPLEADOS.getItemAt(i)._idTecnicoDiagnostico = SystemGlobals.EMPLEADOS.getItemAt(i)._idEmpleado;
+					SystemGlobals.EMPLEADOS.getItemAt(i)._responsableCotizacion = SystemGlobals.EMPLEADOS.getItemAt(i)._idEmpleado;
+					SystemGlobals.EMPLEADOS.getItemAt(i)._responsableCortesia = SystemGlobals.EMPLEADOS.getItemAt(i)._idEmpleado;
+					SystemGlobals.EMPLEADOS.getItemAt(i)._responsableCancelacion = SystemGlobals.EMPLEADOS.getItemAt(i)._idEmpleado;
+				}
 				if(DataObject['equipos'])  SystemGlobals.EQUIPOS        = Converter.arrayConverter(DataObject['equipos']);
 				if(DataObject['marcas'])  SystemGlobals.MARCAS        = Converter.arrayConverter(DataObject['marcas']);
 				if(DataObject['tipos_equipo'])  SystemGlobals.TIPOS_EQUIPOS        = Converter.arrayConverter(DataObject['tipos_equipo']);

@@ -26,14 +26,15 @@ package mx.random.constants{
 		]);		
 		
 		
-		public static var AccessTypes:ArrayCollection = new ArrayCollection([ 	{label:"Limitado",				value:0},												
-			{label:"Compañia",				value:1},
-			{label:"Area",					value:2},
-			{label:"Departamento",			value:3},
-			{label:"Ubicaciones",			value:4},
+		public static var AccessTypes:ArrayCollection = new ArrayCollection([ 	
+			{label:"Total",				value:0},
+			{label:"Ventas",			value:1},
+			{label:"Ingeniería",		value:2}
+			//{label:"Limitado",			value:0}
+			/*{label:"Ubicaciones",			value:4},
 			{label:"CECO",					value:5},
 			{label:"Categorías",			value:6},
-			{label:"Total",					value:7}
+			{label:"Total",					value:7}*/
 			
 		]);
 		
@@ -692,6 +693,19 @@ package mx.random.constants{
 			{label:"Avion", value:"O"}
 		]);
 		
+		public static var EstatusLlamada:ArrayCollection = new ArrayCollection([
+			{label:"Seleccionar", value:"0"},
+			{label:"Venta Caída", value:"v"},
+			{label:"Se llegó a una negociación", value:"n"},
+			{label:"Se culminó la venta", value:"c"},
+			{label:"No se llegó a nada", value:"l"}
+		]);
+		
+		public static var SiNo:ArrayCollection = new ArrayCollection([
+			{label:"Seleccionar", value:"0"},
+			{label:"Sí", value:"s"},
+			{label:"No", value:"n"}
+		]);
 		
 		public static var Years:ArrayCollection = new ArrayCollection();
 		public static var YearsUP:ArrayCollection = new ArrayCollection();

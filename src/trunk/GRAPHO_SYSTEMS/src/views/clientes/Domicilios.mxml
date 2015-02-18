@@ -2,86 +2,39 @@
 <s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009"
 			   xmlns:s="library://ns.adobe.com/flex/spark"
 			   xmlns:mx="library://ns.adobe.com/flex/mx"
-			   xmlns:components="views.components.*"
-			   width="742" height="458" horizontalCenter="0"
-			   title="Refacciones">
+			   width="590" height="530" contentBackgroundColor="#D5FBDB"
+			   title="Domicilios">
 	
 	
-	<s:TextInput x="118" y="10" id="_nombre" change="dataChange();" width="247" tabIndex="1"/>
-	<s:TextInput x="118" y="43" id="_noParte" change="dataChange();" width="247" tabIndex="1"/>
-	<s:Label x="10" y="48" width="100" height="16" fontStyle="normal"
-			 text="No. Parte:" textAlign="right"
-			 verticalAlign="middle"/>
-	<s:TextInput x="118" y="76" id="_precio" change="dataChange();" width="133" tabIndex="1"/>
-	<s:Label x="10" y="80" width="100" height="16" fontStyle="normal"
-			 text="Precio :" textAlign="right"
-			 verticalAlign="middle"/>
-	<s:Label x="371" y="12" width="75" height="16" fontStyle="normal"
-			 text="Referencias:" textAlign="right"
-			 verticalAlign="middle"/>
-	
-	<s:DataGrid id="_dataList" y="209" left="19" right="15" height="156" dataProvider="{_DataResult}"
-				enabled="{_dataReady&amp;&amp;!_newData&amp;&amp;!_updateData}"
-				selectionChange="onDataSelect();" selectionMode="singleRow">
-		<s:columns>	
-			<s:ArrayList>
-				<s:GridColumn headerText="Nombre" dataField="_nombre" ></s:GridColumn>	
-			</s:ArrayList>
-		</s:columns>
-	</s:DataGrid>
-	<s:Button visible="{!_newData&amp;&amp;!_updateData}" left="19" bottom="10" width="80"
-			  height="30" label="{SystemGlobals.LABELS[5][SystemGlobals.LANGUAGE]}"
-			  click="newData();" enabled="{_dataReady&amp;&amp;_idsRefacciones==null}"/>
-	<s:Button visible="{_newData||_updateData}" left="107" bottom="10" width="80" height="30"
-			  label="{SystemGlobals.LABELS[7][SystemGlobals.LANGUAGE]}" click="cancel();"
-			  enabled="{_dataReady}"/>
-	<s:Button visible="{_newData}" left="19" bottom="10" width="80" height="30"
-			  label="{SystemGlobals.LABELS[10][SystemGlobals.LANGUAGE]}" click="createData();"
-			  enabled="{_dataReady}"/>
-	<s:Button visible="{!_newData&amp;&amp;!_updateData}" left="107" bottom="10" width="80"
-			  height="30" label="{SystemGlobals.LABELS[6][SystemGlobals.LANGUAGE]}"
-			  click="deleteDataAlert();" enabled="{_dataReady&amp;&amp;!_newData&amp;&amp;_idsRefacciones==null}"/>
-	<s:Button visible="{_updateData&amp;&amp;!_newData}" left="19" bottom="10" width="80" height="30"
-			  label="{SystemGlobals.LABELS[8][SystemGlobals.LANGUAGE]}" click="updateData();"
-			  enabled="{_dataReady&amp;&amp;!_newData&amp;&amp;_updateData}"/>
-	<s:Button right="15" bottom="10" width="145" height="30"
-			  label="{SystemGlobals.LABELS[9][SystemGlobals.LANGUAGE]}" click="closeWindow();"
-			  enabled="{!_newData}"/>
-	
-	<s:ComboBox id="_searchType" y="165" left="86" width="107" dataProvider="{_searchTypes}"
-				tabIndex="2"/>
-	<s:TextInput id="_searchField" y="165" left="201" width="131" change="search();"
-				 enabled="{!_newData}" tabIndex="3"/>
-	<s:Label y="170" left="-26" width="105" text="{SystemGlobals.LABELS[4][SystemGlobals.LANGUAGE]} :"
-			 textAlign="right"/>
-	<s:Label x="10" y="12" width="100" height="16" fontStyle="normal"
-			 text="Nombre :" textAlign="right"
-			 verticalAlign="middle"/>
-	<s:TextArea id="_referencias" x="451" y="10" width="276" height="177" change="dataChange();"/>
 	
 	<fx:Script>
 		<![CDATA[
-			import mx.collections.ArrayCollection;
-			import mx.controls.Alert;
-			import mx.events.CloseEvent;
-			import mx.managers.PopUpManager;
-			import mx.random.constants.Catalogs;
-			import mx.random.constants.Languages;
+			import mx.random.userAuth.User;
 			import mx.random.constants.SystemGlobals;
+			import mx.random.constants.GlobalData;
+			import mx.random.constants.Catalogs;
+			import mx.random.constants.ConstantData;
+			import mx.random.constants.Constantes;
+			import mx.random.windowManagers.PopManager;
+			import mx.random.constants.Languages;
+			import mx.random.forms.Validator;
+			import mx.random.dataManagers.EventManager;
 			import mx.random.converters.Converter;
 			import mx.random.dataManagers.DataManager;
-			import mx.random.dataManagers.EventManager;
-			import mx.random.forms.Validator;
 			import mx.random.web.WebApplication;
-			import mx.random.windowManagers.PopManager;
+			import mx.managers.PopUpManager;
+			import mx.collections.ArrayCollection;
+			import mx.events.CloseEvent;
+			import mx.controls.Alert;
+			import mx.rpc.remoting.RemoteObject;
 			import mx.rpc.events.FaultEvent;
 			import mx.rpc.events.ResultEvent;
-			import mx.rpc.remoting.RemoteObject;
 			
 			private var _webApplication:WebApplication;
 			private var Valid:Validator 			= new Validator();
 			private var _workManager:Object 		= new Object();
 			private var _MainService:RemoteObject 		= new RemoteObject();
+			private var _SaleService:RemoteObject 		= new RemoteObject();
 			[Bindable]	private var _Data:DataManager 				= new DataManager(this);
 			[Bindable]	private var _DataResult:ArrayCollection 		= new ArrayCollection();			
 			private var _eventManager:EventManager 		= new EventManager(this);
@@ -98,15 +51,13 @@
 			
 			//-----------Local Vars -----------
 			
-			private var _selectedId:Number 		= 0;
-			private var _selectedName:String 	= "";
-			private var _serviceName  			= "Refacciones";
-			private var _mainId  				= "_idRefaccion";
-			private var _mainFocusField:String 	= "_nombre";
+			private var _selectedId:Number = 0;
+			private var _selectedName:String 		= "";
+			private var _serviceName  				= "Direcciones";
+			private var _mainId  					= "_idDireccion";
+			private var _mainFocusField:String      = "_calle";
+			private var _currentClient:String = "";
 			
-			private var _idEquipo = -1;
-			private var _idsRefacciones = null; //stores a list of a spare parts the need to be displayed in the grid
-			private var _idsPrediagnosticos = null;
 			//-----------Local Vars -----------
 			
 			//---------------------------- Context ---------------------------------------------            
@@ -117,29 +68,24 @@
 						this[p] = contextObj[p];
 					}
 				}
+				initView();
 			}
 			
 			public function set workManager(value:Object):void{
 				_workManager = value;
 			}
 			
-			public function set idEquipo(value:Object):void{
-				_idEquipo = value;
-			}
-			
-			public function set idsRefacciones(value:Object):void{//Indicates a list of ids that need to be displayed, these need to be the only in the grid
-				_idsRefacciones = value;
-			}
-			
-			public function set idsPrediagnosticos(value:Object):void{
-				_idsPrediagnosticos = value;
-			}
-			
 			public function set webApplication(value:WebApplication):void{
 				_webApplication = value;
-				initView();
+				
 			}
 			public function get webApplication():WebApplication{ return _webApplication; } 
+			
+			public function set dataObject(value:Object):void{
+				if(value != null){
+					_currentClient = value._idCliente;	
+				}
+			}
 			
 			//---------------------------- Context ---------------------------------------------  
 			
@@ -154,38 +100,36 @@
 			
 			private function addValidations():void{
 				Valid.changeLanguage(Languages.SPANISH);
+				Valid.setErrorKnot(Validator.CIRCLE_KNOT,0xFF0000);			
+				Valid.validateOnChange = true;			
 				
-				//----------- Validaciones ---------------------------
-				Valid.addStringVal(_nombre,1,100,"Nombre");
-				
-				//----------- Validaciones ---------------------------
-				
-				
-				Valid.validateOnChange = true;
-				Valid.setErrorKnot(Validator.CIRCLE_KNOT,0xFF0000);
+				Valid.addStringVal(_calle,5,255,"Calle");
+				Valid.addStringVal(_noExterior,1,8,"Número Exterior");
+				Valid.addStringVal(_ciudad,2,50,"Ciudad");
+				Valid.addStringVal(_colonia,2,50,"Colonia");
+				Valid.addComboVal(_idEstado,"Estado");
+				Valid.addStringVal(_cp,5,5,"Código Postal");				
 			}
 			
-			private function onFocusOut(e:Event):void{
-				if(_newData||_updateData) Valid.validateAll();//Valid.validateOne(e.currentTarget.name);
+			
+			
+			private function extraCreateData(params:Object):Object{
+				/*params["_newsImage"] = _image;*/
+				params["_idPropietario"] = _currentClient;
+				return params;							
 			}
 			
-			private function extraCreateData(params:Object):Object{				
-				//params["_newsImage"] = _image;
-				params["_idEquipo"] = _idEquipo;
-				return params;
-			}
-			
-			private function createRecordExtras():void{
-				//_image = "defaultNew.jpg";
+			private function createRecordExtras():void{				
+				/*_image = "defaultNew.jpg";*/		
 			}
 			
 			private function extraUpdateData(params:Object):Object{	
-				//params['_color'] = areaColor.selectedColor;	
+				//params['_fechaNacimiento'] = _year.selectedItem.label+'-'+_month.selectedItem.value+'-'+_day.selectedItem.value;			
 				return params;
 			}
 			
-			private function loadExtraFields(params:Object):void{				
-				//_image = params["_newsImage"];
+			private function loadExtraFields(params:Object):void{
+				/*_image = params["_newsImage"];*/
 			}
 			
 			private function forceImports():void{
@@ -193,22 +137,22 @@
 			}
 			
 			public function initView():void{
-				forceImports();
 				_MainService = _webApplication.getService(_serviceName);
-				_Data.exceptions = ["_idRefaccion","_fechaCreacion","_idEquipo"];
+				_Data.exceptions = ["_idDireccion","_idTipoDireccion","_idPropietario","_idPais","_latitud","_longitud"];
 				_MainService.addEventListener(FaultEvent.FAULT,onFault);
 				initData();
 				addValidations();
-				
-				_searchType.selectedIndex = 1;
-			}
-			
-			public function imageUploadReady(data:Object):void{
-				
+				loadScroll();
 			}
 			
 			// ------------------- View Extra Data -------------------------------
 			
+			private function loadScroll():void{
+				_dataList.visible = false;
+				for(var n:Number = 0;n<100;n++){
+					_DataResult.addItem({i:0});
+				}
+			}
 			
 			private function initData():void{
 				_MainService.getFields();
@@ -226,10 +170,10 @@
 			private function newData():void{
 				_Data.clear();
 				_newData = true;
-				_updateData = false;
-				Valid.validateAll();
+				_updateData = false;				
 				this[_mainFocusField].setFocus();
 				createRecordExtras();
+				Valid.validateAll();
 			}
 			
 			private function createData():void{
@@ -250,12 +194,6 @@
 					params[_mainId] = _dataList.selectedItem[_mainId];
 					_MainService.updateRecord(params);
 					_MainService.updateRecord.addEventListener(ResultEvent.RESULT,onUpdateComplete);
-					if(this._idsRefacciones != null){
-						if(_idsPrediagnosticos != null && _idsPrediagnosticos.length > 0){
-							_MainService.updateSparePartPrize(_idsPrediagnosticos.join(","),params[_mainId],params['_precio']);	
-							_MainService.updateSparePartPrize.addEventListener(ResultEvent.RESULT,onUpdateSparePartPrizeComplete);
-						}
-					}
 					_dataIndex =_dataList.selectedIndex;
 				}else{
 					Alert.show(Valid.errors,"Error");
@@ -282,8 +220,9 @@
 			
 			private function cancel():void{
 				onDataSelect();
-				resetBooleans();
+				resetBooleans();				
 				Valid.validateAll();
+				Valid.removeAllKnots();				
 			}
 			
 			private function resetBooleans():void{
@@ -291,8 +230,8 @@
 				_updateData = false;
 			}
 			
-			private function dataChange():void{
-				_updateData = true;
+			private function dataChange():void{				
+				_updateData = true;				
 			}
 			
 			private function openImageEditor():void{
@@ -304,6 +243,11 @@
 				}
 			}
 			//-------------------------------- ResultsEvents --------------------------------------		
+			
+			private function onFilterChange():void{
+				_dataIndex = -1;
+				getData();
+			}
 			
 			private function onGetFieldsResult(e:ResultEvent):void{
 				_MainService.getFields.removeEventListener(ResultEvent.RESULT,onGetFieldsResult);
@@ -317,16 +261,14 @@
 					_dataReady = false;
 				}
 				_DataResult= new ArrayCollection();
-				
+				_dataList.visible = true;
 				
 			}
 			
-			private function getData():void{
-				if(_idsRefacciones != null){
-					_MainService.getRecords(_idEquipo,_idsRefacciones.join(","));	
-				}else{
-					_MainService.getRecords(_idEquipo);
-				}				
+			public function getData():void{
+				
+				var parmas:Object = {};
+				_MainService.getRecords(_currentClient);
 				_MainService.getRecords.addEventListener(ResultEvent.RESULT,onGetDataResult);
 			}
 			
@@ -341,6 +283,8 @@
 					_dataList.selectedIndex = _dataIndex;
 					_dataList.setSelectedIndex(_dataList.selectedIndex);
 					loadExtraFields(_DataResult[_dataIndex]);
+					Valid.validateAll();
+					Valid.removeAllKnots();
 				}
 				_dataReady = true;
 				resetBooleans();
@@ -362,32 +306,24 @@
 			private function onCreateComplete(e:ResultEvent):void{				
 				_MainService.createRecord.removeEventListener(ResultEvent.RESULT,onCreateComplete);
 				_dataIndex = _DataResult.length;
-				Catalogs.reloadSpecificTables(["refacciones"]);
 				getData();
 			}
 			
 			private function onUpdateComplete(e:ResultEvent):void{
 				_MainService.updateRecord.removeEventListener(ResultEvent.RESULT,onUpdateComplete);
-				Catalogs.reloadSpecificTables(["refacciones"]);
 				getData();
-			}
-			
-			private function onUpdateSparePartPrizeComplete(e:ResultEvent):void{
-				_MainService.updateSparePartPrize.removeEventListener(ResultEvent.RESULT,onUpdateSparePartPrizeComplete);
-				//getData();
 			}
 			
 			private function onDeleteComplete(e:ResultEvent):void{
 				_MainService.deleteRecord.removeEventListener(ResultEvent.RESULT,onDeleteComplete);
 				_dataIndex = _DataResult.length-2;
-				Catalogs.reloadSpecificTables(["refacciones"]);
 				getData();
 			}
 			
 			//-------------------------------- ResultsEvents --------------------------------------	
 			
 			//-------------------------------- POP UP WINDOW --------------------------------------	
-			public function openPopUp(popUpName:String,modal:Boolean = true):void{
+			public function openPopUp(popUpName:String,modal:Boolean = false):void{
 				var pop:TitleWindow = PopUpManager.createPopUp(this, getDefinitionByName("views."+popUpName) as Class, modal) as TitleWindow;
 				pop.name = popUpName;
 				pop.addEventListener(CloseEvent.CLOSE, closePopup);
@@ -410,10 +346,12 @@
 			}
 			
 			private function vlidateSearch(item:Object):Boolean{
-				var isMatch:Boolean = false;           
-				if(item[_searchType.selectedItem.value].toLowerCase().search(_searchFilter.toLowerCase()) != -1){
-					isMatch = true
-				}              
+				var isMatch:Boolean = false; 
+				if(item[_searchType.selectedItem.value]!=null){         
+					if(item[_searchType.selectedItem.value].toLowerCase().search(_searchFilter.toLowerCase()) != -1){
+						isMatch = true
+					}   
+				}           
 				return isMatch;              
 			}
 			
@@ -421,12 +359,61 @@
 				_searchFilter = _searchField.text;
 				searchFilter();
 			}
+			
+			
+			private function updateFilter():void{
+				//_searchField.text = "";
+				//search();
+			}	
+			
 			private var _searchFilter:String 			= new String();
-			[Bindable]	private var _searchTypes:ArrayCollection 	= new ArrayCollection([{label:"Nombre", value:"_nombre"}]);
+			[Bindable]	private var _searchTypes:ArrayCollection 	= new ArrayCollection([
+				{label:"Calle", value:"_calle"},
+				{label:"Ciudad", value:"_ciudad"}
+			]);
 			
 			//-------------------------------- Search Engine --------------------------------------					
 			
 		]]>
 	</fx:Script>
+	<s:Label x="87" y="27" text="calle"  fontSize="9" color="#797979" fontStyle="italic"/>
+	<s:Label x="87" y="68" text="ciudad"  fontSize="9" color="#797979" fontStyle="italic"/>
+	<s:Label x="413" y="68" text="estado"  fontSize="9" color="#797979" fontStyle="italic"/>
+	<s:Label x="415" y="27" text="número"  fontSize="9" color="#797979" fontStyle="italic"/>
+	<s:Label x="472" y="27" text="interior"  fontSize="9" color="#797979" fontStyle="italic"/>
+	<s:Label x="517" y="27" text="c.p."  fontSize="9" color="#797979" fontStyle="italic"/>
+	<s:Label x="21.5" y="42" text="Dirección :" />
+	<s:TextInput x="87" y="37" id="_calle" change="dataChange();" width="318" maxChars="255" tabIndex="1"/>
+	<s:TextInput x="414" y="37" id="_noExterior" change="dataChange();" width="48" maxChars="10" tabIndex="2" restrict="0-9"/>
+	<s:TextInput x="470" y="37" id="_noInterior" change="dataChange();" width="40" maxChars="5" tabIndex="3" restrict="0-9 A-Z "/>
+	<s:TextInput x="515" y="37" id="_cp" change="dataChange();" width="55" restrict="0-9" maxChars="5" tabIndex="4"/>
+	<s:TextInput x="87" y="78" id="_ciudad" change="dataChange();" width="152" tabIndex="5"/>
+	<s:Label x="87" y="108" text="entre calles"  fontSize="9" color="#797979" fontStyle="italic"/>
+	<s:TextInput x="87" y="118" id="_entreCalles" change="dataChange();" width="319" tabIndex="8"/>
+	<s:Label x="12.5" y="151" text="Referencia :" />
+	<s:TextArea x="86" y="148" id="_referencia" change="dataChange();" width="484" height="48" tabIndex="9"/>
+	
+	<s:DataGrid height="188" dataProvider="{_DataResult}" id="_dataList" selectionChange="onDataSelect();" enabled="{_dataReady&amp;&amp;!_newData&amp;&amp;!_updateData}" width="484" x="86" y="252">
+		<s:columns>
+			<s:ArrayList>
+				<s:GridColumn headerText="Calle" dataField="_calle"/>
+				<s:GridColumn dataField="_ciudad" headerText="Ciudad"></s:GridColumn>
+			</s:ArrayList>
+		</s:columns>
+	</s:DataGrid>
+	<s:Button label="Nuevo" width="80" enabled="{_dataReady}" visible="{!_newData&amp;&amp;!_updateData}" click="newData();" x="86" y="448"/>
+	<s:Button label="Cancelar" width="80" enabled="{_dataReady}" visible="{_newData||_updateData}" click="cancel();" x="174" y="448"/>
+	<s:Button label="Aceptar" width="80" enabled="{_dataReady}" visible="{_newData}" click="createData();" x="86" y="448"/>
+	<s:Button label="Eliminar" width="80" enabled="{_dataReady&amp;&amp;!_newData}" visible="{!_newData&amp;&amp;!_updateData}" click="deleteDataAlert();" x="174" y="448"/>
+	<s:Button label="Actualizar" width="80" enabled="{_dataReady&amp;&amp;!_newData&amp;&amp;_updateData}" visible="{_updateData&amp;&amp;!_newData}" click="updateData();" x="86" y="448"/>
+	<s:Button label="Regresar" click="closeWindow();" width="187"  enabled="{!_newData}" x="383" y="448"/>
+	
+	<s:ComboBox 	x="157" id="_searchType" 	dataProvider="{_searchTypes}" 	width="92" y="217" change="updateFilter();"/>
+	<s:TextInput 	x="257" id="_searchField" 	change="search();" 		width="313" enabled="{!_newData}" y="217"/>
+	<s:Label x="90" text="Filtrar por :" textAlign="right" y="224"/>
+	<s:ComboBox  x="414" y="78" id="_idEstado" change="dataChange();" width="156" dataProvider="{ConstantData.NationalStates}" labelField="label" tabIndex="7"/>
+	
+	<s:Label x="247" y="68" text="colonia"  fontSize="9" color="#797979" fontStyle="italic"/>
+	<s:TextInput x="246" y="78" id="_colonia" change="dataChange();" width="159" tabIndex="6"/>
 	
 </s:TitleWindow>

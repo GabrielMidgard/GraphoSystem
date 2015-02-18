@@ -11,10 +11,12 @@
 	</fx:Declarations>
 	
 	
-	<s:Label x="30" y="160" text="Nivel :" textAlign="right"/>
-	<s:ComboBox  x="78" y="160" id="_roleId"  labelField="_roleName" change="dataChange();" dataProvider="{SystemGlobals.ADMIN_ROLES}" width="160" tabIndex="7"/>
-	<s:Label x="16" y="134" text="Groupo :" textAlign="right"/>
-	<s:ComboBox  x="78" y="134" id="_groupId"  labelField="_groupName" change="dataChange();" dataProvider="{SystemGlobals.ADMIN_GROUPS}" width="160" tabIndex="6"/>
+	<s:Label visible="false" x="30" y="160" text="Nivel :" textAlign="right"/>
+	<s:ComboBox id="_roleId" visible="false" x="78" y="160" width="160" change="dataChange();"
+				dataProvider="{SystemGlobals.ADMIN_ROLES}" labelField="_roleName" tabIndex="7"/>
+	<s:Label visible="false" x="16" y="134" text="Groupo :" textAlign="right"/>
+	<s:ComboBox id="_groupId" visible="false" x="78" y="134" width="160" change="dataChange();"
+				dataProvider="{SystemGlobals.ADMIN_GROUPS}" labelField="_groupName" tabIndex="6"/>
 	<s:Label x="13" y="26" text="Usuario :" textAlign="right"/>
 	<s:Label x="77" y="16" text="nombre" textAlign="right" color="#CAC8C8" fontStyle="italic" fontSize="9"/>
 	<s:Label x="246" y="16" text="a. paterno" textAlign="right" color="#CAC8C8" fontStyle="italic" fontSize="9"/>
@@ -28,7 +30,7 @@
 	<s:TextInput x="78" y="104" id="_psw" maxChars="16" displayAsPassword="true" change="dataChange();" width="160" tabIndex="5"/>
 	<s:Label x="23" y="52" text="E-Mail :" textAlign="right"/>
 	<s:TextInput x="78" y="52" id="_mail" restrict="a-z @ . _ -" maxChars="50" change="dataChange();" width="328" tabIndex="3"/>
-	<s:CheckBox x="246" y="162" id="_active" change="dataChange();" width="62" label="Activo"/>
+	<s:CheckBox x="246" y="106" id="_active" change="dataChange();" width="62" label="Activo"/>
 	
 	
 	<s:Button label="Nuevo" width="80" enabled="{_dataReady}" visible="{!_newData&amp;&amp;!_updateData}" click="newData();" bottom="10" left="10"/>
@@ -42,7 +44,7 @@
 	<s:TextInput id="_searchField" right="10" bottom="261" width="330" change="search();"
 				 enabled="{!_newData}"/>
 	<s:Label x="30" text="Filtrar :" textAlign="right" bottom="263"/>
-	<s:Button x="246" y="134" width="30" click="openPopUp('system.UsersGroups',true)"
+	<s:Button visible="false" x="246" y="134" width="30" click="openPopUp('system.UsersGroups',true)"
 			  icon="@Embed('assets/Icons/Buttons/Edit.png')"
 			  skinClass="spark.skins.spark.ButtonSkin" toolTip="Editar Grupos">
 		
@@ -174,6 +176,7 @@
 			private function extraCreateData(params:Object):Object{
 				//params["_newsImage"] = _image;
 				//params['_fechaNacimiento'] 	= _year.selectedItem.label+'-'+_month.selectedItem.value+'-'+_day.selectedItem.value;
+				params["_roleId"] = 4;//PAtch, the group and level comboboxes don't work
 				return params;
 			}
 			

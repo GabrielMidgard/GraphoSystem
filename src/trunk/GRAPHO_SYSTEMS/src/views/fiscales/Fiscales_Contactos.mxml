@@ -128,8 +128,9 @@
 				Valid.addSomeRequired([_mailPrincipal,_mailSecundario],"E-Mails");
 				Valid.addSomeEquals(_mailPrincipal,_mailSecundario,"Los E-Mails no pueden ser iguales",true);
 				
-				/*								
-				Valid.addStringVal(_rfc,13,14,"RFC");
+											
+				Valid.addStringVal(_rfc,12,13,"RFC");
+				/*	
 				Valid.addStringVal(_calle,5,255,"Calle");
 				Valid.addStringVal(_numeroExterior,1,8,"Número Exterior");
 				Valid.addStringVal(_ciudad,2,50,"Ciudad");
@@ -378,15 +379,15 @@
 	<s:Button label="Regresar" click="closeWindow();" width="217"  enabled="{!_newData}" x="414" y="311"/>
 	<s:Button label="Aceptar" width="78" enabled="{_dataReady}" visible="{_newData}" click="createData();" x="89" y="311"/>
 	<s:Label x="27" y="64" text="Contacto :" />
-	<s:TextInput x="88" y="57" id="_nombre" change="dataChange();" width="156" tabIndex="4"/>
+	<s:TextInput x="88" y="57" id="_nombre" change="dataChange();" width="156" tabIndex="1"/>
 	<s:Label x="89" y="46" color="#7E7E7E" fontFamily="Arial" fontSize="10" fontStyle="italic"
 			 text="nombre(s)"/>
 	<s:Label x="252" y="46" color="#7E7E7E" fontFamily="Arial" fontSize="10" fontStyle="italic"
 			 text="paterno"/>
 	<s:Label x="411" y="46" color="#7E7E7E" fontFamily="Arial" fontSize="10" fontStyle="italic"
 			 text="materno"/>
-	<s:TextInput x="252" y="57" id="_paterno" change="dataChange();" width="150" tabIndex="5"/>
-	<s:TextInput x="410" y="57" id="_materno" change="dataChange();" width="174" tabIndex="6"/>
+	<s:TextInput x="252" y="57" id="_paterno" change="dataChange();" width="150" tabIndex="2"/>
+	<s:TextInput x="410" y="57" id="_materno" change="dataChange();" width="174" tabIndex="3"/>
 	<s:Label x="87.5" y="222" color="#7E7E7E" fontFamily="Arial" fontSize="10" fontStyle="italic"
 			 text="casa"/>
 	<s:Label x="85.5" y="260" color="#7E7E7E" fontFamily="Arial" fontSize="10" fontStyle="italic"
@@ -399,14 +400,14 @@
 			 text="oficina"/>
 	<s:Label x="548" y="221" color="#7E7E7E" fontFamily="Arial" fontSize="10" fontStyle="italic"
 			 text="ext."/>
-	<s:TextInput x="548" y="232" id="_ext" change="dataChange();" width="36" maxChars="5" tabIndex="18" restrict="0-9 A-Z "/>
+	<s:TextInput x="548" y="232" id="_ext" change="dataChange();" width="36" maxChars="5" tabIndex="16" restrict="0-9 A-Z "/>
 	<s:Label x="23" y="242" text="Teléfonos :" />
 	<s:Label x="37" y="277" text="E- Mail :" />
-	<s:TextInput x="88" y="233" id="_telefonoCasa" change="dataChange();" width="152" tabIndex="15" restrict="0-9 "/>
-	<s:TextInput x="248" y="234" id="_telefonoMovil" change="dataChange();" width="152" tabIndex="16" restrict="0-9 "/>
-	<s:TextInput x="414" y="232" id="_telefonoOficina" change="dataChange();" width="128" tabIndex="17" restrict="0-9 "/>
-	<s:TextInput x="88" y="271" id="_mailPrincipal" change="dataChange();" width="152" tabIndex="19"/>
-	<s:TextInput x="248" y="272" id="_mailSecundario" change="dataChange();" width="152" tabIndex="20"/>
+	<s:TextInput x="88" y="233" id="_telefonoCasa" change="dataChange();" width="152" tabIndex="13" restrict="0-9 "/>
+	<s:TextInput x="248" y="234" id="_telefonoMovil" change="dataChange();" width="152" tabIndex="14" restrict="0-9 "/>
+	<s:TextInput x="414" y="232" id="_telefonoOficina" change="dataChange();" width="128" tabIndex="15" restrict="0-9 "/>
+	<s:TextInput x="88" y="271" id="_mailPrincipal" change="dataChange();" width="152" tabIndex="17"/>
+	<s:TextInput x="248" y="272" id="_mailSecundario" change="dataChange();" width="152" tabIndex="18"/>
 	
 	<s:Label x="88" y="141" color="#7E7E7E" fontFamily="Arial" fontSize="10" fontStyle="italic"
 			 text="calle"/>
@@ -421,19 +422,19 @@
 	<s:Label x="517.5" y="141" color="#7E7E7E" fontFamily="Arial" fontSize="10" fontStyle="italic"
 			 text="c.p."/>
 	<s:Label x="25" y="159" text="Dirección :" />
-	<s:TextInput x="88" y="152" id="_calle" change="dataChange();" width="314" maxChars="255" tabIndex="7"/>
-	<s:TextInput x="414" y="152" id="_numeroExterior" change="dataChange();" width="48" maxChars="10" tabIndex="8" restrict="0-9"/>
-	<s:TextInput x="470" y="152" id="_numeroInterior" change="dataChange();" width="40" maxChars="5" tabIndex="9" restrict="0-9 A-Z "/>
-	<s:TextInput x="518" y="152" id="_cp" change="dataChange();" width="65" restrict="0-9" maxChars="5" tabIndex="10"/>
-	<s:TextInput x="88" y="193" id="_ciudad" change="dataChange();" width="152" tabIndex="11"/>
+	<s:TextInput x="88" y="152" id="_calle" change="dataChange();" width="314" maxChars="255" tabIndex="6"/>
+	<s:TextInput x="414" y="152" id="_numeroExterior" change="dataChange();" width="48" maxChars="10" tabIndex="7" restrict="0-9"/>
+	<s:TextInput x="470" y="152" id="_numeroInterior" change="dataChange();" width="40" maxChars="5" tabIndex="8" restrict="0-9 A-Z "/>
+	<s:TextInput x="518" y="152" id="_cp" change="dataChange();" width="65" restrict="0-9" maxChars="5" tabIndex="9"/>
+	<s:TextInput x="88" y="193" id="_ciudad" change="dataChange();" width="152" tabIndex="10"/>
 	
-	<s:ComboBox  x="414" y="195" id="_estado" change="dataChange();" width="125.5" dataProvider="{ConstantData.NationalStates}" labelField="label" tabIndex="13"/>
+	<s:ComboBox  x="414" y="195" id="_estado" change="dataChange();" width="125.5" dataProvider="{ConstantData.NationalStates}" labelField="label" tabIndex="12"/>
 	<s:Label x="249" y="182" color="#7E7E7E" fontFamily="Arial" fontSize="10" fontStyle="italic"
 			 text="colonia"/>
 	<s:TextInput x="248" y="193" id="_colonia" change="dataChange();" width="152" tabIndex="11" restrict="A-Z "/>
-	<s:TextInput x="88" y="85" id="_rfc" change="dataChange();" width="156" maxChars="14" tabIndex="3"/>
+	<s:TextInput x="88" y="85" id="_rfc" change="dataChange();" width="156" maxChars="14" tabIndex="4"/>
 	<s:Label x="50" y="94" text="RFC :" />
-	<s:TextInput x="88" y="113" id="_curp" change="dataChange();" width="156" maxChars="20" tabIndex="3"/>
+	<s:TextInput x="88" y="113" id="_curp" change="dataChange();" width="156" maxChars="20" tabIndex="5"/>
 	<s:Label x="41" y="122" text="CURP :" />
 	<s:Button x="252" y="84" width="40" click="importData(&quot;rfc&quot;);"
 			  skinClass="skins.ButtonSkin">

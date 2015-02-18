@@ -13,6 +13,7 @@
 			import views.system.UC;
 			import views.fiscales.Fiscales_Contactos;
 			import views.fiscales.Fiscales_Representantes;
+			import views.clientes.Domicilios;
 			import mx.random.userAuth.User;
 			import mx.random.constants.SystemGlobals;
 			import mx.random.constants.GlobalData;
@@ -98,10 +99,15 @@
 			// ------------------- View Extra Data -------------------------------
 			
 			private function get viewContext():Object{
+				var idcliente = -1;
+				if(_dataList.selectedItem != null){
+					idcliente = _dataList.selectedItem._idCliente;
+				}
 				return {webApplication: _webApplication,
 					workManager: this,
 					selectedItem: _dataList.selectedItem,
-					Cliente: _dataList.selectedItem
+					dataObject:_dataList.selectedItem,
+					idCliente:idcliente
 				}					
 			}
 			
@@ -127,7 +133,7 @@
 				Valid.addStringVal(_nombreEmpresa,3,150,"Nombre de la Empresa");
 				Valid.addStringVal(_rfc,12,13,"RFC");
 				Valid.addStringVal(_razonSocial,3,150,"Razón Social");
-				Valid.addStringVal(_numeroCliente,3,150,"Número de Cliente");
+				//Valid.addStringVal(_numeroCliente,3,150,"Número de Cliente");
 				Valid.addComboVal(_idTipoCliente,"Tipo de Cliente");				
 				
 				Valid.addStringVal(_calle,5,255,"Calle");
@@ -493,9 +499,9 @@
 				 fontWeight="bold" maxChars="50" tabIndex="1"/>
 	<s:TextInput x="113" y="85" id="_razonSocial" change="dataChange();" width="484" maxChars="50" tabIndex="2"/>
 	<s:Label x="27.5" y="206" text="Responsable :" />
-	<s:TextInput x="113" y="201" id="_representante" width="318" maxChars="50" tabIndex="2" editable="false"/>
+	<s:TextInput id="_representante" x="113" y="201" width="318" editable="false" maxChars="50"/>
 	<s:Label x="49.5" y="238" text="Contacto :" />
-	<s:TextInput x="113" y="233" id="_contacto" width="318" maxChars="50" tabIndex="2" editable="false"/>
+	<s:TextInput id="_contacto" x="113" y="233" width="318" editable="false" maxChars="50"/>
 	<s:TextInput x="113" y="115" id="_rfc" change="dataChange();" width="191" maxChars="50" tabIndex="3" restrict="A-Z 0-9 ^\ "/>
 	<s:Label x="47.5" y="278" text="Dirección :" />
 	<s:TextInput x="113" y="273" id="_calle" change="dataChange();" width="318" maxChars="255" tabIndex="7"/>
@@ -504,20 +510,21 @@
 	<s:TextInput x="541" y="273" id="_cp" change="dataChange();" width="55" restrict="0-9" maxChars="5" tabIndex="10"/>
 	<s:TextInput x="113" y="314" id="_ciudad" change="dataChange();" width="152" tabIndex="11"/>
 	<s:Label x="113" y="344" text="entre calles"  fontSize="9" color="#797979" fontStyle="italic"/>
-	<s:TextInput x="113" y="354" id="_entreCalles" change="dataChange();" width="319" tabIndex="11"/>
+	<s:TextInput id="_entreCalles" x="113" y="354" width="319" change="dataChange();" tabIndex="14"/>
 	<s:Label x="45.5" y="461" text="Teléfonos :" />
 	<s:Label x="72.5" y="120" text="RFC :" />
 	<s:Label x="59.5" y="496" text="E- Mail :" />
-	<s:TextInput x="113" y="456" id="_telefonoCasa" change="dataChange();" width="152" tabIndex="14"/>
-	<s:TextInput x="272" y="456" id="_telefonoMovil" change="dataChange();" width="160" tabIndex="15"/>
-	<s:TextInput x="113" y="494" id="_mailPrincipal" change="dataChange();" width="152" tabIndex="17"/>
-	<s:TextInput x="272" y="494" id="_mailSecundario" change="dataChange();" width="160" tabIndex="18"/>
-	<s:TextInput  x="201" y="25" id="_fechaInscripcion"  change="dataChange();" width="103"/>
+	<s:TextInput x="113" y="456" id="_telefonoCasa" change="dataChange();" width="152" tabIndex="16"/>
+	<s:TextInput x="272" y="456" id="_telefonoMovil" change="dataChange();" width="160" tabIndex="17"/>
+	<s:TextInput x="113" y="494" id="_mailPrincipal" change="dataChange();" width="152" tabIndex="20"/>
+	<s:TextInput x="272" y="494" id="_mailSecundario" change="dataChange();" width="160" tabIndex="21"/>
+	<s:TextInput id="_fechaInscripcion" x="201" y="25" width="103" change="dataChange();"/>
 	<s:Label x="39.5" y="389" text="Referencia :" />
-	<s:TextArea x="113" y="386" id="_referencia" change="dataChange();" width="484" height="48" tabIndex="21"/>
+	<s:TextArea x="113" y="386" id="_referencia" change="dataChange();" width="484" height="48" tabIndex="15"/>
 	<s:Label x="74.5" y="150" text="Giro :" />
-	<s:TextArea x="113" y="145" id="_giro" change="dataChange();" width="484" height="48" tabIndex="21"/>
-	<s:TextInput x="113" y="25" id="_numeroCliente" change="dataChange();" width="80" editable="true" fontWeight="bold" textAlign="left"/>
+	<s:TextArea x="113" y="145" id="_giro" change="dataChange();" width="484" height="48" tabIndex="6"/>
+	<s:TextInput id="_numeroCliente" x="113" y="25" width="80" change="dataChange();" editable="true"
+				 fontWeight="bold" textAlign="left"/>
 	
 	<s:DataGrid height="535" dataProvider="{_DataResult}" id="_dataList" selectionChange="onDataSelect();" enabled="{_dataReady&amp;&amp;!_newData&amp;&amp;!_updateData}" width="467" x="631" y="55">
 		<s:columns>
@@ -541,15 +548,15 @@
 		<s:icon>@Embed(source='../../assets/Icons/Buttons/refresh.png')</s:icon>
 	</s:Button>
 	<s:ComboBox  x="440" y="314" id="_estado" change="dataChange();" width="156" dataProvider="{ConstantData.NationalStates}" labelField="label" tabIndex="13"/>
-	<s:ComboBox  x="312" y="115" id="_idTipoCliente" change="dataChange();" width="119" dataProvider="{_tipoCliente}" labelField="label" tabIndex="13"/>
-	<s:ComboBox  x="439" y="115" id="_idEstatus" change="dataChange();" width="157" dataProvider="{_estatusCliente}" labelField="label" tabIndex="13"/>
+	<s:ComboBox  x="312" y="115" id="_idTipoCliente" change="dataChange();" width="119" dataProvider="{_tipoCliente}" labelField="label" tabIndex="4"/>
+	<s:ComboBox  x="439" y="115" id="_idEstatus" change="dataChange();" width="157" dataProvider="{_estatusCliente}" labelField="label" tabIndex="5"/>
 	
 	<s:Label x="273" y="304" text="colonia"  fontSize="9" color="#797979" fontStyle="italic"/>
-	<s:TextInput x="272" y="314" id="_colonia" change="dataChange();" width="159" tabIndex="11"/>
+	<s:TextInput x="272" y="314" id="_colonia" change="dataChange();" width="159" tabIndex="12"/>
 	<s:Label x="441.5" y="446" text="oficina"  fontSize="9" color="#797979" fontStyle="italic"/>
 	<s:Label x="563" y="446" text="ext."  fontSize="9" color="#797979" fontStyle="italic"/>
-	<s:TextInput x="562" y="456" id="_ext" change="dataChange();" width="33" maxChars="5" tabIndex="9" restrict="0-9 A-Z "/>
-	<s:TextInput x="440" y="456" id="_telefonoOficina" change="dataChange();" width="116" tabIndex="16" restrict="0-9 "/>
+	<s:TextInput x="562" y="456" id="_ext" change="dataChange();" width="33" maxChars="5" tabIndex="19" restrict="0-9 A-Z "/>
+	<s:TextInput x="440" y="456" id="_telefonoOficina" change="dataChange();" width="116" tabIndex="18" restrict="0-9 "/>
 	<s:Button x="440" y="200" width="30" click="openPopUp('fiscales.Fiscales_Representantes',true)"
 			  enabled="{_dataReady&amp;&amp;!_newData&amp;&amp;!_updateData}"
 			  skinClass="spark.skins.spark.ButtonSkin"  >
@@ -567,16 +574,12 @@
 	<s:Button x="478" y="232" width="119" height="23" label="Contacto"
 			  click="openPopUp('fiscales.Fiscales_Contactos',true)"
 			  enabled="{_dataReady&amp;&amp;!_newData&amp;&amp;!_updateData}"  />
-	<s:Button x="446" y="353" width="150" height="23" label="Recolección"
-			  click="openPopUp('fiscales.Fiscales_Recoleccion',true)"
+	<s:Button x="446" y="353" width="150" height="23" label="Direcciones"
+			  click="openPopUp('clientes.Domicilios',true)"
 			  enabled="{_dataReady&amp;&amp;!_newData&amp;&amp;!_updateData}" />
-	
-	<s:Button x="113" y="524" label="Equipos" width="150"
-			  click="openPopUp(&quot;equipos.Equipos&quot;,true);"
-			  enabled="{_dataReady&amp;&amp;!_newData&amp;&amp;!_updateData}" />
-	
-	<s:CheckBox x="119" y="530" enabled="false" id="_tieneServicios"/>
-	<s:CheckBox x="452" y="355" enabled="false" id="_tieneRecoleccion"/>
 	<s:CheckBox x="484" y="234" enabled="false" id="_tieneContacto"/>
+	<s:Button x="111" y="538" width="150" height="23" label="Equipos"
+			  click="openPopUp('equipos.Agregar_Equipos',true)"
+			  enabled="{_dataReady&amp;&amp;!_newData&amp;&amp;!_updateData}" />
 	
 </s:TitleWindow>

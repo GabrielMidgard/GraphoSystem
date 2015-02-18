@@ -4,7 +4,7 @@
 			   xmlns:mx="library://ns.adobe.com/flex/mx"
 			   xmlns:components="views.components.*"
 			   width="402" height="330" horizontalCenter="0"
-			   title="Tipos de Equipos">
+			   title="Tecnología">
 
 	
 <s:TextInput x="118" y="10" id="_nombreTipo" change="dataChange();" width="271" tabIndex="1"/>

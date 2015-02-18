@@ -1,18 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="312" height="240" title="Datos de Soporte" showCloseButton="true">
-	<mx:Button x="185" y="151" label="Regresar" width="110" click="closeWindow()"/>
-	<mx:SWFLoader x="0" y="0" source="style/random/Logo.swf"/>
-	<mx:Label x="107" y="17" text="Random Estudio Gráfico"/>
-	<mx:Label x="31" y="182" text="Todosl los derechos reservados 2012-2013"/>
-	<mx:Text x="142" y="40" text="Tels:&#x9;(33) 36.32.55.25&#xa;&#x9;&#x9;(33) 12.04.15.09&#x9;&#xa;&#xa;Web:&#x9;www.random.mx&#xa;Mail:&#x9;clientes@random.mx" width="163" height="105"/>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   width="312" height="252" skinClass="skins.Custom_TileWindow_Skin"
+			   title="Datos de Soporte">
 	
-	<mx:Script>
+	<s:Button x="192" y="173" label="Regresar" width="110" click="closeWindow()"/>
+	<s:SWFLoader visible="false" x="0" y="0" source="style/random/Logo.swf"/>
+	<s:Label x="107" y="17" text="Random Estudio Gráfico"/>
+	<s:Label x="10" y="153" text="Todos los derechos reservados 2012-2013"/>
+	<s:Label x="19" y="40" text="Tels:&#x9;(33) 36.32.55.25&#xd;&#xa;&#x9;(33) 12.04.15.09&#x9;&#xd;&#xa;&#xd;&#xa;Web:&#x9;www.random.mx&#xd;&#xa;Mail:&#x9;clientes@random.mx" width="274" height="105"/>
+	
+	<fx:Script>
 		<![CDATA[
 			import mx.events.CloseEvent;
 			private function closeWindow():void{
 				dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
 			}
 		]]>
-	</mx:Script>
+	</fx:Script>
 	
-</mx:TitleWindow>
+</s:TitleWindow>

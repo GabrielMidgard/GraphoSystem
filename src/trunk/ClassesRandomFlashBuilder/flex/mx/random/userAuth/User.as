@@ -92,11 +92,16 @@ package mx.random.userAuth {
 
 
 		public function inAnyRole(rolesString:String):Boolean {
-			var roles:Array = rolesString.split(",");
-			for (var i:Number = 0; i < roles.length; i++){
-				var roleName:String = StringUtil.trim(roles[i]);
-				if (_roleHash[roleName]) return true;
+			if(rolesString != null){
+				var roles:Array = rolesString.split(",");
+				for (var i:Number = 0; i < roles.length; i++){
+					var roleName:String = StringUtil.trim(roles[i]);
+					if(_roleHash != null){
+						if (_roleHash[roleName]) return true;	
+					}
+				}
 			}
+			
 			return false;
 		}
 
@@ -112,10 +117,12 @@ package mx.random.userAuth {
 			
 
 			// Fill the roleHash with role names in the roles string.
-			var roleNames:Array = role.split(",");
-			_roleHash = {};
-			for (var i:Number = 0; i < roleNames.length; i++){
-				_roleHash[roleNames[i]] = true;
+			if(role != null){
+				var roleNames:Array = role.split(",");
+				_roleHash = {};
+				for (var i:Number = 0; i < roleNames.length; i++){
+					_roleHash[roleNames[i]] = true;
+				}	
 			}
 		}
 	}

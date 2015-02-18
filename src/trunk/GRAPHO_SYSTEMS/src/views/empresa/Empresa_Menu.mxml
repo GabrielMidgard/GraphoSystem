@@ -5,7 +5,7 @@
 	xmlns:mx="library://ns.adobe.com/flex/mx"
 	title="{SystemGlobals.LABELS[21][SystemGlobals.LANGUAGE]}"
 	width="190" 
-	height="578" 
+	height="450" 
 	>
 	
 	<s:Button x="10" y="100" width="170" label="{SystemGlobals.LABELS[22][SystemGlobals.LANGUAGE]}"
@@ -20,31 +20,39 @@
 	<s:Button x="10" y="193" width="170" label="{SystemGlobals.LABELS[13][SystemGlobals.LANGUAGE]}" 
 			  click="openPopUp('empresa.Empresa_Puestos')" 
 			  skinClass="skins.Custom_Button_Light_Skin"/>
-	<s:Button x="10" y="224" width="170" label="{SystemGlobals.LABELS[14][SystemGlobals.LANGUAGE]}"
-			  click="openPopUp('empresa.Empresa_Sucursales')" 
+	<s:Button visible="false" x="10" y="224" width="170"
+			  label="{SystemGlobals.LABELS[14][SystemGlobals.LANGUAGE]}"
+			  click="openPopUp('empresa.Empresa_Sucursales')"
 			  skinClass="skins.Custom_Button_Light_Skin"/>
-	<s:Button x="10" y="255" width="170" label="{SystemGlobals.LABELS[15][SystemGlobals.LANGUAGE]}" 
-			  click="openPopUp('empresa.Empresa_Cecos')" 
+	<s:Button visible="false" x="10" y="255" width="170"
+			  label="{SystemGlobals.LABELS[15][SystemGlobals.LANGUAGE]}"
+			  click="openPopUp('empresa.Empresa_Cecos')" skinClass="skins.Custom_Button_Light_Skin"/>
+	<s:Button visible="false" x="10" y="410" width="170"
+			  label="{SystemGlobals.LABELS[20][SystemGlobals.LANGUAGE]}"
+			  click="openPopUp('empresa.Empresa_Niveles_Accesos')"
 			  skinClass="skins.Custom_Button_Light_Skin"/>
-	<s:Button x="10" y="410" width="170" label="{SystemGlobals.LABELS[20][SystemGlobals.LANGUAGE]}"
-			  click="openPopUp('empresa.Empresa_Niveles_Accesos')" 
-			  skinClass="skins.Custom_Button_Light_Skin"/>
-	<s:Button x="10" y="462" width="170" label="Productos / Refacciones"
+	<s:Button x="11" y="307" width="170" label="Productos / Refacciones"
 			  click="openPopUp('empresa.Empresa_Menu_Refacciones')" 
 			  skinClass="skins.Custom_Button_Light_Skin"/>
-	<s:Button x="10" y="495" width="170" label="Órdenes de Servicio"
+	<s:Button x="11" y="338" width="170" label="Órdenes de Servicio"
 			  click="openPopUp('ods.Seguimiento')" 
 			  skinClass="skins.Custom_Button_Light_Skin"/>
-	<s:Button x="10" y="286" width="170" label="{SystemGlobals.LABELS[16][SystemGlobals.LANGUAGE]}"
+	<s:Button visible="false" x="10" y="286" width="170"
+			  label="{SystemGlobals.LABELS[16][SystemGlobals.LANGUAGE]}"
 			  click="openPopUp('empresa.Empresa_Organigrama')"
 			  skinClass="skins.Custom_Button_Light_Skin"/>
-	<s:Button x="10" y="317" width="170" label="{SystemGlobals.LABELS[17][SystemGlobals.LANGUAGE]}" 
+	<s:Button x="10" y="223" width="170" label="{SystemGlobals.LABELS[17][SystemGlobals.LANGUAGE]}" 
 			  click="openPopUp('empleados.Empleados')" 
 			  skinClass="skins.Custom_Button_Light_Skin"/>
-	<s:Button x="10" y="379" width="170" label="{SystemGlobals.LABELS[19][SystemGlobals.LANGUAGE]}"
-			  click="openPopUp('evaluaciones.Evaluaciones_Seleccion_Empleados')" 
+	<s:Button x="10" y="253" width="170" label="Clientes" 
+			  click="openPopUp('clientes.Clientes')" 
 			  skinClass="skins.Custom_Button_Light_Skin"/>
-	<s:Button x="10" y="348" width="170" label="{SystemGlobals.LABELS[18][SystemGlobals.LANGUAGE]}"
+	<s:Button visible="false" x="10" y="379" width="170"
+			  label="{SystemGlobals.LABELS[19][SystemGlobals.LANGUAGE]}"
+			  click="openPopUp('evaluaciones.Evaluaciones_Seleccion_Empleados')"
+			  skinClass="skins.Custom_Button_Light_Skin"/>
+	<s:Button visible="false" x="10" y="348" width="170"
+			  label="{SystemGlobals.LABELS[18][SystemGlobals.LANGUAGE]}"
 			  click="openPopUp('empresa.Empresa_Competencias')"
 			  skinClass="skins.Custom_Button_Light_Skin"/>
 	<s:Image x="17" y="16" source="assets/Custom/logo.png"/>

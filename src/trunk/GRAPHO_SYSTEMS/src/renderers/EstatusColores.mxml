@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				autoDrawBackground="true">
+	
+	<s:Label text="{data.label}"/>
+	
+	<fx:Script>
+		<![CDATA[
+			override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void{
+				super.updateDisplayList(unscaledWidth,unscaledHeight);
+				switch(data.value){
+					case "0" :
+						setStyle("color","Black");
+					break;
+					case "v" :
+						setStyle("color","Red");
+					break;
+					case "n" :
+						setStyle("color","Blue");
+					break;
+					case "c" :
+						setStyle("color","Green");
+					break;
+					case "l" :
+						setStyle("color","Black");
+					break;					
+				}
+				setStyle("font","Arial");
+				setStyle("fontSize","14");
+			}
+			
+		]]>
+	</fx:Script>
+	
+</s:ItemRenderer>
